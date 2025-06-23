@@ -220,9 +220,9 @@ function renderPermissionTable(permissions, selectedNames, roleName = "") {
                     ]);
 
                     allPermissionsGlobal = allPermissions;
-                    rolePermissionsGlobal = roleData.permissions.map((p) =>
-                        normalize(p.permission_name)
-                    );
+                    // rolePermissionsGlobal = roleData.permissions.map((p) =>
+                    //     normalize(p.permission_name)
+                    // );
 
                     const expectedPermissions = generateExpectedPermissions();
                     renderPermissionTable(
@@ -230,7 +230,7 @@ function renderPermissionTable(permissions, selectedNames, roleName = "") {
                         rolePermissionsGlobal,
                         roleName
                     );
-                    renderPermissionList(roleData.permissions);
+                    // renderPermissionList(roleData.permissions);
                 } catch (err) {
                     console.error("Lỗi khi tạo permission:", err);
                     alert("Lỗi khi tạo permission: " + err.message);

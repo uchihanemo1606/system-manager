@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     initLoginForm();
-}); 
+});
 function initLoginForm() {
     const form = document.getElementById("loginForm");
     if (!form) return;
@@ -37,10 +37,11 @@ function initLoginForm() {
                 document.cookie = `token=${data.token}; path=/; SameSite=Lax${
                     isSecure ? "; Secure" : ""
                 }`;
-
-                alert(data.message || "Đăng nhập thành công!");
                 window.location.href = data.redirect || "/";
-                errorDiv.textContent = data.message || data.status || "Đăng nhập thành công!";
+                errorDiv.textContent =
+                    data.message || data.status || "Đăng nhập thành công!";
+            } else {
+                errorDiv.textContent = data.message || data.status;
             }
         } catch {
             errorDiv.textContent = "Lỗi server, vui lòng thử lại sau.";

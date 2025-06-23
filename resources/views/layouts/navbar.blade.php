@@ -37,12 +37,14 @@
               <span>Overview</span>
             </a>
           </li>
+          @hasPermission("user.list")
           <li class="item">
             <a data-key="users" class="link flex">
               <i class="bx bx-grid-alt"></i>
               <span>Users</span>
             </a>
           </li>
+           @endhasPermission
           <li class="item">
             <a data-key="roles" class="link flex">
               <i class="bx bx-grid-alt"></i>

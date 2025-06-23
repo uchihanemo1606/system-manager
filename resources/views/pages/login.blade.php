@@ -31,10 +31,10 @@
         </div>
         <div class="form-group">
             <div class="flex items-center justify-between">
-                <label class="flex items-center">
+                {{-- <label class="flex items-center">
                     <input type="checkbox" name="remember" class="mr-2">
                     <span>Nhớ tài khoản</span>
-                </label>
+                </label> --}}
                 <a class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
             </div>
         </div>

@@ -23,15 +23,28 @@ function renderUsers(users) {
     tbody.innerHTML = users
         .map((u) => {
             let actions = "";
+            if (hasPermission("user.update")) {
+                actions += `<li class="list-inline-item px-2"><a href="#"><a href="#"><i class="bx bx-show"></i></a></li>`;
+            }
             if (hasPermission("user.delete")) {
                 actions += `<li class="list-inline-item px-2"><a href="#"><i class="bx bx-trash"></i></a></li>`;
             }
             if (hasPermission("user.update")) {
-                actions += `<li class="list-inline-item px-2"><a href="#"><i class="bx bx-wrench"></i></a></li>`;
+                actions += `
+                <li class="list-inline-item px-2"><a href="#"><i class="bx bx-wrench" 
+                    onclick="loadModal('user_edit', { username: '${u.username}' })" title="Chỉnh sửa người dùng"
+                >
+                    </i></a>
+                </li>`;
             }
 
             if (hasPermission("user.detail")) {
-                actions += `<li class="list-inline-item px-2"><a href="#"><i class="bx bx-user-circle"></i></a></li>`;
+                actions += `
+                        <li class="list-inline-item px-2"><a href="#"><i class="mdi mdi-shield-account"
+                        onclick="loadModal('user_role_edit', { username: '${u.username}' })"
+                        >
+                            </i></a>
+                        </li>`;
             }
             return `
                 <tr>
