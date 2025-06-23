@@ -11,8 +11,8 @@
         @csrf
         <div class="form-group">
             <input
-                type="email"
-                name="email"
+                type="text"
+                name="username"
                 required
                 class="form-input"
                 placeholder=" "
@@ -35,7 +35,7 @@
                     <input type="checkbox" name="remember" class="mr-2">
                     <span>Nhớ tài khoản</span>
                 </label>
-                <a href="{{ route('password.request') }}" class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
+                <a class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
             </div>
         </div>
         <button type="submit" class="login-btn">Đăng Nhập</button>

@@ -23,3 +23,4 @@ Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareIp'])
 Route::post('/createharwarepermission', [HardwarePermissionController::class, 'createHardwarePermission'])
     ->middleware('check.permission')
     ->name('hardwarepermission.create');
+

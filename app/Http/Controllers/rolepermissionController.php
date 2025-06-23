@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
@@ -102,6 +103,12 @@ class rolepermissionController extends Controller
                     'message' => "User {$user->username} created role permission '{$request->input('role_name')}' with permission '{$request->input('permission_name')}'.",
                     'is_delete' => false
                 ]);
+
+                $usernames = DB::table('user_role')->where('role_name', $request->input('role_name'))->pluck('username');
+                foreach ($usernames as $username) {
+                    Cache::forget('user_permissions_' . $username);
+                }
+
                 return response()->json(['message' => 'Role permission created successfully'], 201);
             } else {
                 return response()->json(['message' => 'Failed to create role permission'], 500);
@@ -181,6 +188,11 @@ class rolepermissionController extends Controller
                 'is_delete' => false
             ]);
 
+                $usernames = DB::table('user_role')->where('role_name', $request->input('role_name'))->pluck('username');
+                foreach ($usernames as $username) {
+                    Cache::forget('user_permissions_' . $username);
+                }
+
             if ($updated) {
                 return response()->json(['message' => 'Role permission updated successfully'], 200);
             } else {
@@ -236,6 +248,12 @@ class rolepermissionController extends Controller
                     'message' => "User {$user->username} deleted role permission '{$request->input('role_name')}' with permission '{$request->input('permission_name')}'.",
                     'is_delete' => true
                 ]);
+
+                $usernames = DB::table('user_role')->where('role_name', $request->input('role_name'))->pluck('username');
+                foreach ($usernames as $username) {
+                    Cache::forget('user_permissions_' . $username);
+                }
+
                 return response()->json(['message' => 'Role permission deleted successfully'], 200);
             } else {
                 return response()->json(['message' => 'Failed to delete role permission'], 500);

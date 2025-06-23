@@ -18,3 +18,17 @@ Route::get('/getalldomain', [domainController::class, 'getAllDomains'])
 Route::patch('/updatedomain', [domainController::class,'updateDomain'])
     ->middleware('check.permission')
     ->name('domain.edit');
+
+
+// hardware domain
+Route::post('/createhardwaredomain', [domainController::class, 'createHardwareDomain'])
+    ->middleware('check.permission')
+    ->name('hardwaredomain.create');
+
+Route::get('/gethardwaresoftwareindomain', [domainController::class, 'getHardwareAndSoftwareInDomain'])
+    ->middleware('check.permission')
+    ->name('hardwaredomain.list');
+
+Route::get('/getdomainbyhardware', [domainController::class, 'getdomainbyhardware'])
+    ->middleware('check.permission')
+    ->name('hardwaredomain.list');

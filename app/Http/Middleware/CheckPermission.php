@@ -36,6 +36,18 @@ class CheckPermission
                 return response()->json(['status' => 'error', 'message' => 'User has no roles assigned.'], 403);
             }
 
+            // Bước 3: Lấy danh sách tất cả quyền (permission_name) của người dùng dựa trên vai trò
+            // Cache key nên bao gồm một yếu tố thay đổi khi quyền của user thay đổi, ví dụ version hoặc timestamp.
+            // Hiện tại, đơn giản là username.
+            $cacheKeyUserPermissions = 'user_permissions_' . $user->username;
+            $userPermissions = Cache::remember($cacheKeyUserPermissions, now()->addHours(1), function () use ($userRoles) {
+                return DB::table('role_permissions')
+                    ->whereIn('role_name', $userRoles)
+                    ->pluck('permission_name') // Giả định 'permission_name' trong 'role_permissions' là tên quyền chuẩn
+                    ->unique() // Đảm bảo các quyền là duy nhất
+                    ->all();
+            });
+            // Bước 4: Lấy tên route hiện tại
             $routeName = Route::currentRouteName();
             if (!$routeName) {
                 $incidentId = uniqid('ROUTE_NAME_ERR_');

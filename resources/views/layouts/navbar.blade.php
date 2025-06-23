@@ -11,7 +11,8 @@
         href="/login" class="nav_image">
         <img src="images/logo.png" alt="logo_img" />
       </a>
-      <span class="logo_name">SystemMNG</span>
+      <span class="logo_name">System Manager</span>
+
       <i class="bx bx-lock-alt" id="lock-icon" title="Unlock Sidebar"></i>
       <i class="bx bx-x" id="sidebar-close"></i>
     </div>
@@ -23,8 +24,7 @@
               <img src="images/profile.jpg" alt="logo_img" />
             </span>
             <div class="data_text">
-              <span class="name">David Oliva</span>
-              <span class="email">david@gmail.com</span>
+              <span class="name">{{ $user->username }}</span>
             </div>
           </div>
           <div class="menu_title flex">
@@ -41,6 +41,12 @@
             <a data-key="users" class="link flex">
               <i class="bx bx-grid-alt"></i>
               <span>Users</span>
+            </a>
+          </li>
+          <li class="item">
+            <a data-key="roles" class="link flex">
+              <i class="bx bx-grid-alt"></i>
+              <span>Roles</span>
             </a>
           </li>
         </ul>
@@ -108,28 +114,28 @@
     </div>
   </nav>
   <nav class="navbar flex flex-row" id="main_navbar">
-    <i class="bx bx-menu" id="sidebar-open"></i> 
-    <form class="app-search d-none d-lg-block ">
+    <i class="bx bx-menu" id="sidebar-open"></i>
+    <form class="app-search d-none d-lg-block  " style="padding: 0;">
       <div class="position-relative">
         <input type="text" class="form-control" placeholder="Search...">
         <span class="bx bx-search-alt"></span>
       </div>
-    </form> 
+    </form>
     <div class="dropdown">
       <div type="button" class="" id="page-header-user-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <img class="rounded-circle header-profile-user" src="images/profile.jpg" alt="Header Avatar">
-        <span class="d-none d-xl-inline-block ml-1">Henry</span>
+        <span class="d-none d-xl-inline-block ml-1">{{$user->username }}</span>
         <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
       </div>
       <div class="dropdown-menu dropdown-menu-right">
-        <a class="dropdown-item" href="#"><i class="bx bx-user font-size-16 align-middle mr-1"></i> Profile</a>
+        <a class="dropdown-item" href="#" onclick="loadModal('profile')"><i class="bx bx-user font-size-16 align-middle mr-1"></i> Profile</a>
         <a class="dropdown-item d-block" href="#"><span class="badge badge-success float-right">11</span><i class="bx bx-wrench font-size-16 align-middle mr-1"></i> Settings</a>
         <a class="dropdown-item" href="#"><i class="bx bx-lock-open font-size-16 align-middle mr-1"></i> Lock screen</a>
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item text-danger" href="#"><i class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i> Logout</a>
+        <a class="dropdown-item text-danger" id="logout"><i class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i> Logout</a>
       </div>
     </div>
-
   </nav>
 </body>
 <script src="{{ asset('js/style/bar.js') }}"></script>
+<script src="{{ asset('js/bar.js') }}"></script>

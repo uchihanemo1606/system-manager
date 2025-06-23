@@ -8,6 +8,7 @@ const routes = {
     software: "/software_manager",
     software_file: "/software_detail",
     rule: "/rules",
+    roles: "/roles",
     noticeBoard: "#",
     award: "#",
     setting: "#",
@@ -42,7 +43,7 @@ const toggleLock = () => {
     } else {
         sidebar.classList.remove("hoverable");
         sidebarLockBtn.classList.replace("bx-lock-open-alt", "bx-lock-alt");
-    } 
+    }
     sessionStorage.setItem("sidebarLocked", isLocked);
 };
 

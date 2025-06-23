@@ -4,8 +4,7 @@
   if (navbar && mainContent) {
     mainContent.style.marginTop = `${navbar.offsetHeight}px`;
   }
-}
-
+} 
 window.addEventListener("DOMContentLoaded", updateMainContentMargin);
 window.addEventListener("resize", updateMainContentMargin);
 
