@@ -16,16 +16,22 @@ class hardwarePemisssionModel extends Model
     ];
     public function user()
     {
-        return $this->belongsTo('App\Models\UserModel', 'user_name', 'username');
+        return $this->belongsTo(UserModel::class, 'user_name', 'username');
     }
     public function permissions()
     {
-        return $this->belongsTo('App\Models\permissionModel', 'permissions_name', 'permissions_name');
+        return $this->belongsTo(permissionModel::class, 'permissions_name', 'permissions_name');
     }
     public function userCreatedby()
     {
-        return $this->belongsTo('App\Models\UserModel', 'user_createby', 'username');
+        return $this->belongsTo(UserModel::class, 'user_createdby', 'username');
     }
+
+        public function hardware()
+    {
+        return $this->belongsTo(hardwareModel::class, 'hardware_ip', 'ip');
+    }
+
     protected function casts(): array
     {
         return [

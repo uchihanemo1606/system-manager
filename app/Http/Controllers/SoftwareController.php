@@ -81,6 +81,7 @@ class SoftwareController extends Controller
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
+
             
             $id = $request->query('id');
             if (!$id) {
@@ -96,6 +97,10 @@ class SoftwareController extends Controller
                 'version' => 'nullable|string|max:255',
                 'description' => 'nullable|string|max:1000',
             ]);
+
+            if ($user->cannot('update', $software)) {
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this software.'], 403);
+            }
 
             // Update the software record
             $software->softwareName = $request->input('softwareName');
@@ -135,6 +140,10 @@ class SoftwareController extends Controller
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            if ($user->cannot('viewAny', softwareModel::class)) {
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
             }
 
             $software = SoftwareModel::all();

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('user_creately',100);
             $table->string('permissions_name', 150)->primary();
             $table->string('type',100);
-            $table->foreign('user_creately')->references('username')->on('users')->onDelete('cascade');
+            $table->foreign('user_creately')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();
         });
     }

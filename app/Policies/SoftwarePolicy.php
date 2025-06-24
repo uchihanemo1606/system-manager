@@ -52,9 +52,22 @@ class SoftwarePolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(UserModel $userModel): bool
+    public function viewAny(UserModel $user): bool
     {
-        return false; // Giữ nguyên logic hiện tại
+        $hasPermission = DB::table('software_permissions')
+            ->where('user_name', $user->username)
+            ->where('permissions_name', 'software.list')
+            ->exists();
+
+        // níu trú là quản lý phầng kứng thì no one can't stop you
+        $roles = DB::table('user_role')->where('username', $user->username)->pluck('role_name')->map(function($r) {
+            return mb_strtolower($r, 'UTF-8');
+        });
+        if ($roles->contains('quản lý phần mềm' | 'software manager')) {
+            return true;
+        }
+
+        return $hasPermission;
     }
 
     /**

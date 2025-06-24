@@ -411,4 +411,51 @@ class rolesController extends Controller
             ], 500);
         }
     }
+
+    public function getAllRolesByUser(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $roles = DB::table('roles')
+                ->join('user_role', 'roles.role_name', '=', 'user_role.role_name')
+                ->where('user_role.username', $user->username)
+                ->select('roles.role_name')
+                ->get();
+
+            if ($roles->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No roles found for this user.'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $roles
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not retrieve roles by user. ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

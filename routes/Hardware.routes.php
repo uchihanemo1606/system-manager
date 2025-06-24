@@ -11,12 +11,12 @@ Route::post('/createhardware',[HardwareController::class, 'createHardware'])
     ->name('hardware.create');
 Route::get('/getallhardware', [HardwareController::class, 'getAllHardware'])
     ->middleware('check.permission')
-    ->name('hardware.getAll');
+    ->name('hardware.list');
 Route::patch('/updatehardware', [HardwareController::class, 'updateHardware']);
 Route::delete('/deletehardware', [HardwareController::class, 'deleteHardware']);
 Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareIp'])
     ->middleware('check.permission')
-    ->name('hardware.get');
+    ->name('hardware.list');
 
 // harware perrmision controller
 

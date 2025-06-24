@@ -15,7 +15,7 @@ class routePermissionModel extends Model
     ];
     public function permission()
     {
-        return $this->belongsTo('App\Models\permissionModel', 'permissions_name', 'permissions_name');
+        return $this->belongsTo(permissionModel::class, 'permissions_name', 'permissions_name');
     }
 
     public static function newFactory()

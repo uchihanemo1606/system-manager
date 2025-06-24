@@ -112,7 +112,7 @@ class userRoleController extends Controller
         if ($request->has('id')) {
             $validator = Validator::make($request->all(), [
                 'id' => 'required|integer|exists:user_role,id',
-                'role_name' => 'required|string|max:50',
+                'role_name' => 'required|string|exists:roles,role_name',
             ]);
             if ($validator->fails()) {
                 return response()->json([

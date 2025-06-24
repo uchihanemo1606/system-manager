@@ -40,14 +40,30 @@ class HardwarePolicy
         return false;
     }
 
-    public function viewAny(UserModel $userModel): bool
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(UserModel $user): bool
     {
-        return false;
+        $hasPermission = DB::table('hardware_permissions')
+            ->where('user_name', $user->username)
+            ->where('permissions_name', 'hardware.list')
+            ->exists();
+
+        // níu trú là quản lý phầng kứng thì no one can't stop you
+        $roles = DB::table('user_role')->where('username', $user->username)->pluck('role_name')->map(function($r) {
+            return mb_strtolower($r, 'UTF-8');
+        });
+        if ($roles->contains('quản lý phần cứng')) {
+            return true;
+        }
+
+        return $hasPermission;
     }
 
     public function view(UserModel $user, hardwareModel $hardware): bool
     {
-        return $this->checkHardwarePermission($user, $hardware, 'hardware.view');
+        return $this->checkHardwarePermission($user, $hardware, 'hardware.get'| 'hardware.list');
     }
 
     public function update(UserModel $userModel, hardwareModel $hardware): bool

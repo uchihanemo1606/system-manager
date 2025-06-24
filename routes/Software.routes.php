@@ -4,6 +4,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Controllers\SoftwareController;
+use App\Http\Controllers\softwarefileController;
 
 
 Route::post('/createsoftware',[SoftwareController::class, 'createSoftware'])
@@ -21,3 +22,9 @@ Route::delete('/deleteSoftware', [SoftwareController::class,'deleteSoftware'])
 Route::get('/getsoftwarebyname', [SoftwareController::class, 'getSoftwareByName'])
     ->middleware('check.permission')
     ->name('software.get');
+
+// =======================================================================================SOFTWARE FILE ROUTE============================================================================================================================
+
+Route::post('/createsoftwarefile', [softwarefileController::class, 'createSoftwarefile'])
+    ->middleware('check.permission')
+    ->name('softwarefile.create');

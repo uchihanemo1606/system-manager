@@ -27,16 +27,16 @@ return new class extends Migration
             $table->string('permission_name', 100)->nullable();
             $table->unsignedBigInteger('role_id',)->nullable();
             // Foreign keys
-            $table->foreign('software_id')->references('id')->on('software')->onDelete('cascade');
-            $table->foreign('hardware_ip')->references('ip')->on('hardware')->onDelete('cascade');
-            $table->foreign('username')->references('username')->on('users')->onDelete('cascade');
-            $table->foreign('rule_id')->references('id')->on('rules')->onDelete('cascade');
-            $table->foreign('software_file_id')->references('id')->on('software_file')->onDelete('cascade');
-            $table->foreign('sw_permission_user')->references('user_name')->on('software_permissions')->onDelete('cascade');
-            $table->foreign('hw_permission_user')->references('user_name')->on('hardware_permissions')->onDelete('cascade');
-            $table->foreign('permission_name')->references('permissions_name')->on('permissions')->onDelete('cascade');
-            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
-            $table->foreign('link_domain')->references('link')->on('domain')->onDelete('cascade');
+            $table->foreign('software_id')->references('id')->on('software')->onUpdate('cascade');
+            $table->foreign('hardware_ip')->references('ip')->on('hardware')->onUpdate('cascade');
+            $table->foreign('username')->references('username')->on('users')->onUpdate('cascade');
+            $table->foreign('rule_id')->references('id')->on('rules')->onUpdate('cascade');
+            $table->foreign('software_file_id')->references('id')->on('software_file')->onUpdate('cascade');
+            $table->foreign('sw_permission_user')->references('user_name')->on('software_permissions')->onUpdate('cascade');
+            $table->foreign('hw_permission_user')->references('user_name')->on('hardware_permissions')->onUpdate('cascade');
+            $table->foreign('permission_name')->references('permissions_name')->on('permissions')->onUpdate('cascade');
+            $table->foreign('role_id')->references('id')->on('roles')->onUpdate('cascade');
+            $table->foreign('link_domain')->references('link')->on('domain')->onUpdate('cascade');
             $table->timestamps();
         });
     }

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
-use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
@@ -77,24 +77,28 @@ class HardwareController extends Controller
     } ///áhdakjsdajkgsdjhavsd
 
     public function getAllHardware()
-    {   
+    {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
+            
+            if ($user->cannot('viewAny', hardwareModel::class)) {
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view hardware'], 403);
+            }
 
-        $hardware = hardwareModel::all();
-        $total = $hardware->count();
+            $hardware = hardwareModel::all();
+            $total = $hardware->count();
 
-        if ($hardware->isEmpty()) {
-            return response()->json(['status' => 'error', 'message' => 'No hardware found', 'total' => 0], 404);
-        }
+            if ($hardware->isEmpty()) {
+                return response()->json(['status' => 'error', 'message' => 'No hardware found', 'total' => 0], 404);
+            }
 
-        return response()->json([
-            'status' => 'success',
-            'total' => $total,
-            'data' => $hardware
-        ]);
+            return response()->json([
+                'status' => 'success',
+                'total' => $total,
+                'data' => $hardware
+            ]);
 
         } catch (TokenExpiredException $e) {
             return response()->json([

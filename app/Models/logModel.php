@@ -22,43 +22,43 @@ class logModel extends Model
     ];
     public function software()
     {
-        return $this->belongsTo('App\Models\softwareModel', 'software_id', 'id');
+        return $this->belongsTo(softwareModel::class, 'software_id', 'id');
     }
     public function hardware()
     {
-        return $this->belongsTo('App\Models\hardwareModel', 'hardware_ip', 'ip');
+        return $this->belongsTo(hardwareModel::class, 'hardware_ip', 'ip');
     }
     public function rule()
     {
-        return $this->belongsTo('App\Models\rulesModel', 'rule_id', 'id');
+        return $this->belongsTo(rulesModel::class, 'rule_id', 'id');
     }
     public function role()
     {
-        return $this->belongsTo('App\Models\rolesModel', 'role_id', 'id');
+        return $this->belongsTo(rolesModel::class, 'role_id', 'id');
     }
     public function softwareFile()
     {
-        return $this->belongsTo('App\Models\softwareFileModel', 'software_file_id', 'id');
+        return $this->belongsTo(softwareFileModel::class, 'software_file_id', 'id');
     }
     public function domain()
     {
-        return $this->belongsTo('App\Models\domainModel', 'link_domain', 'link');
+        return $this->belongsTo(domainModel::class, 'link_domain', 'link');
     }
     public function softwarePermission()
     {
-        return $this->belongsTo('App\Models\softwarePermissionModel', 'sw_permission_user', 'user_name');
+        return $this->belongsTo(softwarePermissionModel::class, 'sw_permission_user', 'user_name');
     }
     public function hardwarePermission()
     {
-        return $this->belongsTo('App\Models\hardwarePermissionModel', 'hw_permission_user', 'user_name');
+        return $this->belongsTo(hardwarePemisssionModel::class, 'hw_permission_user', 'user_name');
     }
     public function permission()
     {
-        return $this->belongsTo('App\Models\permissionModel', 'permission_name', 'permissions_name');
+        return $this->belongsTo(permissionModel::class, 'permission_name', 'permissions_name');
     }
     public function user()
     {
-        return $this->belongsTo('App\Models\UserModel', 'username', 'username');
+        return $this->belongsTo(UserModel::class, 'username', 'username');
     }
     protected function casts(): array
     {

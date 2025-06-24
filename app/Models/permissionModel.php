@@ -10,7 +10,7 @@ class permissionModel extends Model
     
     protected $table = 'permissions';
     protected $primaryKey = 'permissions_name'; // Khóa chính của bảng permissions
-    public $incrementing = false; // Vì khóa chính là string
+    public $incrementing = false; // dì khoá 9 là chũi nêng nó 0 tự tânk
     protected $keyType = 'string';
         protected $fillable = [
             'user_creately',

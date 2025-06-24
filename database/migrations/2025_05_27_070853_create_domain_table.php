@@ -17,8 +17,8 @@ return new class extends Migration
             $table->text('name');
             $table->string('link', 500)->unique();
             $table->string('createBy',100);
-            $table->foreign('software_id')->references('id')->on('software')->onDelete('cascade');
-            $table->foreign('createBy')->references('username')->on('users')->onDelete('cascade');
+            $table->foreign('software_id')->references('id')->on('software')->onUpdate('cascade');
+            $table->foreign('createBy')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();
         });
     }

@@ -11,8 +11,7 @@
         href="/login" class="nav_image">
         <img src="images/logo.png" alt="logo_img" />
       </a>
-      <span class="logo_name">System Manager</span>
-
+      <span class="logo_name">SystemMNG</span>
       <i class="bx bx-lock-alt" id="lock-icon" title="Unlock Sidebar"></i>
       <i class="bx bx-x" id="sidebar-close"></i>
     </div>

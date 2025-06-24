@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('description',100);
             $table->boolean('is_delete')->default(false);
             $table->dateTime('date_release');
-            $table->foreign('category_id')->references('id')->on('category_rule')->onDelete('cascade');
-            $table->foreign('username')->references('username')->on('users')->onDelete('cascade');
+            $table->foreign('category_id')->references('id')->on('category_rule')->onUpdate('cascade');
+            $table->foreign('username')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();
         });
     }

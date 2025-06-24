@@ -15,11 +15,11 @@ class softwarePermissionModel extends Model
     ];
     public function software()
     {
-        return $this->belongsTo('App\Models\softwareModel', 'software_id', 'id');
+        return $this->belongsTo(softwareModel::class, 'software_id', 'id');
     }
     public function user()
     {
-        return $this->belongsTo('App\Models\UserModel', 'user_name', 'username');
+        return $this->belongsTo(UserModel::class, 'user_name', 'username');
     }
     public function permission(){
         return $this->belongsTo('App\Models\PermissionModel', 'permissions_name', 'permissions_name');

@@ -167,6 +167,90 @@ class ruleController extends Controller
         }
     }
 
+    public function getCategoryRuleById(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rules = request() ->query('id');
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|integer|exists:category_rules,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $categoryRule = DB::table('category_rules')
+                ->where('id', $request->input('id'))
+                ->first();
+
+            if (!$categoryRule) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Category rule not found.'
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Category rule retrieved successfully.',
+                'data' => $categoryRule,
+            ], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve category rule by ID. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getCategoryRuleByName(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rules = request() ->query('name');
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:100|exists:category_rules,name',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $categoryRule = DB::table('category_rules')
+                ->where('name', $request->input('name'))
+                ->first();
+
+            if (!$categoryRule) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Category rule not found.'
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Category rule retrieved successfully.',
+                'data' => $categoryRule,
+            ], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve category rule by name. ' . $e->getMessage()], 500);
+        }
+    }
+
     public function createRule(Request $request)
     {
         try {
@@ -426,5 +510,196 @@ class ruleController extends Controller
         }
     }
 
+    public function deleteSoftwareRule(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rules = request() ->query('id');
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $deleted = DB::table('software_rules')
+                ->where('id', $request->input('id'))
+                ->delete();
+
+            if ($deleted === 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No software rule deleted or rule not found.'
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Software rule deleted successfully.',
+                'id' => $request->input('id'),
+            ], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not delete software rule. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getAllRulesInSoftware(Request $request)
+    {
+       try
+       {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rules = DB::table('software_rules')
+                ->join('rules', 'software_rules.rule_id', '=', 'rules.id')
+                ->select('software_rules.*', 'rules.name as rule_name', 'rules.description as rule_description')
+                ->get();
+
+            return response()->json([
+                'message' => 'Software rules retrieved successfully.',
+                'data' => $rules,
+            ], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve software rules. ' . $e->getMessage()], 500);
+       } 
+    }
+
+    public function getRuleById(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rules = request() ->query('id');
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|integer|exists:rules,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $rule = DB::table('rules')
+                ->where('id', $request->input('id'))
+                ->first();
+
+            if (!$rule) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Rule not found.'
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Rule retrieved successfully.',
+                'data' => $rule,
+            ], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve rule by ID. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getRuleBycategoryId(Request $request)
+    {
+        try{
+            if(!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rules = request()->query('category_rule_id') ?? $request->input('category_rule_id');
+
+            $validator = Validator::make($request->all(), [
+                'category_rule_id' => 'required|integer|exists:category_rules,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            $rules = DB::table('rules')
+                ->where('category_rule_id', $request->input('category_rule_id'))
+                ->get();
+            if ($rules->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No rules found for this category.'
+                ], 404);
+            }
+            return response()->json([
+                'message' => 'Rules retrieved successfully.',
+                'data' => $rules,
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve rules by category ID. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getRuleByName(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rules = request() ->query('name') ?? $request->input('name');
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:100|exists:rules,name',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $rule = DB::table('rules')
+                ->where('name', 'like', '%' . $request->input('name') . '%')
+                ->first();
+
+            if (!$rule) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Rule not found.'
+                ], 404);
+            }
+
+            return response()->json([
+                'message' => 'Rule retrieved successfully.',
+                'data' => $rule,
+            ], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve rule by name. ' . $e->getMessage()], 500);
+        }
+    }
 
 }
