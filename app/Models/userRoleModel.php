@@ -17,11 +17,11 @@ class userRoleModel extends Model
 
     public function user()
     {
-        return $this->belongsTo('App\Models\UserModel', 'username', 'username');
+        return $this->belongsTo(UserModel::class, 'username', 'username');
     }
     public function role()
     {
-        return $this->belongsTo('App\Models\rolesModel', 'role_name', 'role_name');
+        return $this->belongsTo(rolesModel::class, 'role_name', 'role_name');
     }
     protected function casts(): array
     {

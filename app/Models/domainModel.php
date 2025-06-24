@@ -24,7 +24,7 @@ class domainModel extends Model
 
     public function software()
     {
-        return $this->belongsTo('App\Models\softwareModel', 'software_id', 'id');
+        return $this->belongsTo(softwareModel::class, 'software_id', 'id');
     }
 
 }

@@ -12,7 +12,7 @@ class rolesModel extends Model
     public $table = 'roles';
     public $primaryKey = 'role_name';
     public $incrementing = false; // khoá 9 0 tự tăng
-    protected $keyType = 'string'; // Khóa chính là kiểu chuỗi (string)
+    protected $keyType = 'string'; //khoá 9 là chũi
     protected $fillable = [
         'role_name',
         'assigned_at',

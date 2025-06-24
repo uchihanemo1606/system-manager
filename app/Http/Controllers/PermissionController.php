@@ -1460,7 +1460,7 @@ class PermissionController extends Controller
             $result = [];
             foreach ($roles as $roleName) {
                 // Lấy tất cả permission_name từ role_permission cho từng role
-                $permissionNames = DB::table('role_permission')
+                $permissionNames = DB::table('role_permissions')
                     ->where('role_name', $roleName)
                     ->pluck('permission_name');
 
