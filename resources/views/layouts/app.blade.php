@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 @php
-use App\Helpers\ViteModalHelper;
+    use App\Helpers\ViteModalHelper;
 
-$modalAssets = App\Helpers\ViteModalHelper::getModalAssets();
-$routeName = Route::currentRouteName();
-$cssPath = isset($page) ? 'css/' . $page . '.css' : null;
-$scriptPath = isset($page) ? 'js/' . $page . '.js' : null;
+    $modalAssets = App\Helpers\ViteModalHelper::getModalAssets();
+    $routeName = Route::currentRouteName();
+    $cssPath = isset($page) ? 'css/' . $page . '.css' : null;
+    $scriptPath = isset($page) ? 'js/' . $page . '.js' : null;
 
 @endphp
 
@@ -18,13 +18,16 @@ $scriptPath = isset($page) ? 'js/' . $page . '.js' : null;
     <link href="assets\css\app.min.css" id="app-style" rel="stylesheet" type="text/css">
     <link href="assets\css\icons.min.css" rel="stylesheet" type="text/css">
     <link href="assets\css\boxicons.min.css" rel="stylesheet" type="text/css">
-    <link href="assets/css/materialdesignicons.min.css" rel="stylesheet"> 
+    <link href="assets/css/materialdesignicons.min.css" rel="stylesheet">
     <!-- role detail -->
     <link href="assets\libs\summernote\summernote-bs4.min.css" rel="stylesheet" type="text/css">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    @if($cssPath && file_exists(public_path($cssPath)))
-    <link href="{{ asset($cssPath) }}" rel="stylesheet" />
+
+    @if ($cssPath && file_exists(public_path($cssPath)))
+        <link href="{{ asset($cssPath) }}" rel="stylesheet" />
     @endif
 </head>
 
@@ -35,8 +38,22 @@ $scriptPath = isset($page) ? 'js/' . $page . '.js' : null;
         @include('layouts.main_modal')
         @yield('content')
     </main>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="liveToast" class="toast align-items-center text-bg-primary border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toast-message">
+                    Thông báo mẫu
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
 </body>
 <!-- script modal -->
+
+<script src="assets\libs\jquery\jquery.min.js"></script>
+<script src="assets\libs\bootstrap\js\bootstrap.bundle.min.js"></script>
 <script>
     // console.log("menu:", @json($permissionsRoute));
     // console.log("code:", @json($userPermissionCodes));
@@ -45,25 +62,23 @@ $scriptPath = isset($page) ? 'js/' . $page . '.js' : null;
     window.userPermissionCodes = @json($userPermissionCodes);
     // end test 
     window.viteAssets = {
-        @foreach($modalAssets as $name => $path)
-        '{{ $name }}': '{{ Vite::asset($path) }}',
+        @foreach ($modalAssets as $name => $path)
+            '{{ $name }}': '{{ Vite::asset($path) }}',
         @endforeach
     };
 </script>
 <!-- scripts java file -->
-@if($scriptPath && file_exists(public_path($scriptPath)))
-<script src="{{ asset($scriptPath) }}"></script>
+@if ($scriptPath && file_exists(public_path($scriptPath)))
+    <script src="{{ asset($scriptPath) }}"></script>
 @endif
+
+@yield('scripts')
 <script src="/js/app.js"></script>
 <script src="js\style\app.js"></script>
-@yield('scripts')
-
-<script src="assets\libs\jquery\jquery.min.js"></script>
-<script src="assets\libs\bootstrap\js\bootstrap.bundle.min.js"></script>
 <script src="assets\libs\metismenu\metisMenu.min.js"></script>
-
 <!-- role_detail -->
 <script src="assets\libs\summernote\summernote-bs4.min.js"></script>
 <script src="assets\libs\summernote\email-summernote.init.js"></script>
-
+{{-- toast notification --}}
+@vite('resources/js/component/toast.js')
 </html>

@@ -1,6 +1,7 @@
 <head>
     <title>Đăng Nhập</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <link href="assets\css\bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css">
 </head>
 <div class="login-container">
     <div class="login-title">Đăng Nhập</div>
@@ -10,22 +11,11 @@
     <form id="loginForm" autocomplete="off">
         @csrf
         <div class="form-group">
-            <input
-                type="text"
-                name="username"
-                required
-                class="form-input"
-                placeholder=" "
-                autocomplete="username">
+            <input type="text" name="username" required class="form-input" placeholder=" " autocomplete="username">
             <label class="form-label">Username</label>
         </div>
         <div class="form-group">
-            <input
-                type="password"
-                name="password"
-                required
-                class="form-input"
-                placeholder=" "
+            <input type="password" name="password" required class="form-input" placeholder=" "
                 autocomplete="current-password">
             <label class="form-label">Mật khẩu</label>
         </div>
@@ -43,5 +33,5 @@
     <div id="error"></div>
 </div>
 <div class="bg-login">
-</div> 
+</div>
 <script src="{{ asset('js/login.js') }}"></script>

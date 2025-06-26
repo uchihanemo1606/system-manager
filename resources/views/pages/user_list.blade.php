@@ -3,7 +3,7 @@
 <div>
     @hasPermission("user.list")
     <div class="row">
-        <div class="col-12 d-flex justify-content-between align-items-center mb-3">
+        <div class="page-title-box  col-12 d-flex justify-content-between align-items-center mb-3">
             <h4 class="mb-0 font-size-18">Danh sách người dùng</h4>
             @hasPermission("user.create")
             <a href="#" class="btn btn-primary" onclick="loadModal('user_create')">Thêm người dùng</a>

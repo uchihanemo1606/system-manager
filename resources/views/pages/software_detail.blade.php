@@ -60,26 +60,7 @@
                              <i class="bx bx-plus-medical text-lg"></i>
                          </p>
                      </div>
-                     <div class="table-responsive">
-                         <table class="table table-centered table-nowrap">
-                             <tbody>
-                                 <?php for ($i = 0; $i < 6; $i++) { ?>
-                                     <tr>
-                                         <td style="width: 50px;"><img src="images\avatar-1.jpg" class="rounded-circle avatar-xs" alt=""></td>
-                                         <td>
-                                             <h5 class="font-size-14 m-0"><a href="" class="text-dark">Daniel Canales</a></h5>
-                                         </td>
-                                         <td>
-                                             <div>
-                                                 <a href="#" class="badge badge-primary font-size-11"><?= ($i % 2 == 1) ? "Frontend" : "Backend" ?></a>
-                                                 <?= ($i % 2 == 1) ? ' <a href="#" class="badge badge-primary font-size-11">UI</a>' : '' ?>
-                                             </div>
-                                         </td>
-                                     </tr>
-                                 <?php } ?>
-                             </tbody>
-                         </table>
-                     </div>
+                    
                  </div>
              </div>
          </div>

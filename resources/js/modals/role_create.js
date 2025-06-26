@@ -65,12 +65,7 @@ function renderTableRow(p, isChecked, roleName) {
     const name = p.permissions_name;
     const isExisting = allPermissionsGlobal.some(
         (perm) => normalize(perm.permissions_name) === normalize(name)
-    );
-
-    if (!isExisting) {
-        console.log("Permission exists:", name, allPermissionsGlobal);
-    }
-
+    ); 
     if (!isExisting) {
         const normalized = normalize(p.permissions_name);
         return `
@@ -317,7 +312,7 @@ async function initRoleCreateModal() {
             );
 
             alert("Tạo vai trò thành công!");
-            $("#roleCreateModal").modal("hide");
+            $("#modalContainer").modal("hide");
             window.dispatchEvent(new CustomEvent("rolePermissionUpdated"));
         } catch (err) {
             console.error("Lỗi khi tạo vai trò:", err);

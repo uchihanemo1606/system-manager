@@ -50,11 +50,10 @@ function renderRoles(roles) {
                     </div>
                 </td>
             </tr>
-        `;
+            `;
         })
         .join("");
-}
-
+} 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadRoles();
 });

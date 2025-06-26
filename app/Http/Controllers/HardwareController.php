@@ -86,9 +86,9 @@ class HardwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
             
-            if ($user->cannot('viewAny', hardwareModel::class)) {
-            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view hardware'], 403);
-            }
+            // if ($user->cannot('list', hardwareModel::class)) {
+            // return response()->json(['status' => 'error', 'message' => 'You do not have permission to view hardware'], 403);
+            // }
 
             $hardware = hardwareModel::all();
             $total = $hardware->count();

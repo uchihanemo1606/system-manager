@@ -11,9 +11,11 @@
 
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="text-primary mb-0">Danh sách Quyền hiện tại</h5>
-            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addPermissionModal">
-                <i class="bx bx-plus mr-1"></i> Thêm Permission
-            </button>
+            @hasPermission('permission.list')
+                <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addPermissionModal">
+                    <i class="bx bx-plus mr-1"></i> Thêm Permission
+                </button>
+            @endhasPermission
         </div>
         <div class="flex-grow-1 overflow-auto border rounded p-2" style="max-height: 60vh;">
             <ul class="list-group" id="permission-list">
@@ -62,38 +64,38 @@
                     </div>
                 </div>
             </div> --}}
-              <div class="px-4">
-                    <div class="d-flex justify-content-between align-items-center ">
-                        <h5 class="text-primary border-bottom pb-2 mb-0">Danh sách Permission</h5>
-                        <button class="btn btn-link px-0" type="button" data-toggle="collapse"
-                            data-target="#permissionFilters">
-                            <i class="mdi mdi-filter-variant mr-1"></i> Bộ lọc
-                        </button>
-                    </div>
+            <div class="px-4">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5 class="text-primary border-bottom pb-2 mb-0">Danh sách Permission</h5>
+                    <button class="btn btn-link px-0" type="button" data-toggle="collapse"
+                        data-target="#permissionFilters">
+                        <i class="mdi mdi-filter-variant mr-1"></i> Bộ lọc
+                    </button>
+                </div>
 
-                    <div class="collapse show" id="permissionFilters">
-                        <div class="form-row">
-                            <div class="form-group col">
-                                <input type="text" class="form-control" id="filter-name" placeholder="Tìm theo tên">
-                            </div>
-                            <div class="form-group col">
-                                <select class="form-control" id="filter-type" name="type"></select>
-                            </div>
+                <div class="collapse show" id="permissionFilters">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <input type="text" class="form-control" id="filter-name" placeholder="Tìm theo tên">
                         </div>
-                        <div class="form-row">
-                            <div class="form-group col">
-                                <input type="date" class="form-control" id="filter-created-date">
-                            </div>
-                            <div class="form-group col">
-                                <select class="form-control" id="filter-selected">
-                                    <option value="">Tất cả</option>
-                                    <option value="selected">Đã chọn</option>
-                                    <option value="unselected">Chưa chọn</option>
-                                </select>
-                            </div>
+                        <div class="form-group col">
+                            <select class="form-control" id="filter-type" name="type"></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <input type="date" class="form-control" id="filter-created-date">
+                        </div>
+                        <div class="form-group col">
+                            <select class="form-control" id="filter-selected">
+                                <option value="">Tất cả</option>
+                                <option value="selected">Đã chọn</option>
+                                <option value="unselected">Chưa chọn</option>
+                            </select>
                         </div>
                     </div>
                 </div>
+            </div>
             <!-- Danh sách permission cuộn được -->
             <div class="modal-body overflow-auto px-4 py-3" style="flex-grow: 1; background-color: #f8f9fa;">
                 <div id="permission-checkboxes"></div>
@@ -111,4 +113,3 @@
         </form>
     </div>
 </div>
-

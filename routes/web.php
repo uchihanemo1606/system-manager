@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\View;
 
 Route::get('/login', fn() => view('pages/login'));
 Route::get('/apis', fn() => view('scribe/index'));
-Route::get('/modal/{modal}', function ($modal, Request $request) {
-    $view = 'modals.' . str_replace('/', '.', $modal);
-    return View::exists($view) ? view($view) : view('modal_not_found');
-})->where('modal', '.*');
+// Route::get('/modal/{modal}', function ($modal, Request $request) {
+//     $view = 'modals.' . str_replace('/', '.', $modal);
+//     return View::exists($view) ? view($view) : view('modal_not_found');
+// })->where('modal', '.*');
 
 Route::middleware(['check.login'])->group(function () {
     $getCommonData = fn(Request $request) => [
@@ -18,6 +18,13 @@ Route::middleware(['check.login'])->group(function () {
         'permissions' => $request->attributes->get('permissions'),
         'permissionsRoute' => $request->attributes->get('permissionsRoute'),
     ];
+    Route::get('/modal/{modal}', function ($modal, Request $request) use ($getCommonData) {
+        $view = 'modals.' . str_replace('/', '.', $modal);
+        if (View::exists($view)) {
+            return view($view, $getCommonData($request));
+        }
+        return view('modal_not_found', $getCommonData($request));
+    })->where('modal', '.*');
     Route::get('/', function (Request $request) use ($getCommonData) {
         return view('pages/user_list', $getCommonData($request));
     });

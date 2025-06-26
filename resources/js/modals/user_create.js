@@ -1,7 +1,8 @@
 import { create_user } from "../api/user";
 import { get_all_role } from "../api/role";
+import { showToast } from "../component/toast";
 
-function initUserCreateModal() {  
+function initUserCreateModal() {
     const createUserForm = document.getElementById("create-user-form");
     const roleContainer = document.getElementById("role-checkboxes");
 
@@ -16,11 +17,14 @@ function initUserCreateModal() {
     // Gọi API lấy danh sách roles
     async function fetchRoles() {
         try {
-            const roles = await get_all_role(); 
+            const roles = await get_all_role();
             renderRoles(roles.data);
-        } catch (err) {
-            console.error("Lỗi khi tải danh sách quyền:", err);
-            alert("Không thể tải danh sách quyền");
+        } catch (err) { 
+            showToast({
+                message: err.message || "Không thể tải danh sách quyền!",
+                type: "error",
+                timeout: 2000,
+            })
         }
     }
 
@@ -60,7 +64,11 @@ function initUserCreateModal() {
         const data = Object.fromEntries(formData.entries());
 
         if (data.password !== data.verifyPassword) {
-            alert("Mật khẩu không khớp!");
+            showToast({
+                message: "Mật khẩu và xác nhận mật khẩu không khớp!",
+                type: "error",
+                timeout: 2000,
+            })
             return;
         }
 
@@ -75,12 +83,19 @@ function initUserCreateModal() {
                 roles: roles,
             });
 
-            alert("Tạo người dùng thành công");
+            showToast({
+                message: "Tạo user thành công!",
+                type: "success",
+                timeout: 2000,
+            });
             $("#createUserModal").modal("hide");
             window.dispatchEvent(new CustomEvent("userCreated"));
         } catch (err) {
-            console.error(err);
-            alert(err.message || "Đã có lỗi xảy ra");
+            showToast({
+                message: err.message || "Có lỗi xảy ra khi tạo user!",
+                type: "error",
+                timeout: 2000,
+            });
         }
     });
 }

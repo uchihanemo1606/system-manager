@@ -38,7 +38,7 @@ function renderUsers(users) {
                 </li>`;
             }
 
-            if (hasPermission("user.detail")) {
+            if (hasPermission("userrole.update")) {
                 actions += `
                         <li class="list-inline-item px-2"><a href="#"><i class="mdi mdi-shield-account"
                         onclick="loadModal('user_role_edit', { username: '${u.username}' })"
