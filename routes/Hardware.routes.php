@@ -9,6 +9,7 @@ use app\Http\Middleware\CheckPermission;
 Route::post('/createhardware',[HardwareController::class, 'createHardware'])
     ->middleware('check.permission')
     ->name('hardware.create');
+
 Route::get('/getallhardware', [HardwareController::class, 'getAllHardware'])
     ->middleware('check.permission')
     ->name('hardware.list');

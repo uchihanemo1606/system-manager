@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('route_name',100);
             $table->string('permissions_name',150);
-            $table->foreign('permissions_name')->references('permissions_name')->on('permissions');
+            $table->foreign('permissions_name')->references('permissions_name')->on('permissions')->onUpdate('cascade');
             $table->timestamps();
             
         });

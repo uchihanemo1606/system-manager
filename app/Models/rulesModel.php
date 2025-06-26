@@ -24,11 +24,11 @@ class rulesModel extends Model
 
     public function category()
     {
-        return $this->belongsTo('App\Models\categoryRulesModel', 'category_id', 'id');
+        return $this->belongsTo(categoryRulesModel::class, 'category_id', 'id');
     }
     public function user()
     {
-        return $this->belongsTo('App\Models\UserModel', 'username', 'username');
+        return $this->belongsTo(UserModel::class, 'username', 'username');
     }
 
 }

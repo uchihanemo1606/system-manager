@@ -13,6 +13,6 @@ class hardwareAccessDomainModel extends Model
     ];
     public function hardware()
     {
-        return $this->belongsTo('App\Models\hardwareModel', 'hardware_ip', 'ip');
+        return $this->belongsTo(hardwareModel::class, 'hardware_ip', 'ip');
     }
 }

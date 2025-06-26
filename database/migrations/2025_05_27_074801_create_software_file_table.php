@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('file_name', 200);
             $table->string('file_path', 255);
             $table->text('description')->nullable();
-            $table->foreign('username')->references('username')->on('users');
-            $table->foreign('software_id')->references('id')->on('software');
+            $table->foreign('username')->references('username')->on('users')->onUpdate('cascade');
+            $table->foreign('software_id')->references('id')->on('software')->onUpdate('cascade');
             $table->timestamps();
         });
     }

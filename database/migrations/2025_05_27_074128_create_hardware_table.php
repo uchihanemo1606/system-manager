@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('services');
             $table->boolean('is_active')->default(true);
             $table->string('created_by', 100);
-            $table->foreign('created_by')->references('username')->on('users')->onDelete('cascade');
+            $table->foreign('created_by')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();
         });
     }

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('user_createby', 100);
             $table->boolean('is_delete')->default(false);
             $table->text('description')->nullable();
-            $table->foreign('user_createby')->references('username')->on('users')->onDelete('cascade');
+            $table->foreign('user_createby')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();
         });
     }

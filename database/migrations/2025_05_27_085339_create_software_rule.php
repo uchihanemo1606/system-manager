@@ -16,8 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('rule_id');
             $table->unsignedBigInteger('software_id');
             $table->dateTime('assigned_at')->useCurrent();
-            $table->foreign('software_id')->references('id')->on('software')->onDelete('cascade');
-            $table->foreign('rule_id')->references('id')->on('rules')->onDelete('cascade');
+            $table->foreign('software_id')->references('id')->on('software')->onUpdate('cascade');
+            $table->foreign('rule_id')->references('id')->on('rules')->onUpdate('cascade');
             $table->timestamps();
         });
     }

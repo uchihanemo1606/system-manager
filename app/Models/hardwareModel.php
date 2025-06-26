@@ -39,6 +39,6 @@ class hardwareModel extends Model
     }
     public function user()
     {
-        return $this->belongsTo('App\Models\UserModel', 'created_by', 'username');
+        return $this->belongsTo(UserModel::class, 'created_by', 'username');
     }
 }
