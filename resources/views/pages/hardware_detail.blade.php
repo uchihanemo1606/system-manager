@@ -165,9 +165,9 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     {{-- rule --}}
-                    @include('components.rule', ['type' => 'hardware'])
+                    @include('components.rule_by_type', ['type' => 'hardware'])
                     @vite('resources/js/component/rule/hardware_rule.js')  
                     <div class="card">
                         <div class="card-body">
