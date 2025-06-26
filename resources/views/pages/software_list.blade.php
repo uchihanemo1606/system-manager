@@ -1,97 +1,87 @@
- @extends('layouts.app')
- @section('content')
- <div class="container-fluid">
-     <div class="row">
-         <div class="col-12">
-             <div class="page-title-box d-flex align-items-center justify-content-between">
-                 <h4 class="mb-0 font-size-18">Quản lý phần mềm</h4>
-             </div>
-         </div>
-     </div>
-     <div class="row">
-         <?php for ($i = 0; $i < 12; $i++) { ?>
-             <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                 <!-- Card here -->
-                 <div class="card">
-                     <div class="card-body">
-                         <div class="media">
-                             <div class="avatar-md mr-4">
-                                 <span class="avatar-title rounded-circle bg-light text-danger font-size-16">
-                                     <img src="images\img-1.jpg" alt="" height="30">
-                                 </span>
-                             </div>
-                             <div class="media-body overflow-hidden">
-                                 <h5 class="text-truncate font-size-15"><a href="software_detail" class="text-dark">Tool</a></h5>
-                                 <p class="text-muted mb-4">It will be as simple as Occidental</p>
-                                 <div class="team">
-                                     <a href="javascript: void(0);" class="team-member d-inline-block" data-toggle="tooltip" data-placement="top" title="" data-original-title="Daniel Canales">
-                                         <img src="images\avatar-1.jpg" class="rounded-circle avatar-xs m-1" alt="">
-                                     </a>
-                                     <a href="javascript: void(0);" class="team-member d-inline-block" data-toggle="tooltip" data-placement="top" title="" data-original-title="Jennifer Walker">
-                                         <img src="images\avatar-1.jpg" class="rounded-circle avatar-xs m-1" alt="">
-                                     </a>
-                                 </div>
-                             </div>
-                         </div>
-                     </div>
-                     <div class="px-4 py-3 border-top flex flex-row justify-content-between">
-                         <ul class="list-inline mb-0">
-                             <li class="list-inline-item mr-3">
-                                 <span class="badge badge-primary">4.1.1</span>
-                             </li>
-                             <li class="list-inline-item mr-3" data-toggle="tooltip" data-placement="top" title="" data-original-title="Due Date">
-                                 <i class="bx bx-calendar mr-1"></i> 15 Oct, 19
-                             </li>
-                             <li class="list-inline-item mr-3" data-toggle="tooltip" data-placement="top" title="" data-original-title="Comments">
-                                 </i> 214
-                             </li>
-                         </ul>
-                         <ul class="list-inline mb-0 ">
+@hasPermission('software.list')
+    @extends('layouts.app')
+    @section('content')
+        <div>
+            <div class="row">
+                <div class="page-title-box col-12 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 font-size-18">Quản lý phần mềm</h4>
+                    @hasPermission('software.create')
+                        <a href="#" class="btn btn-primary" onclick="loadModal('software_create')">Thêm phần mềm</a>
+                    @endhasPermission
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Bộ lọc tìm kiếm</h5>
 
-                             <li class="list-inline-item mr-3">
-                                 <a href="#" class="text-muted"><i class="bx bx-link-external"></i> Link</a>
-                             </li>
-                             <li class="list-inline-item mr-3">
-                                 <a href="#" class="text-muted"><i class="bx bx-file"></i> File</a>
-                             </li>
-                         </ul>
-                     </div>
-                 </div>
-             </div>
-         <?php } ?>
-     </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <input type="text" id="filter-name" class="form-control" placeholder="Tên phần mềm">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <input type="text" id="filter-language" class="form-control" placeholder="Ngôn ngữ">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <input type="text" id="filter-version" class="form-control" placeholder="Phiên bản">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <select id="filter-delete" class="form-control">
+                                <option value="">-- Trạng thái xóa --</option>
+                                <option value="false">Chưa xóa</option>
+                                <option value="true">Đã xóa</option>
+                            </select>
+                        </div>
+                    </div>
 
+                    <div id="advanced-filters" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <input type="text" id="filter-createdby" class="form-control" placeholder="Người tạo">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="date" id="filter-createdat" class="form-control" placeholder="Ngày tạo">
+                            </div>
+                        </div>
+                    </div>
 
-     <div class="row">
-         <div class="col-lg-12">
-             <ul class="pagination pagination-rounded justify-content-center mt-2 mb-5">
-                 <li class="page-item disabled">
-                     <a href="#" class="page-link"><i class="mdi mdi-chevron-left"></i></a>
-                 </li>
-                 <li class="page-item">
-                     <a href="#" class="page-link">1</a>
-                 </li>
-                 <li class="page-item active">
-                     <a href="#" class="page-link">2</a>
-                 </li>
-                 <li class="page-item">
-                     <a href="#" class="page-link">3</a>
-                 </li>
-                 <li class="page-item">
-                     <a href="#" class="page-link">4</a>
-                 </li>
-                 <li class="page-item">
-                     <a href="#" class="page-link">5</a>
-                 </li>
-                 <li class="page-item">
-                     <a href="#" class="page-link"><i class="mdi mdi-chevron-right"></i></a>
-                 </li>
-             </ul>
-         </div>
-     </div>
- </div>
+                    <div class="mt-2 d-flex justify-content-between">
+                        <button class="btn btn-link text-primary p-0" type="button" onclick="toggleAdvancedFilters()">
+                            <span id="toggle-text">Hiện thêm bộ lọc nâng cao</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="loadSoftware()">Tìm kiếm</button>
 
+                    </div>
+                </div>
+            </div>
 
+            <div class="row" id="software-list-container">
+                <!-- Danh sách phần mềm sẽ được render bằng JS vào đây -->
+            </div>
 
- </div>
- @endsection
+            <div class="row">
+                <div class="col-12">
+                    <div class="text-center">
+                        <a href="javascript:void(0);" class="text-success" onclick="loadSoftware()">
+                            <i class="bx bx-hourglass bx-spin mr-2"></i> Tải lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endsection
+    <script>
+        function toggleAdvancedFilters() {
+            const advanced = document.getElementById('advanced-filters');
+            const toggleText = document.getElementById('toggle-text');
+
+            if (advanced.style.display === 'none') {
+                advanced.style.display = 'block';
+                toggleText.innerText = 'Ẩn bộ lọc nâng cao';
+            } else {
+                advanced.style.display = 'none';
+                toggleText.innerText = 'Hiện thêm bộ lọc nâng cao';
+            }
+        }
+    </script>
+    @vite('resources/js/pages/software_list.js')
+@endhasPermission

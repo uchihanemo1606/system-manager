@@ -51,8 +51,7 @@ async function get_all_permission() {
 }
 
 // Cập nhật quyền cho role
-function update_role_permission(roleId, permissionIds) {
-    console.log("Cập nhật role", roleId, "với quyền", permissionIds);
+function update_role_permission(roleId, permissionIds) { 
     return Promise.resolve(true);
 }
 function renderTypeOptions(selected = "") {

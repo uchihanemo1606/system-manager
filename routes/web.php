@@ -26,7 +26,7 @@ Route::middleware(['check.login'])->group(function () {
         return view('modal_not_found', $getCommonData($request));
     })->where('modal', '.*');
     Route::get('/', function (Request $request) use ($getCommonData) {
-        return view('pages/user_list', $getCommonData($request));
+        return view('pages/dashboard', $getCommonData($request));
     });
     Route::get('/{page}', function ($page, Request $request) use ($getCommonData) {
         $view = 'pages.' . str_replace('/', '.', $page);

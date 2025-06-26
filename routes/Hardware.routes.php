@@ -17,8 +17,7 @@ Route::patch('/updatehardware', [HardwareController::class, 'updateHardware']);
 Route::delete('/deletehardware', [HardwareController::class, 'deleteHardware']);
 Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareByIP'])
     ->middleware('check.permission')
-    ->name('hardware.list');
-
+    ->name('hardware.list'); 
 // harware perrmision controller
 
 Route::post('/createharwarepermission', [HardwarePermissionController::class, 'createHardwarePermission'])

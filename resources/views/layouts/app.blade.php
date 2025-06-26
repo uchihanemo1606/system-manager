@@ -33,12 +33,7 @@
 
 <body>
     <!-- content -->
-    @include('layouts.navbar')
-    <main class="main-content" id="layout-main-content">
-        @include('layouts.main_modal')
-        @yield('content')
-    </main>
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
         <div id="liveToast" class="toast align-items-center text-bg-primary border-0" role="alert">
             <div class="d-flex">
                 <div class="toast-body" id="toast-message">
@@ -47,7 +42,12 @@
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
-    </div>
+    </div> 
+    @include('layouts.navbar')
+    <main class="main-content" id="layout-main-content">
+        @include('layouts.main_modal')
+        @yield('content')
+    </main>
 
 </body>
 <!-- script modal -->

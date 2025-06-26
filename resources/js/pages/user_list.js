@@ -60,20 +60,20 @@ function renderUsers(users) {
                             <a href="#" class="text-dark">${u.username}</a>
                         </h5>
                     </td>
-                    <td>${
-                        u.email ||
+                    <td class="text-center">${
+                        u.fullName ||
                         `  <div class="team">
                         <span class="badge badge-secondary">Chưa có dữ liệu</span>
                     </div>`
                     }</td>
-                    <td>${(u.roles || [])
+                    <td class="text-center">${(u.roles || [])
                         .map(
                             (r) =>
                                 `<a href="#" class="badge badge-soft-primary font-size-11 m-1">${r}</a>`
                         )
                         .join("")}</td>
-                    <td>${u.projects_count ?? 0}</td>
-                    <td>
+                    <td class="text-center">${u.email ?? 0}</td>
+                    <td class="text-right">
                         <ul class="list-inline font-size-20 contact-links mb-0">
                             ${actions}
                         </ul>
@@ -108,21 +108,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     filterForm?.addEventListener("submit", (e) => {
         e.preventDefault();
         const params = Object.fromEntries(new FormData(filterForm).entries());
-        const filtered = allUsers.filter(
-            (u) =>
-                (!params.username ||
-                    u.username
-                        ?.toLowerCase()
-                        .includes(params.username.toLowerCase())) &&
-                (!params.email ||
-                    u.email?.toLowerCase().includes(params.email.toLowerCase()))
+        
+        const filtered = allUsers.filter((u) =>
+            (!params.username || u.username?.toLowerCase().includes(params.username.toLowerCase())) &&
+            (!params.email || u.email?.toLowerCase().includes(params.email.toLowerCase())) &&
+            (!params.fullName || u.fullName?.toLowerCase().includes(params.fullName.toLowerCase())) &&
+            (!params.role || (u.roles || []).includes(params.role))
         );
+
         renderUsers(filtered);
     });
 
     await loadUsers();
     await loadRolesForFilter();
 });
+
 window.initUserCreateModal = async function () {
     const container = document.getElementById("role-checkboxes");
     if (!container) return;
@@ -157,7 +157,6 @@ window.initUserCreateModal = async function () {
         container.innerHTML = "<p class='text-danger'>Không thể tải quyền</p>";
     }
 };
-window.addEventListener("userCreated", () => {
-    console.log("Reload danh sách user sau khi tạo user thành công");
+window.addEventListener("userCreated", () => { 
     loadUsers();
 });

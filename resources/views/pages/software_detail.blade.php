@@ -1,224 +1,165 @@
- @extends('layouts.app')
- @section('content')
- <div class="container-fluid">
-     <div class="row">
-         <div class="col-12">
-             <div class="page-title-box d-flex align-items-center justify-content-between">
-                 <h4 class="mb-0 font-size-18">chi tiết phần mềm</h4>
-             </div>
-         </div>
-     </div>
+@extends('layouts.app')
+@section('content')
+    @hasPermission('software.detail')
+        <div class="container-fluid" id="software-detail" style="display: none;">
 
-     <div class="row">
-         <div class="col-lg-8">
-             <div class="card">
-                 <div class="card-body">
-                     <div class="media">
-                         <img src="images\software_default.png" alt="" class="avatar-sm mr-4">
-                         <div class="media-body overflow-hidden">
-                             <h5 class="text-truncate font-size-15">Software Name</h5>
-                             <p class="text-muted">Version: 1.1.1</p>
-                         </div>
-                     </div>
-                     <div>
-                         <h5 class="font-size-15" style="display: inline;">Ngôn ngữ: </h5> JavaScript
-                     </div>
-                     <h5 class="font-size-15 mt-2">Mô tả phần mềm :</h5>
-                     <p class="text-muted ">To an English person, it will seem like simplified English, as a skeptical Cambridge friend of mine told me what Occidental is. The European languages are members of the same family. Their separate existence is a myth. For science, music, sport, etc,</p>
-                     <h5 class="font-size-15 mt-2">Quy chế liên quan :</h5>
-                     <div class="text-muted mt-1">
-                         <p><i class="mdi mdi-chevron-right text-primary mr-1"></i> To achieve this, it would be necessary</p>
-                         <p><i class="mdi mdi-chevron-right text-primary mr-1"></i> Separate existence is a myth.</p>
-                         <p><i class="mdi mdi-chevron-right text-primary mr-1"></i> If several languages coalesce</p>
-                     </div>
-                     <div class="row task-dates">
-                         <div class="col-sm-4 col-6">
-                             <div class="mt-4">
-                                 <h5 class="font-size-14"><i class="bx bx-calendar mr-1 text-primary"></i> Ngày tạo</h5>
-                                 <p class="text-muted mb-0">08 Sept, 2019</p>
-                             </div>
-                         </div>
+            <div class="d-flex justify-content-between mb-3">
+                <h4 class="mb-0 font-size-18">Chi tiết phần mềm</h4>
+                @hasPermission('software.update')
+                    <button id="toggle-edit-btn" class="btn btn-primary">
+                        <i class="mdi mdi-pencil"></i> Sửa
+                    </button>
+                @endhasPermission
+            </div>
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media mb-3">
+                                <img src="/images/software_default.png" alt="" class="avatar-sm mr-3">
+                                <div class="media-body overflow-hidden">
+                                    <h5 class="text-truncate font-size-15">
+                                        <span id="software-name-view"></span>
+                                        <input id="software-name-input" class="form-control d-none" />
+                                    </h5>
+                                    <p class="text-muted mb-0">Version: <span id="software-version-view"></span></p>
+                                    <input id="software-version-input" class="form-control d-none mt-2" />
+                                </div>
+                            </div>
 
-                         <div class="col-sm-4 col-6">
-                             <div class="mt-4">
-                                 <h5 class="font-size-14"><i class="bx bx-calendar-check mr-1 text-primary"></i> ngày cập nhật</h5>
-                                 <p class="text-muted mb-0">12 Oct, 2025</p>
-                             </div>
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </div>
-         <div class="col-lg-4">
-             <div class="card">
-                 <div class="card-body">
-                     <div class="flex flex-row justify-content-between align-items-center">
-                         <h4 class="card-title mb-4">Danh sách người dùng trong nhóm</h4>
+                            <div class="mb-3">
+                                <h5 class="font-size-15 d-inline">Ngôn ngữ:</h5>
+                                <span id="software-language-view" class="ml-2"></span>
+                                <input id="software-language-input" class="form-control d-none mt-2" />
+                            </div>
 
-                         <p class="  text-primary ">
-                             Thêm mới
-                             <i class="bx bx-plus-medical text-lg"></i>
-                         </p>
-                     </div>
-                    
-                 </div>
-             </div>
-         </div>
-     </div>
-     <div class="row">
-         <div class="col-lg-4">
-             <div class="card">
-                 <div class="card-body">
-                     <h4 class="card-title mb-4">Overview</h4>
+                            <h5 class="font-size-15 mt-3">Mô tả phần mềm:</h5>
+                            <p id="software-description-view" class="text-muted"></p>
+                            <textarea id="software-description-input" class="form-control d-none mt-2"></textarea>
 
-                     <div id="overview-chart" class="apex-charts" dir="ltr"></div>
-                 </div>
-             </div>
-         </div>
-         <div class="col-lg-4">
-             <div class="card">
-                 <div class="card-body">
-                     <h4 class="card-title mb-4">Danh sách file của phần mềm</h4>
-                     <div class="table-responsive">
-                         <table class="table table-nowrap table-centered table-hover mb-0">
-                             <tbody>
-                                 <tr>
-                                     <td style="width: 45px;">
-                                         <div class="avatar-sm">
-                                             <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
-                                                 <i class="bx bxs-file-doc"></i>
-                                             </span>
-                                         </div>
-                                     </td>
-                                     <td>
-                                         <h5 class="font-size-14 mb-1"><a href="#" class="text-dark">Skote Landing.Zip</a></h5>
-                                         <small>Size : 3.25 MB</small>
-                                     </td>
-                                     <td>
-                                         <div class="text-center">
-                                             <a href="#" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                                         </div>
-                                     </td>
-                                 </tr>
-                                 <tr>
-                                     <td>
-                                         <div class="avatar-sm">
-                                             <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
-                                                 <i class="bx bxs-file-doc"></i>
-                                             </span>
-                                         </div>
-                                     </td>
-                                     <td>
-                                         <h5 class="font-size-14 mb-1"><a href="#" class="text-dark">Skote Admin.Zip</a></h5>
-                                         <small>Size : 3.15 MB</small>
-                                     </td>
-                                     <td>
-                                         <div class="text-center">
-                                             <a href="#" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                                         </div>
-                                     </td>
-                                 </tr>
-                                 <tr>
-                                     <td>
-                                         <div class="avatar-sm">
-                                             <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
-                                                 <i class="bx bxs-file-doc"></i>
-                                             </span>
-                                         </div>
-                                     </td>
-                                     <td>
-                                         <h5 class="font-size-14 mb-1"><a href="#" class="text-dark">Skote Logo.Zip</a></h5>
-                                         <small>Size : 2.02 MB</small>
-                                     </td>
-                                     <td>
-                                         <div class="text-center">
-                                             <a href="#" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                                         </div>
-                                     </td>
-                                 </tr>
-                                 <tr>
-                                     <td>
-                                         <div class="avatar-sm">
-                                             <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
-                                                 <i class="bx bxs-file-doc"></i>
-                                             </span>
-                                         </div>
-                                     </td>
-                                     <td>
-                                         <h5 class="font-size-14"><a href="#" class="text-dark">Veltrix admin.Zip</a></h5>
-                                         <small>Size : 2.25 MB</small>
-                                     </td>
-                                     <td>
-                                         <div class="text-center">
-                                             <a href="#" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                                         </div>
-                                     </td>
-                                 </tr>
-                             </tbody>
-                         </table>
-                     </div>
-                 </div>
-             </div>
-         </div>
-         <div class="col-lg-4">
-             <div class="card">
-                 <div class="card-body">
-                     <h4 class="card-title mb-4">Lịch sử thay đổi</h4>
+                            <div class="row mt-4">
+                                <div class="col-sm-4">
+                                    <h5 class="font-size-14"><i class="bx bx-calendar mr-1 text-primary"></i> Ngày tạo</h5>
+                                    <p class="text-muted mb-0" id="software-created-view"></p>
+                                </div>
+                                <div class="col-sm-4">
+                                    <h5 class="font-size-14"><i class="bx bx-calendar-check mr-1 text-primary"></i> Ngày cập
+                                        nhật</h5>
+                                    <p class="text-muted mb-0" id="software-updated-view"></p>
+                                </div>
+                                <div class="col-sm-4">
+                                    <h5 class="font-size-14"><i class="bx bx-user mr-1 text-primary"></i> Người tạo</h5>
+                                    <p class="text-muted mb-0" id="software-createdby-view"></p>
+                                </div>
+                            </div>
 
-                     <div class="media mb-4">
-                         <div class="mr-3">
-                             <img class="media-object rounded-circle avatar-xs" alt="" src="assets\images\users\avatar-2.jpg">
-                         </div>
-                         <div class="media-body">
-                             <h5 class="font-size-13 mb-1">David Lambert</h5>
-                             <p class="text-muted mb-1">
-                                 Separate existence is a myth.
-                             </p>
-                         </div>
-                         <div class="ml-3">
-                             <a href="" class="text-primary">Reply</a>
-                         </div>
-                     </div>
+                            <div class="mt-3">
+                                <h5 class="font-size-14 d-inline">Trạng thái:</h5>
+                                <span id="software-is-delete-view" class="ml-2"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4">Quy chế</h4>
+ 
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4">Thành viên quản lý phần mềm</h4>
+                            @include('components.user_member_list', ['type' => 'software'])
+                            @vite('resources/js/component/user_member_list/user_member_software.js')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h4 class="card-title mb-4">Tên miền</h4>
+                                @hasPermission('domain.create')
+                                    <button id="add_domain" class="btn btn-primary" type="button" data-software='{}'
+                                        onclick="loadModal('domain_create', JSON.parse(this.dataset.software))">
+                                        <i class="mdi mdi-plus"></i> Thêm tên miền
+                                    </button>
+                                @endhasPermission
+                            </div>
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                <table class="table table-nowrap table-centered table-hover mb-0" id="domain_list">
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                     <div class="media mb-4">
-                         <div class="mr-3">
-                             <img class="media-object rounded-circle avatar-xs" alt="" src="assets\images\users\avatar-3.jpg">
-                         </div>
-                         <div class="media-body">
-                             <h5 class="font-size-13 mb-1">Steve Foster</h5>
-                             <p class="text-muted mb-1">
-                                 <a href="" class="text-success">@Henry</a>
-                                 To an English person it will like simplified
-                             </p>
-                         </div>
-                         <div class="ml-3">
-                             <a href="" class="text-primary">Reply</a>
-                         </div>
-                     </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4">Danh sách file của phần mềm</h4>
+                            <div class="table-responsive">
+                                <table class="table table-nowrap table-centered table-hover mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 45px;">
+                                                <div class="avatar-sm">
+                                                    <span
+                                                        class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
+                                                        <i class="bx bxs-file-doc"></i>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <h5 class="font-size-14 mb-1"><a href="#" class="text-dark">Skote
+                                                        Landing.Zip</a></h5>
+                                                <small>Size : 3.25 MB</small>
+                                            </td>
+                                            <td>
+                                                <div class="text-center">
+                                                    <a href="#" class="text-dark"><i
+                                                            class="bx bx-download h3 m-0"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="avatar-sm">
+                                                    <span
+                                                        class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
+                                                        <i class="bx bxs-file-doc"></i>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <h5 class="font-size-14 mb-1"><a href="#" class="text-dark">Skote
+                                                        Admin.Zip</a></h5>
+                                                <small>Size : 3.15 MB</small>
+                                            </td>
+                                            <td>
+                                                <div class="text-center">
+                                                    <a href="#" class="text-dark"><i
+                                                            class="bx bx-download h3 m-0"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
 
-                     <div class="media mb-4">
-                         <div class="avatar-xs mr-3">
-                             <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-16">
-                                 S
-                             </span>
-                         </div>
-                         <div class="media-body">
-                             <h5 class="font-size-13 mb-1">Steven Carlson</h5>
-                             <p class="text-muted mb-1">
-                                 Separate existence is a myth.
-                             </p>
-                         </div>
-                         <div class="ml-3">
-                             <a href="" class="text-primary">Reply</a>
-                         </div>
-                     </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4">Lịch sử thay đổi</h4>
 
-                     <div class="text-center mt-4 pt-2">
-                         <a href="#" class="btn btn-primary btn-sm">View more</a>
-                     </div>
-                 </div>
-             </div>
-         </div>
-     </div>
- </div>
- @endsection
+                            <div class="text-center mt-4 pt-2">
+                                <a href="#" class="btn btn-primary btn-sm">View more</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @vite('resources/js/pages/software_detail.js')
+    @endhasPermission
+@endsection

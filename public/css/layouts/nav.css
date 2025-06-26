@@ -3,6 +3,12 @@
      padding: 0;
      box-sizing: border-box; 
  }
+.limit-3-lines {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp:1;
+    -webkit-box-orient: vertical;
+}
 
  body {
      min-height: 100vh;

@@ -2,7 +2,7 @@
 
 const routes = {
     login: "/login",
-    overview: "#",
+    overview: "/dashboard",
     users: "/user_list",
     hardware: "/hardware_list",
     software: "/software_list",

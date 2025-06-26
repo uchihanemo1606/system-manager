@@ -4,9 +4,9 @@ import {
     get_all_user_role,
     delete_user_role,
 } from "../api/role";
+import { showToast } from "../component/toast";
 
-async function initUserRoleEditModal(data) {
-    console.log("initUserRoleEditModal", data);
+async function initUserRoleEditModal(data) { 
 
     const res = await get_all_role(); // Tất cả roles
     const r2 = await get_all_user_role(); // Tất cả user-role
@@ -72,10 +72,12 @@ async function initUserRoleEditModal(data) {
                 });
                 if (res !== false) successDelete++;
             }
-
-            alert(
-                ` Gán vai trò hoàn tất cho ${username}\n➕ Thêm mới: ${successAdd}\n➖ Xóa: ${successDelete}`
-            );
+ 
+            showToast({
+                message: `Gán vai trò hoàn tất cho ${username}\n➕ Thêm mới: ${successAdd}\n➖ Xóa: ${successDelete}`,
+                type: "success",
+                timeout: 2000,
+            })
         });
 }
 

@@ -171,9 +171,7 @@ class HardwareController extends Controller
 
         if ($user->cannot('update', $hardware)) {
             return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this hardware.'], 403);
-        }
-
-
+        } 
         $oldData = $hardware->only([
         'ip',
         'dbname',

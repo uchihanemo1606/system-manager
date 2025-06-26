@@ -2,8 +2,7 @@ import { get_user_by_username, update_profile } from "../api/user";
 import { formatDateTime } from "../component/formatDateTime";
 
 function initUserEditModal(data) {
-    const username = data.username;
-    console.log("initProfileModal", data);
+    const username = data.username; 
     const profileForm = document.getElementById("edit-user-form");
     if (!profileForm) {
         console.error("Không tìm thấy form profile");

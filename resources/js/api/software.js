@@ -1,40 +1,40 @@
 import { defaultHeaders } from "../config/api_config";
-export async function create_hardware(data) {
-    const res = await fetch("/api/createhardware", {
+export async function create_software(data) {
+    const res = await fetch("/api/createsoftware", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
     });
     const result = await res.json();
-    if (!res.ok) throw new Error(result.message || "Lỗi tạo phần cứng   ");
+    if (!res.ok) throw new Error(result.message || "Lỗi tạo phần mềm  "); 
     return result;
 }
-export const get_all_hardware = async () => {
-    const res = await fetch("api/getallhardware", {
+export const get_all_software = async () => {
+    const res = await fetch("api/getallsoftware", {
         headers: defaultHeaders(),
     });
     const data = await res.json();
     if (res.ok) {
-        return data.hardware || data;
-    }
-    return [];
-};
-export const get_hardware_by_ip = async ({ ip }) => {
-    const res = await fetch(
-        `/api/gethardwarebyip?ip=${encodeURIComponent(ip)}`,
-        {
-            headers: defaultHeaders(),
-        }
-    );
-    const data = await res.json();
-    if (res.ok) {
-        return data.hardware || data;
+        return data.software || data;
     }
     return [];
 };
 
-export async function update_hardware(data) {
-    const res = await fetch("/api/updatehardware", {
+export const get_software_by_id = async ({ id }) => {
+    const res = await fetch(
+        `/api/getsoftwarebyid?id=${encodeURIComponent(id)}`,
+        {
+            headers: defaultHeaders(),
+        }
+    );  
+    const data = await res.json();
+    if (res.ok) {
+        return data.software || data;
+    }
+    return [];
+};
+export async function update_software(data) {
+    const res = await fetch("/api/updatesoftware", {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -48,18 +48,11 @@ export async function update_hardware(data) {
     }
 
     if (!res.ok) {
-        let errorMessages = result?.message || "Lỗi khi sửa phần cứng";
+        let errorMessages = result?.message || "Lỗi khi sửa phần mềm";
 
         if (result?.errors) {
             const detailErrors = Object.entries(result.errors)
-                .map(
-                    ([field, messages]) =>
-                        `${field}: ${
-                            Array.isArray(messages)
-                                ? messages.join(", ")
-                                : messages
-                        }`
-                )
+                .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
                 .join("\n");
             errorMessages += `\n${detailErrors}`;
         }

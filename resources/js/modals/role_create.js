@@ -6,6 +6,7 @@ import {
     permissionActions,
     permissionTypes,
 } from "../api/role";
+import { showToast } from "../component/toast";
 let selectedPermissionsGlobal = new Set();
 // Tạo danh sách tất cả các permission nên có
 function generateExpectedPermissions() {
@@ -65,7 +66,7 @@ function renderTableRow(p, isChecked, roleName) {
     const name = p.permissions_name;
     const isExisting = allPermissionsGlobal.some(
         (perm) => normalize(perm.permissions_name) === normalize(name)
-    ); 
+    );
     if (!isExisting) {
         const normalized = normalize(p.permissions_name);
         return `
@@ -79,7 +80,9 @@ function renderTableRow(p, isChecked, roleName) {
                     </span>
                 </td>
                 <td>
-                    <span class="badge badge-secondary">${p.type || "Không xác định"}</span>
+                    <span class="badge badge-secondary">${
+                        p.type || "Không xác định"
+                    }</span>
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-success create-missing-permission-btn shadow-sm"
@@ -114,10 +117,15 @@ function renderTableRow(p, isChecked, roleName) {
                     ${name}
                 </td>
                 <td class="align-middle">
-                    <span class="badge badge-info">${p.type || "Không xác định"}</span>
+                    <span class="badge badge-info">${
+                        p.type || "Không xác định"
+                    }</span>
                 </td>
                 <td class="align-middle text-muted">
-                    ${p.description || '<span class="font-italic">Không có mô tả</span>'}
+                    ${
+                        p.description ||
+                        '<span class="font-italic">Không có mô tả</span>'
+                    }
                 </td>
             </tr>
 
@@ -207,8 +215,11 @@ function renderPermissionTable(permissions, selectedNames, roleName = "") {
                     //     permission_name: permissionName,
                     // });
 
-                    alert(`Đã tạo permission "${permissionName}"`);
-
+                    showToast({
+                        message: `Đã tạo permission "${permissionName}"`,
+                        type: "success",
+                        timeout: 2000,
+                    });
                     // 3. Reload lại dữ liệu
                     const [allPermissions] = await Promise.all([
                         get_all_permission(),
@@ -228,7 +239,11 @@ function renderPermissionTable(permissions, selectedNames, roleName = "") {
                     // renderPermissionList(roleData.permissions);
                 } catch (err) {
                     console.error("Lỗi khi tạo permission:", err);
-                    alert("Lỗi khi tạo permission: " + err.message);
+                    showToast({
+                        message: err?.message || "Lỗi khi tạo permission",
+                        type: "error",
+                        timeout: 2000,
+                    });
                 }
             });
         });
@@ -284,7 +299,11 @@ async function initRoleCreateModal() {
         bindFilterEvents();
     } catch (err) {
         console.error("Lỗi khi load dữ liệu:", err);
-        alert("Không thể tải dữ liệu.");
+        showToast({
+            message: err?.message || "Lỗi khi tải dữ liệu permission",
+            type: "error",
+            timeout: 2000,
+        });
     }
 
     form.addEventListener("submit", async (e) => {
@@ -294,7 +313,11 @@ async function initRoleCreateModal() {
         const roleName = roleNameInput.value.trim();
 
         if (!roleName) {
-            alert("Vui lòng nhập tên vai trò.");
+            showToast({
+                message: "Vui lòng nhập tên vai trò.",
+                type: "warning",
+                timeout: 2000,
+            });
             return;
         }
         const selectedPermissions = Array.from(selectedPermissionsGlobal);
@@ -311,12 +334,20 @@ async function initRoleCreateModal() {
                 )
             );
 
-            alert("Tạo vai trò thành công!");
+            showToast({
+                message: `Đã tạo vai trò "${roleName}" với ${selectedPermissions.length} quyền.`,
+                type: "success",
+                timeout: 2000,
+            });
             $("#modalContainer").modal("hide");
             window.dispatchEvent(new CustomEvent("rolePermissionUpdated"));
         } catch (err) {
             console.error("Lỗi khi tạo vai trò:", err);
-            alert(err.message || "Đã xảy ra lỗi khi tạo vai trò.");
+            showToast({
+                message: err?.message || "Lỗi khi tạo vai trò",
+                type: "error",
+                timeout: 2000,
+            });
         }
     });
 }
