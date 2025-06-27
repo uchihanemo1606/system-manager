@@ -19,10 +19,9 @@ Route::patch('/updateuser', [AuthController::class, 'updateUser']);
 Route::patch('/changepassword', [AuthController::class, 'changePassword']);
 // Route::get('/getuserbyid/{id}', [UserController::class, 'getUserById']);
 route::get('/getallusers', [UserController::class, 'getAllUsers'])->middleware('check.permission')->name('user.list');
-route::get('/getuserbyname', [UserController::class, 'getUserByName']); 
+route::get('/getuserbyname', [UserController::class, 'getUserByName']);
 route::get('/getuserbyusername', [UserController::class,'getUserByUsername']);
 
 route::get('/sendmail', [MailController::class, 'sendEmail'])->name('mail.send');
 
-Route::get('/getmypermissions', [PermissionController::class, 'getMyPermissions']); 
-// route::get('/getuserbyusername', [UserController::class, 'getUserByUsername']); 
+Route::get('/getmypermissions', [PermissionController::class, 'getMyPermissions']);

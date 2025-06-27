@@ -60,6 +60,7 @@ class UserController extends Controller
             $users = UserModel::all();
             return response()->json([
                 'status' => 'success',
+                'count' => $users->count(),
                 'users' => $users,
             ]);
         } catch (TokenExpiredException $e) {

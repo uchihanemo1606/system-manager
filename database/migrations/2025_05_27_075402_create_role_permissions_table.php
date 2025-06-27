@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('role_name',100);
             $table->string('permission_name', 100);
             $table->timestamp('assigned_at');
-            $table->foreign('role_name')->references('role_name')->on('roles')->onDelete('cascade');
-            $table->foreign('permission_name')->references('permissions_name')->on('permissions')->onDelete('cascade');
+            $table->foreign('role_name')->references('role_name')->on('roles')->onUpdate('cascade');
+            $table->foreign('permission_name')->references('permissions_name')->on('permissions')->onUpdate('cascade');
             $table->timestamps();
         });
     }

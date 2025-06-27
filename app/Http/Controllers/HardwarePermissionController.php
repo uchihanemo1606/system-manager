@@ -25,7 +25,7 @@ class HardwarePermissionController extends Controller
         }
 
         $validated = $request->validate([
-            'hardware_ip' => 'required|string|exists:hardwares,ip',
+            'hardware_ip' => 'required|string|exists:hardware,ip|max:25',
             'user_name' => 'required|string|exists:users,username',
             'permissions_name' => 'required|string|max:255',
         ]);
@@ -49,7 +49,7 @@ class HardwarePermissionController extends Controller
             'hardware_ip' => $validated['hardware_ip'],
             'user_name' => $validated['user_name'],
             'permissions_name' => $validated['permissions_name'],
-            'user_createdby' => $user->username,
+            'user_createby' => $user->username,
             'assigned_at' => now(),
         ]);
 
@@ -294,6 +294,71 @@ class HardwarePermissionController extends Controller
             'data' => $permissions,
         ], 200);
         }catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not retrieve user permission details. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getUserInHardwarePermission(Request $request)
+    {
+        try {
+        if (!$user = JWTAuth::parseToken()->authenticate()) {
+            return response()->json(['message' => 'Please login to use this function'], 401);
+        }
+
+        // Lấy hardware_ip từ query hoặc body
+        $hardwareIp = $request->query('hardware_ip') ?? $request->input('hardware_ip');
+
+        if (!$hardwareIp) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'hardware_ip is required.'
+            ], 400);
+        }
+
+        // Kiểm tra hardware tồn tại
+        $hardwareExists = DB::table('hardwares')->where('ip', $hardwareIp)->exists();
+        if (!$hardwareExists) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Hardware not found.'
+            ], 404);
+        }
+
+        // Lấy toàn bộ permission của user trên hardware này
+        $permissions = hardwarePemisssionModel::where('hardware_ip', $hardwareIp)
+            ->with(['user', 'permissions', 'userCreatedby'])
+            ->get();
+
+        if ($permissions->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No permissions found for this hardware.'
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'User permissions on hardware retrieved successfully.',
+            'data' => $permissions,
+        ], 200);
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'

@@ -7,13 +7,14 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\hardwareModel;
-
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -79,33 +80,74 @@ class HardwareController extends Controller
     } ///áhdakjsdajkgsdjhavsd
 
     public function getAllHardware()
-    {   
+    {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
+                Log::warning('User not authenticated in getAllHardware');
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
+            
+            // if ($user->cannot('list', hardwareModel::class)) {
+            // return response()->json(['status' => 'error', 'message' => 'You do not have permission to view hardware'], 403);
+            // }
 
-        $hardware = hardwareModel::all();
-        $total = $hardware->count();
+            // Sử dụng policy để kiểm tra người dùng có phải là quản lý phần cứng không
+            $isManager = $user->can('viewAny', hardwareModel::class);
+            Log::info('Policy check result for viewAny', [
+                'username' => $user->username,
+                'isManager' => $isManager,
+            ]);
 
-        if ($hardware->isEmpty()) {
-            return response()->json(['status' => 'error', 'message' => 'No hardware found', 'total' => 0], 404);
-        }
+            $hardwareQuery = hardwareModel::query();
 
-        return response()->json([
-            'status' => 'success',
-            'total' => $total,
-            'data' => $hardware
-        ]);
+            // Nếu người dùng không phải là quản lý, chỉ lấy những hardware họ được phép xem
+            if (!$isManager) {
+                Log::info('User is not a manager, applying specific permissions.', ['username' => $user->username]);
+
+                $allowedIps = DB::table('hardware_permissions')
+                    ->where('user_name', $user->username)
+                    ->where('permissions_name', 'hardware.get') // Lấy quyền xem
+                    ->pluck('hardware_ip');
+
+                Log::info('Found allowed IPs for user', ['username' => $user->username, 'allowedIps' => $allowedIps->toArray()]);
+
+                // Query sẽ chỉ lấy các hardware có IP nằm trong danh sách được phép.
+                // Nếu $allowedIps rỗng, query sẽ không trả về kết quả nào (đây là hành vi đúng).
+                $hardwareQuery->whereIn('ip', $allowedIps);
+            } else {
+                Log::info('User is a manager, will fetch all hardware.', ['username' => $user->username]);
+            }
+
+            // Thực thi query và lấy kết quả
+            $hardware = $hardwareQuery->get();
+            $total = $hardware->count();
+
+            if ($hardware->isEmpty()) {
+                Log::warning('Final query returned no hardware for user', ['username' => $user->username, 'isManager' => $isManager]);
+                // Trả về danh sách rỗng thay vì lỗi 404, vì đây không phải là một lỗi
+                return response()->json(['status' => 'success', 'message' => 'No hardware found for your account', 'total' => 0, 'data' => []], 200);
+            }
+
+            Log::info('Successfully retrieved hardware', ['username' => $user->username, 'total' => $total]);
+
+            return response()->json([
+                'status' => 'success',
+                'total' => $total,
+                'data' => $hardware
+            ]);
 
         } catch (TokenExpiredException $e) {
+            Log::error('TokenExpiredException in getAllHardware', ['error' => $e->getMessage()]);
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
+            Log::error('TokenInvalidException in getAllHardware', ['error' => $e->getMessage()]);
             return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
+            Log::error('JWTException in getAllHardware', ['error' => $e->getMessage()]);
             return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Could not retrieve hardware. ' . $e->getMessage()], 500);
+            Log::critical('Exception in getAllHardware', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['status' => 'error', 'message' => 'An unexpected error occurred.'], 500);
         }
     }
     //update hardware
@@ -113,25 +155,43 @@ class HardwareController extends Controller
     {
     try {
         if (!$user = JWTAuth::parseToken()->authenticate()) {
+            Log::warning('User not authenticated in updateHardware');
             return response()->json(['message' => 'Please login to use this function'], 401);
         }
 
-        // Lấy ip từ query hoặc body
         $ip = $request->query('ip') ?? $request->input('ip');
+        Log::info('Update hardware request received', [
+            'username' => $user->username,
+            'requested_ip' => $ip,
+            'request_payload' => $request->all() // Log toàn bộ payload để debug
+        ]);
+
         if (!$ip) {
             return response()->json(['status' => 'error', 'message' => 'IP is required'], 400);
         }
 
         $hardware = hardwareModel::where('ip', $ip)->first();
         if (!$hardware) {
+            Log::warning('Hardware not found for update', ['ip' => $ip]);
             return response()->json(['status' => 'error', 'message' => 'No hardware found'], 404);
         }
 
+        // --- THÊM LOG TRƯỚC KHI CHECK POLICY ---
+        Log::info('Checking update permission for hardware', [
+            'username' => $user->username,
+            'hardware_ip' => $hardware->ip
+        ]);
+        // ----------------------------------------
+
         if ($user->cannot('update', $hardware)) {
+            // --- THÊM LOG NẾU KHÔNG CÓ QUYỀN ---
+            Log::warning('User denied update permission by policy', [
+                'username' => $user->username,
+                'hardware_ip' => $hardware->ip
+            ]);
+            // -----------------------------------
             return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this hardware.'], 403);
-        }
-
-
+        } 
         $oldData = $hardware->only([
         'ip',
         'dbname',

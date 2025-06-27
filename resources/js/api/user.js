@@ -31,6 +31,17 @@ export const get_profile = async () => {
     }
     return [];
 };
+export const get_user_by_username = async (username) => {
+    const res = await fetch(`api/getuserbyusername?username=${username}`, {
+        headers: defaultHeaders(),
+    });
+    const data = await res.json();
+    console.log("get_user_by_username", data);
+    if (res.ok && data.user) {
+        return data.user[0];
+    }
+    return [];
+};
 // export async function update_profile(data) {
 //     alert("chức năng đang bảo trì");
 //     return;

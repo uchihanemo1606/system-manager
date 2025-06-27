@@ -47,7 +47,7 @@ class AuthController extends Controller
      */
     public function CreateUser(Request $request)
     {
-        try { 
+        try {
             // Nếu chưa có user nào thì cho phép tạo user đầu tiên mà không cần token
             $userCount = UserModel::count();
             if ($userCount > 0) {
@@ -58,13 +58,7 @@ class AuthController extends Controller
                     ], 404);
                 }
             }
- 
-            // if (!$user = JWTAuth::parseToken()->authenticate()) {
-            //     return response()->json([
-            //         'status' => 'error',
-            //         'message' => 'User not found.'
-            //     ], 404);
-            // } 
+
             $request->validate([
                 'username' => 'required|string|max:255|unique:users',
                 'password' => 'required|string|min:8',
@@ -74,18 +68,12 @@ class AuthController extends Controller
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
             ]);
- 
-            // Nếu là user đầu tiên thì không có $user để log
-            if ($userCount > 0) {
-                LogController::createLogAuto([
-                    'username' => $user->username, 
-                    'message' => "{$user->username} đã tạo tài khoản có username là '{$usercreate->username}'",
-                ]);
-            } 
-            // LogController::createLogAuto([
-            //     'username' => $user->username,
-            //     'message' => "{$user->username} đã tạo tài khoản có username là '{$usercreate->username}'",
-            // ]); 
+
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "{$user->username} đã tạo tài khoản có username là '{$usercreate->username}'",
+            ]);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'User created successfully',
@@ -155,8 +143,8 @@ class AuthController extends Controller
         //thêm kiểm tra tk bị khoá, xoá
 
         LogController::createLogAuto([
-            'username' => $request->username,
-            'message' => "{$request->username} đã đăng nhập vào hệ thống",
+            'username' => $request->username, 
+            'message' => "{$request->username} has logged in system.",
         ]);
 
         return response()->json([

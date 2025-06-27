@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('user_name',100);
             $table->unsignedBigInteger('software_id');
             $table->timestamp('assigned_at');
-            $table->foreign('create_by')->references('username')->on('users')->onDelete('cascade');
-            $table->foreign('user_name')->references('username')->on('users')->onDelete('cascade');
-            $table->foreign('software_id')->references('id')->on('software')->onDelete('cascade');
+            $table->foreign('create_by')->references('username')->on('users')->onUpdate('cascade');
+            $table->foreign('user_name')->references('username')->on('users')->onUpdate('cascade');
+            $table->foreign('software_id')->references('id')->on('software')->onUpdate('cascade');
             $table->timestamps();
         });
     }  

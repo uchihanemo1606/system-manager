@@ -9,15 +9,19 @@ use app\Http\Middleware\CheckPermission;
 Route::post('/createhardware',[HardwareController::class, 'createHardware'])
     ->middleware('check.permission')
     ->name('hardware.create');
+
 Route::get('/getallhardware', [HardwareController::class, 'getAllHardware'])
     ->middleware('check.permission')
-    ->name('hardware.getAll');
-Route::patch('/updatehardware', [HardwareController::class, 'updateHardware']);
-Route::delete('/deletehardware', [HardwareController::class, 'deleteHardware']);
-Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareIp'])
-    ->middleware('check.permission')
-    ->name('hardware.get');
+    ->name('hardware.list');
 
+Route::patch('/updatehardware', [HardwareController::class, 'updateHardware'])
+    ->middleware('check.permission')
+    ->name('hardware.edit');
+
+Route::delete('/deletehardware', [HardwareController::class, 'deleteHardware']);
+Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareByIP'])
+    ->middleware('check.permission')
+    ->name('hardware.list'); 
 // harware perrmision controller
 
 Route::post('/createharwarepermission', [HardwarePermissionController::class, 'createHardwarePermission'])

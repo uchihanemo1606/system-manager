@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('hardware_ip', 25);
             $table->unsignedBigInteger('domain_id');
-            $table->foreign('hardware_ip')->references('ip')->on('hardware')->onDelete('cascade');
+            $table->foreign('hardware_ip')->references('ip')->on('hardware')->onUpdate('cascade');
             $table->timestamps();
 
         });

@@ -12,15 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('hardware_permissions', function (Blueprint $table) {
-            $table->string('hardware_ip',25)->primary();
+            $table->id();
+            $table->string('hardware_ip',25);
             $table->string('permissions_name', 100);
             $table->string('user_name', 100);
             $table->string(('user_createby'),100);
             $table->timestamp('assigned_at');
-            $table->foreign('hardware_ip')->references('ip')->on('hardware')->onDelete('cascade');
-            $table->foreign('permissions_name')->references('permissions_name')->on('permissions')->onDelete('cascade');
-            $table->foreign('user_name')->references('username')->on('users')->onDelete('cascade');
-            $table->foreign('user_createby')->references('username')->on('users')->onDelete('cascade');
+            $table->foreign('hardware_ip')->references('ip')->on('hardware')->onUpdate('cascade');
+            $table->foreign('permissions_name')->references('permissions_name')->on('permissions')->onUpdate('cascade');
+            $table->foreign('user_name')->references('username')->on('users')->onUpdate('cascade');
+            $table->foreign('user_createby')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();
         });
     }

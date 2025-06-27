@@ -4,15 +4,10 @@ async function loadRoles() {
     const tbody = document.getElementById("role-table-body");
     if (!tbody) return;
 
-    try {
-        const response = await get_all_role();
+    const response = await get_all_role();
 
-        const roles = response.data; // lấy mảng data từ response
-        console.log(roles);
-        renderRoles(roles);
-    } catch (err) {
-        console.error("Lỗi khi tải danh sách quyền hạng:", err);
-    }   
+    const roles = response.data;
+    renderRoles(roles);
 }
 
 function renderRoles(roles) {
@@ -25,7 +20,7 @@ function renderRoles(roles) {
             const createdAt = role.created_at
                 ? new Date(role.created_at).toLocaleDateString()
                 : "-";
-
+            const safeRoleData = JSON.stringify(role).replace(/"/g, "&quot;");
             return `
             <tr>
                 <td>
@@ -44,22 +39,21 @@ function renderRoles(roles) {
                 </td>
                 <td>
                     <div class="dropdown" >
-                        <button class="btn btn-link p-0 dropdown-toggle" type="button" data-toggle="dropdown" onclick="loadModal('role_detail')">
+                        <button class="btn btn-link p-0 dropdown-toggle" 
+                                type="button"
+                                data-role="${safeRoleData|| '{}'}"
+                                onclick="loadModal('role_detail', JSON.parse(this.dataset.role))"
+                        >
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <button class="dropdown-item" type="button">Sửa</button>
-                            <button class="dropdown-item" type="button">Xem permission</button>
-                            <button class="dropdown-item" type="button" onclick="loadModal('role_detail')">Xem chi tiết</button>
-                        </div>
+                        
                     </div>
                 </td>
             </tr>
-        `;
+            `;
         })
         .join("");
-}
-
+} 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadRoles();
 });
