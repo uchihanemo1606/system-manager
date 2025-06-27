@@ -79,7 +79,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `hardware_permissions` WRITE;
 /*!40000 ALTER TABLE `hardware_permissions` DISABLE KEYS */;
-INSERT INTO `hardware_permissions` VALUES ('192.168.17.24','xem phần cứng','nemohardwareroom','nemohardware','2025-06-12 02:02:59','2025-06-12 02:02:59','2025-06-12 02:02:59'),('192.168.6.6','xem phần cứng','nemohardwareroom','nemohardware','2025-06-12 01:16:37','2025-06-12 01:16:37','2025-06-12 01:16:37');
+INSERT INTO `hardware_permissions` VALUES (1,'192.168.17.24','xem phần cứng','nemohardwareroom','nemohardware','2025-06-12 02:02:59','2025-06-12 02:02:59','2025-06-12 02:02:59'),(2,'192.168.6.6','xem phần cứng','nemohardwareroom','nemohardware','2025-06-12 01:16:37','2025-06-12 01:16:37','2025-06-12 01:16:37');
 /*!40000 ALTER TABLE `hardware_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -115,11 +115,11 @@ UNLOCK TABLES;
 -- Dumping data for table `migrations`
 --
 
-LOCK TABLES `migrations` WRITE;
-/*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'0001_01_01_000001_create_cache_table',1),(2,'0001_01_01_000002_create_jobs_table',1),(3,'2025_05_27_065543_users',1),(4,'2025_05_27_07000_create_software_table',1),(5,'2025_05_27_070853_create_domain_table',1),(6,'2025_05_27_074128_create_hardware_table',1),(7,'2025_05_27_074218_create_category_rule',1),(8,'2025_05_27_074308_create_rules_table',1),(9,'2025_05_27_074437_create_roles_table',1),(10,'2025_05_27_074801_create_software_file_table',1),(11,'2025_05_27_075315_create_permissions_table',1),(12,'2025_05_27_075336_create_user_role_table',1),(13,'2025_05_27_075402_create_role_permissions_table',1),(14,'2025_05_27_075418_create_hardware_permissions_table',1),(15,'2025_05_27_075437_create_software_permissions_table',1),(16,'2025_05_27_085339_create_software_rule',1),(17,'2025_05_28_021131_create_personal_access_tokens_table',1),(18,'2025_05_29_023313_create_hardware_access_domain',1),(19,'2025_06_01_035653_create_route_permission',1),(20,'2025_06_27_074919_create_log_table',1);
-/*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
-UNLOCK TABLES;
+-- LOCK TABLES `migrations` WRITE;
+-- /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
+-- INSERT INTO `migrations` VALUES (1,'0001_01_01_000001_create_cache_table',1),(2,'0001_01_01_000002_create_jobs_table',1),(3,'2025_05_27_065543_users',1),(4,'2025_05_27_07000_create_software_table',1),(5,'2025_05_27_070853_create_domain_table',1),(6,'2025_05_27_074128_create_hardware_table',1),(7,'2025_05_27_074218_create_category_rule',1),(8,'2025_05_27_074308_create_rules_table',1),(9,'2025_05_27_074437_create_roles_table',1),(10,'2025_05_27_074801_create_software_file_table',1),(11,'2025_05_27_075315_create_permissions_table',1),(12,'2025_05_27_075336_create_user_role_table',1),(13,'2025_05_27_075402_create_role_permissions_table',1),(14,'2025_05_27_075418_create_hardware_permissions_table',1),(15,'2025_05_27_075437_create_software_permissions_table',1),(16,'2025_05_27_085339_create_software_rule',1),(17,'2025_05_28_021131_create_personal_access_tokens_table',1),(18,'2025_05_29_023313_create_hardware_access_domain',1),(19,'2025_06_01_035653_create_route_permission',1),(20,'2025_06_27_074919_create_log_table',1);
+-- /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
+-- UNLOCK TABLES;
 
 --
 -- Dumping data for table `permissions`
@@ -224,7 +224,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('nemohardware','$2y$12$SUJUygT1fOWMQDVriV2cPOuBnraDLHdr6i27GchV8A4Z4Cv/mfRRS',NULL,NULL,NULL,0,0,'2025-06-12 00:30:10','2025-06-12 00:30:10'),('nemohardwareroom','$2y$12$HfBkGQDGQ6TkZChgu1Dt0eNE1..YOOeXVDdmKJ3uAQ9qQoJ3OEiMq',NULL,NULL,NULL,0,0,'2025-06-12 00:21:53','2025-06-12 00:21:53'),('nemosoftware','$2y$12$xp1p./JNJdEQDpTg5BmYLuLFNhCAgqXFC9zBJzCpOvd74947KprZ6',NULL,NULL,NULL,0,0,'2025-06-10 23:43:53','2025-06-10 23:43:53'),('nemosystem','$2y$12$5ic2ak9YFlf4aXp3wVARSuHyQz8b0Wpl9MmmlISKkLM5wp2lwqh.y',NULL,NULL,NULL,0,0,'2025-06-11 00:00:52','2025-06-11 00:00:52'),('tiếng','$2y$12$fl/gr6noLNShICjqukFTyum2fB99JR/QB6dhloohLvYaJCXGa9O7C',NULL,NULL,NULL,0,0,'2025-06-10 01:12:31','2025-06-10 01:12:31'),('uchihanemo','$2y$12$Gvu7teGWGcS.HWmBmagjBOpkdfryCLQTHD9Zp5p164aXSDv7sJMa6',NULL,NULL,NULL,0,0,'2025-06-09 20:29:17','2025-06-09 20:29:17');
+INSERT INTO `users` VALUES ('nemohardware','$2y$12$SUJUygT1fOWMQDVriV2cPOuBnraDLHdr6i27GchV8A4Z4Cv/mfRRS',NULL,NULL,NULL,0,0,NULL,'2025-06-12 00:30:10','2025-06-12 00:30:10'),('nemohardwareroom','$2y$12$HfBkGQDGQ6TkZChgu1Dt0eNE1..YOOeXVDdmKJ3uAQ9qQoJ3OEiMq',NULL,NULL,NULL,0,0,NULL,'2025-06-12 00:21:53','2025-06-12 00:21:53'),('nemosoftware','$2y$12$xp1p./JNJdEQDpTg5BmYLuLFNhCAgqXFC9zBJzCpOvd74947KprZ6',NULL,NULL,NULL,0,0,NULL,'2025-06-10 23:43:53','2025-06-10 23:43:53'),('nemosystem','$2y$12$5ic2ak9YFlf4aXp3wVARSuHyQz8b0Wpl9MmmlISKkLM5wp2lwqh.y',NULL,NULL,NULL,0,0,NULL,'2025-06-11 00:00:52','2025-06-11 00:00:52'),('tiếng','$2y$12$fl/gr6noLNShICjqukFTyum2fB99JR/QB6dhloohLvYaJCXGa9O7C',NULL,NULL,NULL,0,0,NULL,'2025-06-10 01:12:31','2025-06-10 01:12:31'),('uchihanemo','$2y$12$Gvu7teGWGcS.HWmBmagjBOpkdfryCLQTHD9Zp5p164aXSDv7sJMa6',NULL,NULL,NULL,0,0,NULL,'2025-06-09 20:29:17','2025-06-09 20:29:17');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
