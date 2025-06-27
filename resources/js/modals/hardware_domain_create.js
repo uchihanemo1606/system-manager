@@ -1,4 +1,8 @@
-import { create_domain_hardware, get_all_domain, get_domain_by_hardware } from "../api/domain";
+import {
+    create_domain_hardware,
+    get_all_domain,
+    get_domain_by_hardware,
+} from "../api/domain";
 import { showToast } from "../component/toast";
 
 let allDomains = [];
@@ -7,11 +11,13 @@ let selectedDomainId = null;
 async function initHardwareDomainCreateModal(data) {
     const nameInput = document.getElementById("hardware-domain-search-name");
     const linkInput = document.getElementById("hardware-domain-search-link");
-    const createByInput = document.getElementById("hardware-domain-search-createby");
+    const createByInput = document.getElementById(
+        "hardware-domain-search-createby"
+    );
     const dateInput = document.getElementById("hardware-domain-search-date");
     const saveBtn = document.getElementById("hardware-domain-save");
     const listContainer = document.getElementById("domain-list-container");
-    console.log(data)
+    console.log(data);
     selectedDomainId = null;
     saveBtn.disabled = true;
 
@@ -19,24 +25,28 @@ async function initHardwareDomainCreateModal(data) {
 
     let myDomainIds = [];
 
-    try {
-        const [allRes, myDomainRes] = await Promise.all([
-            get_all_domain(),
-            get_domain_by_hardware({ip:data.ip})
-        ]);
+    const [allRes, myDomainRes] = await Promise.all([
+        get_all_domain(),
+        get_domain_by_hardware({ ip: data.ip }),
+    ]);
 
-        allDomains = allRes.data || [];
-        myDomainIds = (myDomainRes.data.domains || []).map(d => d.id);
+    allDomains = allRes.data || [];
+    let availableDomains = []; // <-- Sửa thành let
 
-        // Lọc bỏ những domain đã gán
-        const availableDomains = allDomains.filter(d => !myDomainIds.includes(d.id));
-        renderDomainList(availableDomains);
-    } catch (err) {
-        listContainer.innerHTML = `<p class="text-danger text-center">Lỗi khi tải danh sách tên miền.</p>`;
-        console.error(err);
+    if (!allDomains || allDomains.length === 0) {
+        listContainer.innerHTML = `<p class="text-center text-muted mt-2">Không có tên miền nào để gán.</p>`;
         return;
-    }
-
+    } 
+    if (myDomainRes?.data && myDomainRes?.data?.domains) {
+        const myDomainIds = (myDomainRes.data.domains || []).map((d) => d.id);
+        // Lọc bỏ những domain đã gán
+        availableDomains = allDomains.filter(
+            (d) => !myDomainIds.includes(d.id)
+        );
+    } else {
+        availableDomains = allDomains;
+    } 
+    renderDomainList(availableDomains); 
     const applyFilter = () => {
         const nameKeyword = nameInput.value.toLowerCase();
         const linkKeyword = linkInput.value.toLowerCase();
@@ -44,19 +54,25 @@ async function initHardwareDomainCreateModal(data) {
         const dateFilter = dateInput.value;
 
         const filtered = allDomains
-            .filter(d => !myDomainIds.includes(d.id)) // Vẫn giữ lọc bỏ domain đã gán
+            .filter((d) => !myDomainIds.includes(d.id)) // Vẫn giữ lọc bỏ domain đã gán
             .filter((d) => {
                 const matchesName = d.name.toLowerCase().includes(nameKeyword);
                 const matchesLink = d.link.toLowerCase().includes(linkKeyword);
-                const matchesCreateBy = (d.createBy || "").toLowerCase().includes(createByKeyword);
+                const matchesCreateBy = (d.createBy || "")
+                    .toLowerCase()
+                    .includes(createByKeyword);
 
                 let matchesDate = true;
                 if (dateFilter) {
-                    const createdDate = new Date(d.created_at).toISOString().slice(0, 10);
+                    const createdDate = new Date(d.created_at)
+                        .toISOString()
+                        .slice(0, 10);
                     matchesDate = createdDate === dateFilter;
                 }
 
-                return matchesName && matchesLink && matchesCreateBy && matchesDate;
+                return (
+                    matchesName && matchesLink && matchesCreateBy && matchesDate
+                );
             });
 
         renderDomainList(filtered);
@@ -79,7 +95,7 @@ async function initHardwareDomainCreateModal(data) {
                 domain_id: selectedDomainId,
             });
             showToast({ message: "Gán tên miền thành công!", type: "success" });
-            closeModal();
+            // closeModal();
         } catch (err) {
             showToast({
                 message: err.message || "Lỗi khi gán tên miền.",
@@ -97,18 +113,20 @@ function renderDomainList(domains) {
         return;
     }
 
-    listContainer.innerHTML = domains.map((d) => {
-        const link = d.link
-            ? `<a href="${d.link}" target="_blank" class="badge badge-info ml-2">${d.link}</a>`
-            : `<span class="badge badge-secondary ml-2">Không có liên kết</span>`;
-        const createdBy = d.createBy || "Không rõ";
-        const createdAt = d.created_at
-            ? new Date(d.created_at).toLocaleDateString("vi-VN")
-            : "Không rõ";
+    listContainer.innerHTML = domains
+        .map((d) => {
+            const link = d.link
+                ? `<a href="${d.link}" target="_blank" class="badge badge-info ml-2">${d.link}</a>`
+                : `<span class="badge badge-secondary ml-2">Không có liên kết</span>`;
+            const createdBy = d.createBy || "Không rõ";
+            const createdAt = d.created_at
+                ? new Date(d.created_at).toLocaleDateString("vi-VN")
+                : "Không rõ";
 
-        const activeClass = d.id == selectedDomainId ? "border-primary" : "border-light";
+            const activeClass =
+                d.id == selectedDomainId ? "border-primary" : "border-light";
 
-        return `
+            return `
             <div class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center domain-item ${activeClass}" style="cursor:pointer;" data-id="${d.id}" data-name="${d.name}" data-link="${d.link}">
                 <div style="flex:1;">
                     <strong>${d.name}</strong>
@@ -123,7 +141,8 @@ function renderDomainList(domains) {
                 </div>
             </div>
         `;
-    }).join("");
+        })
+        .join("");
 
     // Gán lại sự kiện click cho từng thẻ
     listContainer.querySelectorAll(".domain-item").forEach((item) => {
@@ -137,27 +156,28 @@ function renderDomainList(domains) {
 
             selectedDomainId = id;
 
-            listContainer.querySelectorAll(".domain-item").forEach(el => {
+            listContainer.querySelectorAll(".domain-item").forEach((el) => {
                 el.classList.remove("border-primary");
-                el.querySelector(".select-indicator").className = "mdi mdi-checkbox-blank-circle-outline text-muted select-indicator";
+                el.querySelector(".select-indicator").className =
+                    "mdi mdi-checkbox-blank-circle-outline text-muted select-indicator";
             });
 
             item.classList.add("border-primary");
-            item.querySelector(".select-indicator").className = "mdi mdi-check-circle text-success select-indicator";
+            item.querySelector(".select-indicator").className =
+                "mdi mdi-check-circle text-success select-indicator";
 
             document.getElementById("hardware-domain-save").disabled = false;
         });
 
         // Bấm nút "Xem"
         item.querySelector(".btn-view-domain").addEventListener("click", () => {
-            loadModal('domain_detail', {
+            loadModal("domain_detail", {
                 id: id,
                 name: name,
-                link: link
+                link: link,
             });
         });
     });
 }
-
 
 window.initHardwareDomainCreateModal = initHardwareDomainCreateModal;

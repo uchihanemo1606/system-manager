@@ -23,11 +23,11 @@ async function initHardwareCreateModal(data) {
             });
             form.reset(); 
             window.dispatchEvent(new CustomEvent("hardwareCreated"));
-        } catch (err) {
+        } catch (err) { 
             showToast({
-                message: err.message || "Có lỗi xảy ra!",
+                message: err.message || "Lỗi khi tạo phần cứng.",
                 type: "error",
-                timeout: 2000,
+                timeout: 3000,
             });
         }
     });

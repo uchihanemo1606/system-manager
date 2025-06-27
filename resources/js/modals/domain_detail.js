@@ -79,12 +79,7 @@ async function initDomainDetailModal(domain) {
         // // Danh sách phần cứng
         renderHardwareList(hardware);
     } catch (err) {
-        console.error(err);
-        showToast({
-            message: err.message || "Đã xảy ra lỗi khi tải thông tin.",
-            type: "error",
-            timeout: 3000,
-        });
+        console.error(err); 
     }
 }
 

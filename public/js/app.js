@@ -27,6 +27,13 @@ function loadModal(modalName, data = null) {
             });
         });
 }
+function closeModal() {
+    const modalElement = document.getElementById("modalContainer");
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) {
+        modal.hide();
+    }
+}
 
 
 function loadScript(modalName, callback) {
@@ -54,4 +61,3 @@ function toPascalCase(str) {
     return str.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
 }
 
- 
