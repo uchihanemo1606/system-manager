@@ -71,7 +71,7 @@ class HardwarePolicy
         }
 
         // Kiểm tra quyền cụ thể nếu không phải quản lý
-        return $this->checkHardwarePermission($user, $hardware, 'hardware.get');
+        return $this->checkHardwarePermission($user, $hardware, 'hardware.list');
     }
 
     /**
@@ -82,48 +82,61 @@ class HardwarePolicy
      * @return bool
      */
     public function update(UserModel $user, hardwareModel $hardware): bool
-    {
-        return $this->checkHardwarePermission($user, $hardware, 'hardware.edit');
-    }
+{
+    Log::info('HardwarePolicy@update: Checking update permission', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+    ]);
+    $result = $this->checkHardwarePermission($user, $hardware, 'hardware.edit');
+    Log::info('HardwarePolicy@update: Result', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+        'result' => $result,
+    ]);
+    return $result;
+}
 
-    /**
-     * Xác định xem người dùng có thể xóa phần cứng không.
-     *
-     * @param  \App\Models\UserModel  $user
-     * @param  \App\Models\hardwareModel  $hardware
-     * @return bool
-     */
-    public function delete(UserModel $user, hardwareModel $hardware): bool
-    {
-        return $this->checkHardwarePermission($user, $hardware, 'hardware.delete');
-    }
+public function delete(UserModel $user, hardwareModel $hardware): bool
+{
+    Log::info('HardwarePolicy@delete: Checking delete permission', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+    ]);
+    $result = $this->checkHardwarePermission($user, $hardware, 'hardware.delete');
+    Log::info('HardwarePolicy@delete: Result', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+        'result' => $result,
+    ]);
+    return $result;
+}
 
-    /**
-     * Hàm kiểm tra quyền truy cập phần cứng dựa trên bảng hardware_permissions.
-     *
-     * @param  \App\Models\UserModel  $user
-     * @param  \App\Models\hardwareModel  $hardware
-     * @param  string  $permissionName
-     * @return bool
-     */
-    protected function checkHardwarePermission(UserModel $user, hardwareModel $hardware, string $permissionName): bool
+// ...existing code...
+
+    protected function checkHardwarePermission(UserModel $user, hardwareModel $hardware, string $routeName): bool
     {
-        Log::info('Checking specific hardware permission', [
+        Log::info('HardwarePolicy@checkHardwarePermission: Start', [
             'username' => $user->username,
             'hardware_ip' => $hardware->ip,
-            'permission' => $permissionName,
+            'route_name' => $routeName,
         ]);
 
-        $cacheKey = "route_permission_{$permissionName}";
-        $routeName = Cache::remember($cacheKey, now()->addHours(1), function () use ($permissionName) {
+        // Lấy permissions_name (tên quyền tiếng Việt) từ bảng route_permission
+        $permissionName = Cache::remember("permission_name_for_{$routeName}", now()->addHours(1), function () use ($routeName) {
             return DB::table('route_permission')
-                ->where('permissions_name', $permissionName)
-                ->value('route_name');
+                ->where('route_name', $routeName)
+                ->value('permissions_name');
         });
 
-        if (!$routeName) {
-            Log::warning("No route_name found for permission: {$permissionName}", [
+        Log::info('HardwarePolicy@checkHardwarePermission: permissionName', [
+            'route_name' => $routeName,
+            'permission_name' => $permissionName,
+        ]);
+
+        if (!$permissionName) {
+            Log::warning("HardwarePolicy@checkHardwarePermission: No permission_name found for route", [
                 'user' => $user->username,
+                'route_name' => $routeName,
             ]);
             return false;
         }
@@ -131,12 +144,13 @@ class HardwarePolicy
         $hasPermission = DB::table('hardware_permissions')
             ->where('user_name', $user->username)
             ->where('hardware_ip', $hardware->ip)
-            ->where('permissions_name', $routeName)
+            ->where('permissions_name', $permissionName)
             ->exists();
 
-        Log::info('Specific hardware permission result', [
+        Log::info('HardwarePolicy@checkHardwarePermission: Result', [
             'username' => $user->username,
             'hardware_ip' => $hardware->ip,
+            'permission_name' => $permissionName,
             'result' => $hasPermission,
         ]);
 

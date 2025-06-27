@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('hardware_permissions', function (Blueprint $table) {
-            $table->string('hardware_ip',25)->primary();
+            $table->id();
+            $table->string('hardware_ip',25);
             $table->string('permissions_name', 100);
             $table->string('user_name', 100);
             $table->string(('user_createby'),100);

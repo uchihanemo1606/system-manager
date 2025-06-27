@@ -155,21 +155,41 @@ class HardwareController extends Controller
     {
     try {
         if (!$user = JWTAuth::parseToken()->authenticate()) {
+            Log::warning('User not authenticated in updateHardware');
             return response()->json(['message' => 'Please login to use this function'], 401);
         }
 
-        // Lấy ip từ query hoặc body
         $ip = $request->query('ip') ?? $request->input('ip');
+        Log::info('Update hardware request received', [
+            'username' => $user->username,
+            'requested_ip' => $ip,
+            'request_payload' => $request->all() // Log toàn bộ payload để debug
+        ]);
+
         if (!$ip) {
             return response()->json(['status' => 'error', 'message' => 'IP is required'], 400);
         }
 
         $hardware = hardwareModel::where('ip', $ip)->first();
         if (!$hardware) {
+            Log::warning('Hardware not found for update', ['ip' => $ip]);
             return response()->json(['status' => 'error', 'message' => 'No hardware found'], 404);
         }
 
+        // --- THÊM LOG TRƯỚC KHI CHECK POLICY ---
+        Log::info('Checking update permission for hardware', [
+            'username' => $user->username,
+            'hardware_ip' => $hardware->ip
+        ]);
+        // ----------------------------------------
+
         if ($user->cannot('update', $hardware)) {
+            // --- THÊM LOG NẾU KHÔNG CÓ QUYỀN ---
+            Log::warning('User denied update permission by policy', [
+                'username' => $user->username,
+                'hardware_ip' => $hardware->ip
+            ]);
+            // -----------------------------------
             return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this hardware.'], 403);
         } 
         $oldData = $hardware->only([
