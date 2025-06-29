@@ -337,7 +337,8 @@ class PermissionController extends Controller
                 'phần cứng khỏi domain' => 'hardwaredomain',
                 'hardware khỏi domain' => 'hardwaredomain',
                 'phần cứng trong domain' => 'hardwaredomain',
-
+                'phòng ban' => 'department',
+                'department' => 'department',
 
             ];
 

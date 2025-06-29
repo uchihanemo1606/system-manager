@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('sw_permission_user', 100)->nullable();
             $table->string('hw_permission_user', 100)->nullable();
             $table->string('permission_name', 100)->nullable();
+            $table->string('department', 100)->nullable();
             $table->unsignedBigInteger('role_id',)->nullable();
             $table->boolean('is_delete')->default(false);
             // Foreign keys
@@ -37,6 +38,7 @@ return new class extends Migration
             $table->foreign('hw_permission_user')->references('user_name')->on('hardware_permissions')->onUpdate('cascade');
             $table->foreign('permission_name')->references('permissions_name')->on('permissions')->onUpdate('cascade');
             $table->foreign('role_id')->references('id')->on('roles')->onUpdate('cascade');
+            $table->foreign('department')->references('name')->on('departments')->onUpdate('cascade');
             $table->foreign('link_domain')->references('link')->on('domain')->onUpdate('cascade');
             $table->timestamps();
         });
