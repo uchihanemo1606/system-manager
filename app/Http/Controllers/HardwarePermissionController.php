@@ -26,36 +26,46 @@ class HardwarePermissionController extends Controller
 
         $validated = $request->validate([
             'hardware_ip' => 'required|string|exists:hardware,ip|max:25',
-            'user_name' => 'required|string|exists:users,username',
-            'permissions_name' => 'required|string|max:255',
+            'users' => 'required|array|min:1',
+            'users.*.user_name' => 'required|string|exists:users,username',
+            'users.*.permissions' => 'required|array|min:1',
+            'users.*.permissions.*' => 'required|string|max:255',
         ]);
+
+        $created = [];
+        $skipped = [];
 
         // Kiểm tra trùng lặp
-        $exists = hardwarePemisssionModel::where([
-            'hardware_ip' => $validated['hardware_ip'],
-            'user_name' => $validated['user_name'],
-            'permissions_name' => $validated['permissions_name'],
-        ])->exists();
+       foreach ($validated['users'] as $userData) {
+            foreach ($userData['permissions'] as $permissionName) {
+                $exists = hardwarePemisssionModel::where([
+                    'hardware_ip' => $validated['hardware_ip'],
+                    'user_name' => $userData['user_name'],
+                    'permissions_name' => $permissionName,
+                ])->exists();
 
-        if ($exists) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Permission already exists for this user and hardware.'
-            ], 409);
+                if ($exists) {
+                    $skipped[] = [
+                        'user_name' => $userData['user_name'],
+                        'permissions_name' => $permissionName,
+                    ];
+                    continue;
+                }
+
+                $created[] = hardwarePemisssionModel::create([
+                    'hardware_ip' => $validated['hardware_ip'],
+                    'user_name' => $userData['user_name'],
+                    'permissions_name' => $permissionName,
+                    'user_createby' => $user->username,
+                    'assigned_at' => now(),
+                ]);
+            }
         }
 
-        // Lưu vào DB
-        $permission = hardwarePemisssionModel::create([
-            'hardware_ip' => $validated['hardware_ip'],
-            'user_name' => $validated['user_name'],
-            'permissions_name' => $validated['permissions_name'],
-            'user_createby' => $user->username,
-            'assigned_at' => now(),
-        ]);
-
-        return response()->json([
-            'message' => 'Hardware permission created successfully.',
-            'data' => $permission,
+       return response()->json([
+            'message' => 'Bulk hardware permission creation completed.',
+            'created' => $created,
+            'skipped' => $skipped,
         ], 201);
         } catch (TokenExpiredException $e) {
             return response()->json([

@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\permissionModel;
 use Illuminate\Http\Request;
 use App\Models\softwarePermissionModel;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use App\Http\Controllers\LogController;
+use App\Models\softwareModel;
+use App\Models\UserModel;
 
 class SoftwarePermissionController extends Controller
 {
@@ -28,7 +32,7 @@ class SoftwarePermissionController extends Controller
         ]);
 
         // Kiểm tra type của permission
-        $permission = DB::table('permissions')->where('permissions_name', $validated['permissions_name'])->first();
+        $permission = permissionModel::where('permissions_name', $validated['permissions_name'])->first();
         if (!$permission || $permission->type !== 'software') {
             return response()->json([
                 'status' => 'error',
@@ -58,7 +62,11 @@ class SoftwarePermissionController extends Controller
             'user_createdby' => $user->username,
             'assigned_at' => now(),
         ]);
-
+        logController::createLogAuto([
+            'username' => $user->username,
+            'software_id' => $validated['software_id'],
+            'message' => "{$user->fullName} đã thêm quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
+        ]);
         return response()->json([
             'message' => 'Software permission created successfully.',
             'data' => $permission,
@@ -171,8 +179,8 @@ class SoftwarePermissionController extends Controller
                 ], 400);
             }
 
-            $userExists = DB::table('users')->where('username', $username)->exists();
-            $softwareExists = DB::table('software')->where('id', $softwareId)->exists();
+            $userExists = UserModel::where('username', $username)->exists();
+            $softwareExists = softwareModel::where('id', $softwareId)->exists();
             if (!$userExists || !$softwareExists) {
                 return response()->json([
                     'status' => 'error',
@@ -191,6 +199,12 @@ class SoftwarePermissionController extends Controller
                     'message' => 'No permissions found to delete for this user on this software.'
                 ], 404);
             }
+
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $softwareId,
+                'message' => "{$user->fullName} đã xóa quyền của người dùng {$username} trong phần mềm.",
+            ]);
 
             return response()->json([
                 'message' => 'User permissions removed successfully.',
@@ -291,6 +305,12 @@ class SoftwarePermissionController extends Controller
             $softwarePermission->permissions_name = $validated['permissions_name'];
             $softwarePermission->save();
 
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $validated['software_id'],
+                'message' => "{$user->fullName} đã cập nhật quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
+            ]);
+
             return response()->json([
                 'message' => 'Software permission updated successfully.',
                 'data' => $softwarePermission,
@@ -349,6 +369,12 @@ class SoftwarePermissionController extends Controller
                 'permissions_name' => $validated['permissions_name'],
                 'user_createdby' => $user->username,
                 'assigned_at' => now(),
+            ]);
+
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $validated['software_id'],
+                'message' => "{$user->fullName} đã thêm quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
             ]);
 
             return response()->json([

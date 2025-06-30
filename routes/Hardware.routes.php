@@ -29,3 +29,10 @@ Route::post('/createharwarepermission', [HardwarePermissionController::class, 'c
     ->middleware('check.permission')
     ->name('hardwarepermission.create');
 
+Route::delete('/removeuserpermissioninhardware', [HardwarePermissionController::class, 'removeUserPermisionInHardware'])
+    ->middleware('check.permission')
+    ->name('hardwarepermission.delete');
+
+Route::get('/getdetailuserpermissioninhardware', [HardwarePermissionController::class, 'getDetailUserPermissionInHardware'])
+    ->middleware('check.permission')
+    ->name('hardwarepermission.list');

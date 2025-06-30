@@ -44,7 +44,7 @@ class SoftwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'software_id' => $software->id,
-                'message' => " user {$user->username} created software '{$software->softwareName}'.",
+                'message' => " user {$user->fullName} created software '{$software->softwareName}'.",
                 'is_delete' => false
             ]);
             return response()->json(['message' => 'Software created successfully', 'data' => $software], 201);
@@ -116,7 +116,7 @@ class SoftwareController extends Controller
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'software_id' => $software->id,
-                    'message' => "user {$user->username} is update software '{$software->softwareName}'.",
+                    'message' => "user {$user->fullName} is update software '{$software->softwareName}'.",
                     'is_delete' => false
                 ]);
                 return response()->json(['message' => 'Software updated successfully', 'data' => $software], 200);
@@ -215,7 +215,7 @@ class SoftwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'software_id' => $software->id,
-                'message' => "User '{$user->username}' delete software'{$software->softwareName}.'",
+                'message' => "User '{$user->fullName}' delete software'{$software->softwareName}.'",
                 'is_delete' => false
             ]);
 

@@ -29,6 +29,7 @@ class LogController extends Controller
             'sw_permission_user',
             'hw_permission_user',
             'permission_name',
+            'department',
 
         ];
          $logData = array_intersect_key($data, array_flip($fields));
@@ -65,7 +66,8 @@ class LogController extends Controller
             'sw_permission_user' => 'nullable|string|max:255',
             'hw_permission_user' => 'nullable|string|max:255',
             'permissions_name' => 'nullable|string|max:255',
-            'is_delete' => 'boolean'
+            'department' => 'nullable|string|max:255',
+
         ]);
 
         if ($validator->fails()) {
@@ -259,6 +261,61 @@ class LogController extends Controller
 
             if ($logs->isEmpty()) {
                 return response()->json(['message' => 'No logs found for this user'], 404);
+            }
+
+            return response()->json($logs);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getLogByHardwarer(Request $request, $hardwareIP)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 404);
+            }
+
+            $logs = logModel::where('hardware_ip', $hardwareIP)
+                ->where('is_delete', false)
+                ->get();
+
+            if ($logs->isEmpty()) {
+                return response()->json(['message' => 'No logs found for this hardware IP'], 404);
+            }
+
+            return response()->json($logs);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getLogBySoftware(Request $request, $softwareId)
+    {
+        try
+        {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 404);
+            }
+
+            $logs = logModel::where('software_id', $softwareId)
+                ->where('is_delete', false)
+                ->get();
+
+            if ($logs->isEmpty()) {
+                return response()->json(['message' => 'No logs found for this software ID'], 404);
             }
 
             return response()->json($logs);

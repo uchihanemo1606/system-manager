@@ -39,6 +39,14 @@ class ruleController extends Controller
             'updated_at' => now(),
         ]);
 
+        logController::createLogAuto([
+            'username' => $user->username,
+            'category_rule_id' => $categoryRule,
+            'message' => 'Created category rule with ID: ' . $categoryRule,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         return response()->json([
             'message' => 'Category rule created successfully.',
             'id' => $categoryRule,
