@@ -15,7 +15,7 @@ Route::get('/getalluserpermission' , [SoftwarePermissionController::class, 'getA
 
 Route::get('/getdetailuserpermissioninsoftware', [SoftwarePermissionController::class, 'getDetailUserPermissionInSoftware'])
     ->middleware('check.permission')
-    ->name('softwarepermission.all');
+    ->name('softwarepermission.list');
 
 Route::delete('/deletesoftwarepermission', [SoftwarePermissionController::class, 'removeUserPermissionInSoftware'])
     ->middleware('check.permission')
@@ -27,7 +27,7 @@ Route::get('/getalluserinsoftware/{softwareID}', [softwarePermissionController::
 
 Route::patch('/updatepermissionuserinsoftware', [softwarePermissionController::class, 'updatePermissionUserInSoftware'])
     ->middleware('check.permission')
-    ->name('softwarepermission.update');
+    ->name('softwarepermission.edit');
 
 Route::post('/addpermissionforuser', [softwarePermissionController::class, 'addPermissionForUser'])
     ->middleware('check.permission')

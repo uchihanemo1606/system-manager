@@ -27,7 +27,7 @@ Route::get('/getallcategoryrule', [RuleController::class, 'getAllCategoryRules']
 
 Route::get('/getcategoryrulebyid', [RuleController::class, 'getCategoryRuleById'])
     ->middleware('check.permission')
-    ->name('legal.getbyid');
+    ->name('legal.list');
 
 //get category rule by name
 Route::get('/getcategoryrulebyname',[RuleController::class, 'getCategoryRuleByName'])
