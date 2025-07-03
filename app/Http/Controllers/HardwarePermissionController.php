@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\hardwareModel;
 use Illuminate\Http\Request;
 use App\Models\hardwarePemisssionModel;
 use Illuminate\Support\Facades\DB;
@@ -326,17 +327,14 @@ class HardwarePermissionController extends Controller
         }
     }
 
-    public function getUserInHardwarePermission(Request $request)
+    public function getUserInHardwarePermission(Request $request, $hardwareIP)
     {
-        try {
+    try {
         if (!$user = JWTAuth::parseToken()->authenticate()) {
             return response()->json(['message' => 'Please login to use this function'], 401);
         }
 
-        // Lấy hardware_ip từ query hoặc body
-        $hardwareIp = $request->query('hardware_ip') ?? $request->input('hardware_ip');
-
-        if (!$hardwareIp) {
+        if (!$hardwareIP) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'hardware_ip is required.'
@@ -344,7 +342,7 @@ class HardwarePermissionController extends Controller
         }
 
         // Kiểm tra hardware tồn tại
-        $hardwareExists = DB::table('hardwares')->where('ip', $hardwareIp)->exists();
+        $hardwareExists = hardwareModel::where('ip', $hardwareIP)->exists();
         if (!$hardwareExists) {
             return response()->json([
                 'status' => 'error',
@@ -352,43 +350,54 @@ class HardwarePermissionController extends Controller
             ], 404);
         }
 
-        // Lấy toàn bộ permission của user trên hardware này
-        $permissions = hardwarePemisssionModel::where('hardware_ip', $hardwareIp)
-            ->with(['user', 'permissions', 'userCreatedby'])
-            ->get();
+        // Lấy tất cả user và quyền của họ trên hardware này
+        $permissions = hardwarePemisssionModel::where('hardware_ip', $hardwareIP)
+            ->with(['user'])
+            ->get()
+            ->groupBy('user_name')
+            ->map(function ($items, $userName) {
+                return [
+                    'user_name' => $userName,
+                    'permissions' => $items->pluck('permissions_name'),
+                    'user_info' => $items->first()->user ?? null,
+                ];
+            })
+            ->values();
 
         if ($permissions->isEmpty()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'No permissions found for this hardware.'
+                'message' => 'No users found for this hardware.'
             ], 404);
         }
 
         return response()->json([
-            'message' => 'User permissions on hardware retrieved successfully.',
+            'message' => 'All users and their permissions in hardware retrieved successfully.',
             'data' => $permissions,
         ], 200);
-        } catch (TokenExpiredException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Token has expired.'
-            ], 401);
-        } catch (TokenInvalidException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Token is invalid.'
-            ], 401);
-        } catch (JWTException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Token is absent or could not be parsed.'
-            ], 401);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Could not retrieve user permission details. ' . $e->getMessage()
-            ], 500);
-        }
+    } catch (TokenExpiredException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Token has expired.'
+        ], 401);
+    } catch (TokenInvalidException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Token is invalid.'
+        ], 401);
+    } catch (JWTException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Token is absent or could not be parsed.'
+        ], 401);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Could not retrieve users and permissions. ' . $e->getMessage()
+        ], 500);
     }
+}
+
+
 }
 

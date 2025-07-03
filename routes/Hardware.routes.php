@@ -23,7 +23,9 @@ Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareIp'])
     ->middleware('check.permission')
     ->name('hardware.list');
 
-// harware perrmision controller
+
+// ======================================================================================================================================================================================================================================================
+// HARDWARE PERMISSION CONTROLLER
 
 Route::post('/createharwarepermission', [HardwarePermissionController::class, 'createHardwarePermission'])
     ->middleware('check.permission')
@@ -34,5 +36,9 @@ Route::delete('/removeuserpermissioninhardware', [HardwarePermissionController::
     ->name('hardwarepermission.delete');
 
 Route::get('/getdetailuserpermissioninhardware', [HardwarePermissionController::class, 'getDetailUserPermissionInHardware'])
+    ->middleware('check.permission')
+    ->name('hardwarepermission.list');
+
+Route::get('/getalluserpermissioninhardware/{hardwareIP}', [HardwarePermissionController::class, 'getUserInHardwarePermission'])
     ->middleware('check.permission')
     ->name('hardwarepermission.list');

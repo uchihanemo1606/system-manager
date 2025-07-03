@@ -21,7 +21,7 @@ Route::delete('/deletesoftwarepermission', [SoftwarePermissionController::class,
     ->middleware('check.permission')
     ->name('softwarepermission.delete');
 
-Route::get('/getalluserinsoftware', [softwarePermissionController::class ,'getAllUserPermissionInSoftware'])
+Route::get('/getalluserinsoftware/{softwareID}', [softwarePermissionController::class ,'getAllUserPermissionInSoftware'])
     ->middleware('check.permission')
     ->name('softwarepermission.list');
 
