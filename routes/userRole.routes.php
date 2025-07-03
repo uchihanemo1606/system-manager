@@ -12,7 +12,7 @@ route::patch('/updateuserrole', [userRoleController::class, 'updateUserRoles'])
     ->middleware('check.permission')
     ->name('userrole.edit');
 
-route::delete('/deleteuserrole', [userRoleController::class, 'deleteUserRole'])
+route::delete('/deleteuserrole', [userRoleController::class, 'removeUserRole'])
     ->middleware('check.permission')
     ->name('userrole.delete');
 

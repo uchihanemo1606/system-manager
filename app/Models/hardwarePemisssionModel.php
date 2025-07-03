@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\UserModel;
+use App\Models\permissionModel;
+use App\Models\hardwareModel;
 
 class hardwarePemisssionModel extends Model
 {

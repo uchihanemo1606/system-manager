@@ -23,6 +23,7 @@ class userRoleModel extends Model
     {
         return $this->belongsTo(rolesModel::class, 'role_name', 'role_name');
     }
+    
     protected function casts(): array
     {
         return [

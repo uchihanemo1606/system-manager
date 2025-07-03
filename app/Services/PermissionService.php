@@ -9,6 +9,7 @@ class PermissionService
 {
     public function getUserPermissions($username)
     {
+        Cache::forget('user_permissions_' . $username);
         $cacheKey = 'user_permissions_' . $username;
         return Cache::remember($cacheKey, now()->addHours(1), function () use ($username) {
             $userRoles = DB::table('user_role')->where('username', $username)->pluck('role_name')->all();
