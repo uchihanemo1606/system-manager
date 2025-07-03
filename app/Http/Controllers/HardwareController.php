@@ -62,7 +62,7 @@ class HardwareController extends Controller
             $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xóa phần cứng'];
             foreach ($fullPermissions as $permission) {
                 hardwarePemisssionModel::create([
-                    'hardware_ip' => $hardware->id,
+                    'hardware_ip' => $hardware->ip,
                     'user_name' => $user->username,
                     'permissions_name' => $permission,
                     'user_createby' => $user->username,

@@ -27,10 +27,10 @@ export async function update_domain_by_name(data) {
         });
         throw new Error(result.message || "Lỗi cập nhật tên miền");
     }
-    showToast({
-        message: "Cập nhật tên miền thành công!",
-        type: "success",
-    });
+    // showToast({
+    //     message: "Cập nhật tên miền thành công!",
+    //     type: "success",
+    // });
     return result;
 }
 export async function create_domain(data) {

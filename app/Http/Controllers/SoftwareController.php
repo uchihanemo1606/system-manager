@@ -45,47 +45,27 @@ class SoftwareController extends Controller
             if ($software->save()) {
 
                 $fullPermissions = ['xem phần mềm', 'sửa phần mềm', 'xóa phần mềm'];
+                $userName = $user->username;
                 foreach ($fullPermissions as $permission) {
                     softwarePermissionModel::create([
                         'software_id' => $software->id,
-                        'user_name' => $user->username,
+                        'create_by' => $userName,
+                        'user_name' => $userName,
                         'permissions_name' => $permission,
-                        'create_by' => $user->username,
                         'assigned_at' => now(),
                     ]);
-                }
-
+                } 
                 LogController::createLogAuto([
-                    'username' => $user->username,
+                    'username' => $userName,
                     'software_id' => $software->id,
                     'message' => " user {$user->fullName} created software '{$software->softwareName}'.",
                     'is_delete' => false
                 ]);
-
-                // Create a new software record
-                $software = new SoftwareModel();
-                $software->softwareName = $request->input('softwareName');
-                $software->language = $request->input('language');
-                $software->version = $request->input('version');
-                $software->description = $request->input('description');
-                $software->user_createby = $user->username;
-                $software->created_at = now();
-                $software->updated_at = now();
-
-                // Save the software record
-                if ($software->save()) {
-                    LogController::createLogAuto([
-                        'username' => $user->username,
-                        'software_id' => $software->id,
-                        'message' => " user {$user->username} created software '{$software->softwareName}'.",
-                        'is_delete' => false
-                    ]);
-                    return response()->json(['message' => 'Software created successfully', 'data' => $software], 201);
-                } else {
-                    return response()->json([
-                        'message' => 'Failed to create software'
-                    ], 500);
-                }
+                return response()->json(['message' => 'Software created successfully', 'data' => $software], 201);
+            } else {
+                return response()->json([
+                    'message' => 'Failed to create software'
+                ], 500);
             }
         } catch (TokenExpiredException $e) {
             return response()->json([

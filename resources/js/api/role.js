@@ -250,7 +250,8 @@ export const permissionActions = [
     "thêm",
     "sửa",
     "xoá",
+    "xem",
     "xem danh sách",
     "xem chi tiết",
-    "tìm kiếm",
+    // "tìm kiếm",
 ];

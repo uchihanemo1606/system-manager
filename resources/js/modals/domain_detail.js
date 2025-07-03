@@ -156,7 +156,7 @@ async function initDomainDetailModal(domain) {
                     nameView.textContent = newName;
                     linkView.textContent = newLink;
                     linkView.href = newLink;
-
+                    window.dispatchEvent(new CustomEvent("domainUpdated")); 
                     showToast({ message: "Cập nhật tên miền thành công!", type: "success" });
                 } 
             } catch (err) {

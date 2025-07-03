@@ -15,6 +15,12 @@ let isEditMode = false;
 if (id) {
     loadDomainList(id);
     loadSoftware(id);
+    window.addEventListener("domainCreated", () => {
+        if (id) loadDomainList(id);
+    });
+    window.addEventListener("domainUpdated", () => {
+        if (id) loadDomainList(id);
+    });
 }
 
 toggleBtn?.addEventListener("click", handleToggleEdit);
@@ -40,19 +46,17 @@ function loadDomainList(softwareId) {
 function loadSoftware(softwareId) {
     get_software_by_id({ id: softwareId })
         .then(({ data }) => {
-            if (!data) return showToast({ message: "Không tìm thấy phần mềm.", type: "error" });
-
+            if (!data) return showToast({ message: "Không tìm thấy phần mềm.", type: "error" }); 
             renderSoftwareInfo(data);
             detailBlock.style.display = "block";
             document.getElementById("add_domain").dataset.software = JSON.stringify(data);
-
             if (isEditParam) {
                 isEditMode = true;
                 showInputFields();
             }
             updateToggleBtn();
         })
-        // .catch(() => showToast({ message: "Lỗi lấy dữ liệu phần mềm.", type: "error" }));
+    // .catch(() => showToast({ message: "Lỗi lấy dữ liệu phần mềm.", type: "error" }));
 }
 
 function renderSoftwareInfo(software) {
