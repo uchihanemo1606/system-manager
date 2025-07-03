@@ -96,7 +96,7 @@ class domainController extends Controller
 
         // Validate the request data
         $request->validate([
-            'id' => 'required|integer|exists:domains,id',
+            'id' => 'required|integer|exists:domain,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'link' => 'required|string|max:255',
@@ -168,6 +168,8 @@ class domainController extends Controller
             $hardware_ip = $request->input('hardware_ip');
             $domain_id = $request->input('domain_id');
 
+            $domain = DomainModel::find($domain_id);
+            $domainLink = $domain ? $domain->link : $domain_id;
             // Check if the user has permission to add domains to hardware
             $exists = hardwareAccessDomainModel::where([
             'hardware_ip' => $hardware_ip,
@@ -185,7 +187,8 @@ class domainController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'hardware_ip' => $hardware_ip,
-                'message' => "User {$user->fullName} added domain with ID {$domain_id} to hardware with IP {$hardware_ip}",
+                'link_domain' => $domainLink,
+                'message' => "User {$user->fullName} added hardware in {$domainLink} to hardware with IP {$hardware_ip}",
             ]);
             return response()->json([
                 'message' => 'Domain added to hardware successfully',

@@ -69,6 +69,16 @@ class AuthController extends Controller
             $request->validate([
                 'username' => 'required|string|max:255|unique:users',
                 'password' => 'required|string|min:8',
+                'fullName' => 'required|string|max:100',
+                'email' => [
+                    'nullable',
+                    'string',
+                    'email',
+                    'max:100',
+                    Rule::unique('users')->ignore($request->username, 'username'),
+                ],
+                'phone_number' => 'nullable|string|max:12',
+                'department' => 'nullable|string|exits:departments,name',
             ]);
 
             $usercreate = UserModel::create([
