@@ -147,7 +147,7 @@ class HardwarePermissionController extends Controller
 
         // Kiểm tra user và hardware tồn tại
         $userExists = DB::table('users')->where('username', $username)->exists();
-        $hardwareExists = DB::table('hardwares')->where('ip', $hardwareIp)->exists();
+        $hardwareExists = DB::table('hardware')->where('ip', $hardwareIp)->exists();
         if (!$userExists || !$hardwareExists) {
             return response()->json([
                 'status' => 'error',
@@ -217,7 +217,7 @@ class HardwarePermissionController extends Controller
 
         // Kiểm tra user và hardware tồn tại
         $userExists = DB::table('users')->where('username', $username)->exists();
-        $hardwareExists = DB::table('hardwares')->where('ip', $hardwareIp)->exists();
+        $hardwareExists = DB::table('hardware')->where('ip', $hardwareIp)->exists();
         if (!$userExists || !$hardwareExists) {
             return response()->json([
                 'status' => 'error',

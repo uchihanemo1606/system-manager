@@ -13,3 +13,4 @@ require __DIR__.'/Log.routes.php';
 require __DIR__.'/Hardware.routes.php';
 require __DIR__.'/Software.routes.php';
 require __DIR__.'/domain.routes.php';
+require __DIR__.'/SoftwarePermission.routes.php';

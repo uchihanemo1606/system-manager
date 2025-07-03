@@ -9,19 +9,19 @@ Route::post('createsoftwarepermission', [SoftwarePermissionController::class, 'c
     ->middleware('check.permission')
     ->name('softwarepermission.create');
 
-Route::get('/getalluserpermission' , [SoftwarePermissionController::class, 'getAllUserPermission'])
+Route::get('/getalluserpermission', [SoftwarePermissionController::class, 'getAllUserPermission'])
     ->middleware('check.permission')
     ->name('softwarepermission.list');
 
 Route::get('/getdetailuserpermissioninsoftware', [SoftwarePermissionController::class, 'getDetailUserPermissionInSoftware'])
     ->middleware('check.permission')
-    ->name('softwarepermission.all');
+    ->name('softwarepermission.get');
 
 Route::delete('/deletesoftwarepermission', [SoftwarePermissionController::class, 'removeUserPermissionInSoftware'])
     ->middleware('check.permission')
     ->name('softwarepermission.delete');
 
-Route::get('/getalluserinsoftware/{softwareID}', [softwarePermissionController::class ,'getAllUserPermissionInSoftware'])
+Route::get('/getalluserinsoftware/{softwareID}', [softwarePermissionController::class, 'getAllUserPermissionInSoftware'])
     ->middleware('check.permission')
     ->name('softwarepermission.list');
 

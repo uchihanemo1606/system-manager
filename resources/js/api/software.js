@@ -57,3 +57,59 @@ export async function update_software({ id, ...data }) {
 
     return result;
 }
+export const get_all_user_permission_software = async (softwareID) => {
+    try {
+        const res = await fetch(`/api/getalluserinsoftware/${softwareID}`, {
+            headers: defaultHeaders(),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            return data.hardware || data;
+        }
+        return [];
+    } catch (error) {
+        console.error("Error fetching user permissions for software:", error);
+        throw new Error("Lỗi khi lấy quyền người dùng trong phần mềm");
+    }
+};
+export async function create_software_permission({ software_id, user_name, permissions }) {
+    if (!Array.isArray(permissions) || permissions.length === 0) {
+        throw new Error("Danh sách quyền không hợp lệ.");
+    }
+
+    for (const perm of permissions) {
+        const res = await fetch("/api/createsoftwarepermission", {
+            method: "POST",
+            headers: defaultHeaders(),
+            body: JSON.stringify({
+                software_id,
+                user_name,
+                permissions_name: perm,
+            }),
+        });
+
+        const result = await res.json();
+        if (!res.ok) {
+            throw new Error(result.message || `Lỗi khi tạo quyền: ${perm}`);
+        }
+    }
+}
+export async function remove_user_permission_in_software({ username, softwareId }) {
+    const res = await fetch(`/api/deletesoftwarepermission?user_name=${encodeURIComponent(username)}&software_id=${encodeURIComponent(softwareId)}`, {
+        method: "DELETE",
+        headers: defaultHeaders(),
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi khi xóa quyền người dùng phần mềm.");
+    return result;
+}
+export async function get_all_permission_software_by_user({ username, softwareId }) {
+    const res = await fetch(`/api/getdetailuserpermissioninsoftware?user_name=${encodeURIComponent(username)}&software_id=${encodeURIComponent(softwareId)}`, {
+        headers: defaultHeaders(),
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi khi lấy quyền.");
+    return result.data || [];
+}

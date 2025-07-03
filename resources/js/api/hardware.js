@@ -54,10 +54,9 @@ export async function update_hardware(data) {
             const detailErrors = Object.entries(result.errors)
                 .map(
                     ([field, messages]) =>
-                        `${field}: ${
-                            Array.isArray(messages)
-                                ? messages.join(", ")
-                                : messages
+                        `${field}: ${Array.isArray(messages)
+                            ? messages.join(", ")
+                            : messages
                         }`
                 )
                 .join("\n");
@@ -67,5 +66,46 @@ export async function update_hardware(data) {
         throw new Error(errorMessages);
     }
 
+    return result;
+}
+export const get_all_user_permission_hardware = async (hardwareIP) => {
+    const res = await fetch(`/api/getalluserpermissioninhardware/${hardwareIP}`, {
+        headers: defaultHeaders(),
+    });
+    const data = await res.json();
+    if (res.ok) {
+        return data.hardware || data;
+    }
+    return [];
+};
+export const get_all_permission_hardware_by_user = async ({ username, hardwareIp }) => {
+    const res = await fetch(`/api/getdetailuserpermissioninhardware?user_name=${encodeURIComponent(username)}&hardware_ip=${encodeURIComponent(hardwareIp)}`, {
+        headers: defaultHeaders(),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+        return data.data || data;
+    }
+    return [];
+}
+export async function remove_user_permission_in_hardware({ username, hardwareIp }) {
+    const res = await fetch(`/api/removeuserpermissioninhardware?user_name=${encodeURIComponent(username)}&hardware_ip=${encodeURIComponent(hardwareIp)}`, {
+        method: "DELETE",
+        headers: defaultHeaders()
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi khi xóa quyền");
+    return result;
+}
+
+export async function create_hardware_permission(data) {
+    const res = await fetch("/api/createharwarepermission", {
+        method: "POST",
+        headers: defaultHeaders(),
+        body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi khi tạo quyền");
     return result;
 }

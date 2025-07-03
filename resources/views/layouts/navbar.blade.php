@@ -68,13 +68,13 @@
                             <span>Danh Sách Phần Mềm</span>
                         </a>
                     </li>
-                    @endhasPermission
+                    @endhasPermission 
                     <li class="item">
-                        <a data-key="software_file" class="link flex">
+                        <a data-key="log" class="link flex">
                             <i class="bx bxs-magic-wand"></i>
-                            <span>Bản Ghi Hệ Thống</span>
+                            <span>Bản ghi hệ thống</span>
                         </a>
-                    </li>
+                    </li>  
                     {{-- <li class="item">
                         <a data-key="rule" class="link flex">
                             <i class="bx bxs-magic-wand"></i>
@@ -129,7 +129,8 @@
                 <a class="dropdown-item" href="#" onclick="loadModal('profile')"><i
                         class="bx bx-user font-size-16 align-middle mr-1"></i> Hồ Sơ</a>
                 <div class="dropdown-divider"></div>
-                <button class="dropdown-item text-danger coru" id="logout"><i class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i>Đăng Xuất</button>
+                <button class="dropdown-item text-danger coru" id="logout"><i
+                        class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i>Đăng Xuất</button>
             </div>
         </div>
     </nav>

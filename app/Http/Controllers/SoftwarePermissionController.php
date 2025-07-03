@@ -33,7 +33,7 @@ class SoftwarePermissionController extends Controller
 
         // Kiểm tra type của permission
         $permission = permissionModel::where('permissions_name', $validated['permissions_name'])->first();
-        if (!$permission || $permission->type !== 'software') {
+        if (!$permission ||( $permission->type !== 'software' && $permission->type !== 'softwarepermission')) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Permission type is not suitable for software.'
@@ -59,7 +59,7 @@ class SoftwarePermissionController extends Controller
             'software_id' => $validated['software_id'],
             'user_name' => $validated['user_name'],
             'permissions_name' => $validated['permissions_name'],
-            'user_createdby' => $user->username,
+            'create_by' => $user->username,
             'assigned_at' => now(),
         ]);
         logController::createLogAuto([
