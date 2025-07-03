@@ -12,7 +12,7 @@
         @csrf
         <div class="form-group">
             <input type="text" name="username" required class="form-input" placeholder=" " autocomplete="username">
-            <label class="form-label">Username</label>
+            <label class="form-label">Tên đăng nhập</label>
         </div>
         <div class="form-group">
             <input type="password" name="password" required class="form-input" placeholder=" "
