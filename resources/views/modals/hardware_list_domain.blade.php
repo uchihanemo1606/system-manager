@@ -4,7 +4,7 @@
              <thead>
                  <tr>
                      <th></th>
-                     <th>Danh sách tên miền</th>
+                     <th>Danh sách tên miền đã liên kết</th>
                      <th class="text-center text-nowrap">Tác vụ</th>
                  </tr>
              </thead>

@@ -1,3 +1,4 @@
+import { showToast } from "../component/toast";
 import { defaultHeaders } from "../config/api_config";
 export async function get_all_domain() {
     const res = await fetch(
@@ -8,9 +9,29 @@ export async function get_all_domain() {
     );
     const data = await res.json();
     if (res.ok) {
-        return  data;
+        return data;
     }
     return [];
+}
+export async function update_domain_by_name(data) {
+    const res = await fetch(`/api/updatedomain`, {
+        method: "PATCH",
+        headers: defaultHeaders(),
+        body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) {
+        showToast({
+            message: result.message || "Lỗi cập nhật tên miền",
+            type: "error",
+        });
+        throw new Error(result.message || "Lỗi cập nhật tên miền");
+    }
+    showToast({
+        message: "Cập nhật tên miền thành công!",
+        type: "success",
+    });
+    return result;
 }
 export async function create_domain(data) {
     const res = await fetch("/api/createdomain", {
@@ -20,6 +41,15 @@ export async function create_domain(data) {
     });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Lỗi tạo tên miền");
+    return result;
+}
+export async function delete_domain_by_name(name) {
+    const res = await fetch(`/api/deletedomain?name=${name}`, {
+        method: "DELETE",
+        headers: defaultHeaders(),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi xóa tên miền " + name);
     return result;
 }
 export const get_domain_software = async (id) => {
@@ -38,7 +68,7 @@ export const get_domain_software = async (id) => {
 
     return filteredDomains;
 };
-export async function get_hardware_software_by_domain({link,name}) {
+export async function get_hardware_software_by_domain({ link, name }) {
     const res = await fetch(
         `/api/gethardwaresoftwareindomain?link=${link}&name=${name}`,
         {
@@ -47,11 +77,11 @@ export async function get_hardware_software_by_domain({link,name}) {
     );
     const data = await res.json();
     if (res.ok) {
-        return  data;
+        return data;
     }
     return [];
 }
-export async function get_domain_by_hardware({ip}) {
+export async function get_domain_by_hardware({ ip }) {
     const res = await fetch(
         `/api/getdomainsbyhardware?ip=${ip}`,
         {
@@ -60,7 +90,7 @@ export async function get_domain_by_hardware({ip}) {
     );
     const data = await res.json();
     if (res.ok && data?.data?.hardware_ip == ip) {
-        return  data;
+        return data;
     }
     return [];
 }

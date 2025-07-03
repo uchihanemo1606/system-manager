@@ -14,73 +14,65 @@
             <i class="bx bx-lock-alt" id="lock-icon" title="Unlock Sidebar"></i>
             <i class="bx bx-x" id="sidebar-close"></i>
         </div>
-        <div class="menu_container">
+        <div class="menu_container text-nowrap">
             <div class="menu_items">
                 <ul class="menu_item">
-                    <div class="sidebar_profile flex">
-                        <span class="nav_image">
-                            <img src="images/profile.jpg" alt="logo_img" />
-                        </span>
-                        <div class="data_text">
-                            <span class="name">{{ $user->username }}</span>
-                        </div>
-                    </div>
                     <div class="menu_title flex">
-                        <span class="title">Dashboard</span>
+                        <span class="title">BẢNG ĐIỀU KHIỂN</span>
                         <span class="line"></span>
                     </div>
                     <li class="item">
                         <a data-key="overview" class="link flex">
                             <i class="bx bx-home-alt"></i>
-                            <span>Overview</span>
+                            <span>Thống Kê</span>
                         </a>
                     </li>
                     @hasPermission('user.list')
-                        <li class="item">
-                            <a data-key="users" class="link flex">
-                                <i class="bx bx-group"></i>
-                                <span>Users</span>
-                            </a>
-                        </li>
+                    <li class="item">
+                        <a data-key="users" class="link flex">
+                            <i class="bx bx-group"></i>
+                            <span>Danh Sách Người Dùng</span>
+                        </a>
+                    </li>
                     @endhasPermission
                     @hasPermission('role.list')
-                        <li class="item">
-                            <a data-key="roles" class="link flex">
-                                <i class="bx bx-shield"></i>
-                                <span>Roles</span>
-                            </a>
-                        </li>
+                    <li class="item">
+                        <a data-key="roles" class="link flex">
+                            <i class="bx bx-shield"></i>
+                            <span>Quản Lý Vai Trò</span>
+                        </a>
+                    </li>
                     @endhasPermission
                 </ul>
                 <ul class="menu_item">
                     <div class="menu_title flex">
-                        <span class="title">Manager</span>
+                        <span class="title">Quản lý</span>
                         <span class="line"></span>
                     </div>
                     @hasPermission('hardware.list')
-                        <li class="item">
-                            <a data-key="hardware" class="link flex">
-                                <i class="bx"><svg style="width: 22px;height: 22px;" xmlns="http://www.w3.org/2000/svg"
-                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
-                                    </svg></i>
-                                <span>hardware</span>
-                            </a>
-                        </li>
+                    <li class="item">
+                        <a data-key="hardware" class="link flex">
+                            <i class="bx"><svg style="width: 22px;height: 22px;" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+                                </svg></i>
+                            <span>Danh Sách Phần Cứng</span>
+                        </a>
+                    </li>
                     @endhasPermission
                     @hasPermission('software.list')
-                        <li class="item">
-                            <a data-key="software" class="link flex">
-                                <i class="bx bx-cloud-upload"></i>
-                                <span>SoftWare</span>
-                            </a>
-                        </li>
+                    <li class="item">
+                        <a data-key="software" class="link flex">
+                            <i class="bx bx-cloud-upload"></i>
+                            <span>Danh Sách Phần Mềm</span>
+                        </a>
+                    </li>
                     @endhasPermission
                     <li class="item">
                         <a data-key="software_file" class="link flex">
                             <i class="bx bxs-magic-wand"></i>
-                            <span>System</span>
+                            <span>Bản Ghi Hệ Thống</span>
                         </a>
                     </li>
                     {{-- <li class="item">
@@ -92,7 +84,7 @@
                 </ul>
                 <ul class="menu_item">
                     <div class="menu_title flex">
-                        <span class="title">Setting</span>
+                        <span class="title">Khác</span>
                         <span class="line"></span>
                     </div>
                     {{-- <li class="item">
@@ -110,7 +102,7 @@
                     <li class="item">
                         <a href="#" class="link flex">
                             <i class="bx bx-cog"></i>
-                            <span>Setting</span>
+                            <span>Cài Đặt</span>
                         </a>
                     </li>
                 </ul>
@@ -127,23 +119,17 @@
             </div>
         </form>
         <div class="dropdown">
-            <div type="button" class="" id="page-header-user-dropdown" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
+            <div type="button" class="" id="page-header-user-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
                 <img class="rounded-circle header-profile-user" src="images/profile.jpg" alt="Header Avatar">
                 <span class="d-none d-xl-inline-block ml-1">{{ $user->username }}</span>
                 <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
             </div>
             <div class="dropdown-menu dropdown-menu-right">
                 <a class="dropdown-item" href="#" onclick="loadModal('profile')"><i
-                        class="bx bx-user font-size-16 align-middle mr-1"></i> Profile</a>
-                <a class="dropdown-item d-block" href="#"><span
-                        class="badge badge-success float-right">11</span><i
-                        class="bx bx-wrench font-size-16 align-middle mr-1"></i> Settings</a>
-                <a class="dropdown-item" href="#"><i
-                        class="bx bx-lock-open font-size-16 align-middle mr-1"></i> Lock screen</a>
+                        class="bx bx-user font-size-16 align-middle mr-1"></i> Hồ Sơ</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item text-danger" id="logout"><i
-                        class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i> Logout</a>
+                <button class="dropdown-item text-danger coru" id="logout"><i class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i>Đăng Xuất</button>
             </div>
         </div>
     </nav>

@@ -96,7 +96,7 @@ class domainController extends Controller
 
             // Validate the request data
             $request->validate([
-                'id' => 'required|integer|exists:domains,id',
+                'id' => 'required|integer|exists:domain,id',
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string|max:1000',
                 'link' => 'required|string|max:255',

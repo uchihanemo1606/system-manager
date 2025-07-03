@@ -81,7 +81,7 @@
                                 @hasPermission('domain.create')
                                     <button id="add_domain" class="btn btn-primary" type="button" data-software='{}'
                                         onclick="loadModal('domain_create', JSON.parse(this.dataset.software))">
-                                        <i class="mdi mdi-plus"></i> Thêm tên miền
+                                        <i class="mdi mdi-plus"></i>Tạo tên miền
                                     </button>
                                 @endhasPermission
                             </div>

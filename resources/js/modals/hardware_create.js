@@ -1,18 +1,21 @@
 import { create_hardware } from "../api/hardware";
-import { showToast } from "../component/toast";
-import { closeModal } from "../component/modal";
+import { showToast } from "../component/toast"; 
+import { validateHardwareData } from "../component/requiredFields/hardware_required";
 
-async function initHardwareCreateModal(data) {
-    const form = document.getElementById("hardware-form");
-    if (!form) return;
+async function initHardwareCreateModal() {
+    const form = document.getElementById("hardware-form"); // Bắt form từ DOM
 
     form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Ngăn reload
 
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
         data.isVirtualServer = data.isVirtualServer === "1";
+        data.hdd = `${data.hdd} ${data.hdd_unit}`;
+        data.ram = `${data.ram} ${data.ram_unit}`;
+
+        if (!validateHardwareData(data)) return;
 
         try {
             const res = await create_hardware(data);
@@ -21,9 +24,9 @@ async function initHardwareCreateModal(data) {
                 type: "success",
                 timeout: 2000,
             });
-            form.reset(); 
+            form.reset();
             window.dispatchEvent(new CustomEvent("hardwareCreated"));
-        } catch (err) { 
+        } catch (err) {
             showToast({
                 message: err.message || "Lỗi khi tạo phần cứng.",
                 type: "error",

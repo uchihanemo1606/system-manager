@@ -4,7 +4,7 @@
             <h4 class="mb-0">Tạo Phần Mềm</h4>
         </div>
         <div class="card-body">
-            <form id="software-form">
+            <form id="software-form" novalidate>
                 <div class="mb-3">
                     <label for="softwareName" class="form-label">Tên Phần Mềm <span class="text-danger">*</span></label>
                     <input type="text" id="softwareName" name="softwareName" class="form-control" required maxlength="255">

@@ -1,5 +1,8 @@
 <div class="modal-body">
-    <h5 class="mb-3">Tìm kiếm tên miền</h5>
+    <div>
+        <h5 class="mb-3">Danh sách tên miền</h5>
+        <p>danh sách các tên miền chưa liên kết với phần cứng này</p>
+    </div>
     <div class="row">
         <div class="col-md-3 mb-2">
             <input type="text" id="hardware-domain-search-name" class="form-control" placeholder="Tên miền">

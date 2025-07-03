@@ -1,5 +1,6 @@
 import { create_software } from "../api/software";
 import { showToast } from "../component/toast";
+import { validateSoftwareData } from "../component/requiredFields/software_required";
 
 async function initSoftwareCreateModal() {
     const form = document.getElementById("software-form");
@@ -10,7 +11,9 @@ async function initSoftwareCreateModal() {
 
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
- 
+
+        if (!validateSoftwareData(data)) return;
+
         try {
             const res = await create_software(data);
             showToast({
