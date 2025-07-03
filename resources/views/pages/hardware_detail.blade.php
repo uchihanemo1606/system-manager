@@ -210,8 +210,7 @@
                             cung cấp máy ảo VPS, server hosting,.. sẵn sàng hỗ trợ các bạn tận tâm. chúng tôi vui lòng
                             tiếp nhận
                         </p>
-                        <textarea id="hardware-services-input" class="form-control d-none"></textarea>
-
+                        <textarea id="hardware-services-input" class="form-control d-none"></textarea> 
                     </div>
                 </div>
             </div>

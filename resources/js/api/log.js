@@ -10,7 +10,7 @@ import { defaultHeaders } from "../config/api_config";
 //     return result;
 // }
 export const get_log_by_hardware = async (ip) => {
-    const res = await fetch(`api/getLogByType?hardware_ip=${ip}`, {
+    const res = await fetch(`api/getloginhardware/${ip}`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -19,3 +19,14 @@ export const get_log_by_hardware = async (ip) => {
     }
     return [];
 };
+export const get_log_by_software = async (id) => {
+    const res = await fetch(`api/getloginsoftware/${id}`, {
+        headers: defaultHeaders(),
+    })
+    const data = await res.json()
+    if (res.ok) {
+        return data || [];
+    }
+    return [];
+}
+

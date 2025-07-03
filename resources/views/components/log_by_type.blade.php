@@ -1,4 +1,40 @@
-<div class="card" >
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title mb-3 text-primary">Lịch sử thay đổi {{ $type === 'hardware' ? 'phần cứng' : 'phần mềm' }}</h4>
+
+        <div class="border rounded mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0 fs-6 text-primary">Bộ lọc tìm kiếm</h5>
+                <button class="btn btn-sm btn-outline-primary" id="toggle-filter">
+                    <i class="bx bx-chevron-up" id="toggle-icon"></i> Mở rộng
+                </button>
+            </div>
+
+            <div id="filter-content" class="mt-2" style="display: none;">
+                @include('components.log_filter_form')
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mb-2">
+            <label class="me-2">Số lượng mỗi trang:</label>
+            <select id="items-per-page" class="form-select form-select-sm" style="width: auto;">
+                <option value="4" selected>4</option>
+                <option value="8">8</option>
+                <option value="16">16</option>
+            </select>
+        </div>
+
+        <ul class="verti-timeline list-unstyled" id="log-timeline">
+            <!-- Timeline sẽ được render bằng JS -->
+        </ul>
+        
+        <div id="pagination" class="mt-3"></div>
+    </div>
+</div>
+
+
+
+<!-- <div class="card" >
     <div class="card-body">
         <h4 class="card-title mb-5">Lịch sử thay đổi</h4>
         <div class="">
@@ -62,4 +98,4 @@
             </ul>
         </div>
     </div>
-</div>
+</div> -->
