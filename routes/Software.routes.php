@@ -14,9 +14,9 @@ Route::post('/createsoftware', [SoftwareController::class, 'createSoftware'])
 Route::get('/getallsoftware', [SoftwareController::class, 'getAllSoftware'])
     ->middleware('check.permission')
     ->name('software.list');
-Route::patch('/updatesoftware', [SoftwareController::class, 'updateSoftware'])
+Route::patch('/updatesoftware/{id}', [SoftwareController::class, 'updateSoftware'])
     ->middleware('check.permission')
-    ->name('software.update');
+    ->name('software.edit');
 Route::delete('/deleteSoftware', [SoftwareController::class, 'deleteSoftware'])
     ->middleware('check.permission')
     ->name('software.delete');

@@ -145,7 +145,7 @@ function saveData() {
     update_hardware(data)
         .then(() => {
             showToast({ message: "Cập nhật thành công!", type: "success" });
-            
+
             // Gọi lại dữ liệu từ server
             get_hardware_by_ip({ ip })
                 .then((hardware) => {
@@ -154,6 +154,9 @@ function saveData() {
                     isEditMode = false;
                     updateURLParam("edit", false);
                     updateToggleBtn();
+                    if (typeof window.fetchHardwareLogs === "function") {
+                        window.fetchHardwareLogs();
+                    }
                 })
                 .catch((err) => {
                     console.error("Lỗi lấy lại dữ liệu sau khi cập nhật:", err);

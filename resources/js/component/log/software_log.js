@@ -14,11 +14,15 @@ async function fetchLogs() {
 
     try {
         allLogs = await get_log_by_software(id);
+        allLogs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sắp xếp giảm dần theo ngày tạo
         renderTimeline(allLogs, 1);
     } catch (err) {
         console.error("Lỗi khi gọi API:", err);
     }
 }
+
+
+window.fetchSoftwareLogs = fetchLogs;
 
 document.getElementById("items-per-page").addEventListener("change", e => {
     ITEMS_PER_PAGE = parseInt(e.target.value);

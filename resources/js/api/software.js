@@ -6,7 +6,7 @@ export async function create_software(data) {
         body: JSON.stringify(data),
     });
     const result = await res.json();
-    if (!res.ok) throw new Error(result.message || "Lỗi tạo phần mềm  "); 
+    if (!res.ok) throw new Error(result.message || "Lỗi tạo phần mềm  ");
     return result;
 }
 export const get_all_software = async () => {
@@ -26,37 +26,32 @@ export const get_software_by_id = async ({ id }) => {
         {
             headers: defaultHeaders(),
         }
-    );  
+    );
     const data = await res.json();
     if (res.ok) {
         return data.software || data;
     }
     return [];
 };
-export async function update_software(data) {
-    const res = await fetch("/api/updatesoftware", {
+export async function update_software({ id, ...data }) {
+    const res = await fetch(`/api/updatesoftware/${id}`, {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
     });
 
-    let result;
-    try {
-        result = await res.json();
-    } catch (e) {
+    const result = await res.json().catch(() => {
         throw new Error("Lỗi không xác định từ server, không thể parse JSON.");
-    }
+    });
 
     if (!res.ok) {
         let errorMessages = result?.message || "Lỗi khi sửa phần mềm";
-
         if (result?.errors) {
             const detailErrors = Object.entries(result.errors)
                 .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
                 .join("\n");
             errorMessages += `\n${detailErrors}`;
         }
-
         throw new Error(errorMessages);
     }
 

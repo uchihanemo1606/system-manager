@@ -34,7 +34,7 @@ function handleToggleEdit() {
 function loadDomainList(softwareId) {
     get_domain_software(softwareId)
         .then(renderDomainList)
-        .catch(() => showToast({ message: "Lỗi lấy danh sách tên miền.", type: "error" }));
+        .catch(() => console.log({ message: "Lỗi lấy danh sách tên miền.", type: "error" }));
 }
 
 function loadSoftware(softwareId) {
@@ -52,7 +52,7 @@ function loadSoftware(softwareId) {
             }
             updateToggleBtn();
         })
-        .catch(() => showToast({ message: "Lỗi lấy dữ liệu phần mềm.", type: "error" }));
+        // .catch(() => showToast({ message: "Lỗi lấy dữ liệu phần mềm.", type: "error" }));
 }
 
 function renderSoftwareInfo(software) {
@@ -87,14 +87,13 @@ function toggleField(field, showInput) {
 
 function saveData() {
     const data = {
-        id,
         softwareName: getValue("name"),
         language: getValue("language"),
         version: getValue("version"),
         description: getValue("description"),
     };
 
-    update_software(data)
+    update_software({ id, ...data })
         .then(() => {
             setText("software-name-view", data.softwareName);
             setText("software-language-view", data.language);
@@ -106,6 +105,10 @@ function saveData() {
             updateURLParam("edit", false);
             updateToggleBtn();
             showToast({ message: "Cập nhật thành công!", type: "success" });
+
+            if (typeof window.fetchSoftwareLogs === "function") {
+                window.fetchSoftwareLogs();
+            }
         })
         .catch(err => {
             showToast({ message: err.message || "Lỗi cập nhật.", type: "error" });
