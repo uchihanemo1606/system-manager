@@ -244,14 +244,13 @@ class LogController extends Controller
         }
     }
 
-    public function getLogCreateByUser(Request $request)
+    public function getLogCreateByUser(Request $request, $username)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 404);
             }
 
-            $username = $request->query('username');
             if (!$username) {
                 return response()->json(['message' => 'Username is required'], 400);
             }
