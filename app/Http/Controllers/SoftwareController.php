@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\SoftwareModel;
+use App\Models\softwarePermissionModel;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -41,6 +42,18 @@ class SoftwareController extends Controller
 
         // Save the software record
         if ($software->save()) {
+
+            $fullPermissions = ['xem phần mềm', 'sửa phần mềm', 'xóa phần mềm'];
+            foreach ($fullPermissions as $permission) {
+                softwarePermissionModel::create([
+                    'software_id' => $software->id,
+                    'user_name' => $user->username,
+                    'permissions_name' => $permission,
+                    'create_by' => $user->username,
+                    'assigned_at' => now(),
+                ]);
+            }
+
             LogController::createLogAuto([
                 'username' => $user->username,
                 'software_id' => $software->id,

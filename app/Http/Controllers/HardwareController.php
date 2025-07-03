@@ -14,6 +14,7 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\hardwareModel;
+use App\Models\hardwarePemisssionModel;
 use Illuminate\Support\Facades\Log;
 
 
@@ -57,6 +58,17 @@ class HardwareController extends Controller
         
         // Save the hardware record
         if ($hardware->save()) {
+
+            $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xóa phần cứng'];
+            foreach ($fullPermissions as $permission) {
+                hardwarePemisssionModel::create([
+                    'hardware_ip' => $hardware->id,
+                    'user_name' => $user->username,
+                    'permissions_name' => $permission,
+                    'user_createby' => $user->username,
+                    'assigned_at' => now(),
+                ]);
+            }
             LogController::createLogAuto([
                 'username' => $user->username,
                 'hardware_ip' => $hardware->ip,
