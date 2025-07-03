@@ -337,7 +337,8 @@ class PermissionController extends Controller
                 'phần cứng khỏi domain' => 'hardwaredomain',
                 'hardware khỏi domain' => 'hardwaredomain',
                 'phần cứng trong domain' => 'hardwaredomain',
-
+                'phòng ban' => 'department',
+                'department' => 'department',
 
             ];
 
@@ -409,7 +410,7 @@ class PermissionController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'permission_name' => $defaultPermission,
-                'message' => "user $user->username has been create new permission: ' . $defaultPermission",
+                'message' => "user $user->fullName has been create new permission: ' . $defaultPermission",
             ]);
 
             return response()->json([
@@ -545,7 +546,7 @@ class PermissionController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'permission_name' => $name,
-                'message' => "User $user->username updated permission from '{$oldName}' => '{$newName}'",
+                'message' => "User $user->fullName updated permission from '{$oldName}' => '{$newName}'",
             ]);
 
             return response()->json([
@@ -679,7 +680,7 @@ class PermissionController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'permission_name' => $permissionName,
-                'message' => "User $user->username deleted permission: {$permissionName}",
+                'message' => "User $user->fullName deleted permission: {$permissionName}",
             ]);
 
             return response()->json([

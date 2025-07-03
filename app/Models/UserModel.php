@@ -31,6 +31,7 @@ class UserModel extends Authenticatable implements JWTSubject
         'phone_number',
         'hidden',
         'is_delete',
+        'department',
     ];
 
     /**
@@ -63,5 +64,17 @@ class UserModel extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function roles()
+    {
+        return $this->hasMany(userRoleModel::class, 'username', 'username');
+    }
+
+    public function getRole()
+    {
+    return $this->roles->pluck('role_name')->map(function($r) {
+    return trim(mb_strtolower($r, 'UTF-8'));
+    })->toArray();
     }
 }

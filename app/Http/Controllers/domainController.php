@@ -47,7 +47,7 @@ class domainController extends Controller
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'link_domain' => $domain->link,
-                    'message' => " user {$user->username} created domain '{$domain->name}'.",
+                    'message' => " user {$user->fullName} created domain '{$domain->name}'.",
                     'is_delete' => false
                 ]);
                 return response()->json(['message' => 'Domain created successfully', 'data' => $domain], 201);
@@ -185,7 +185,7 @@ class domainController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'hardware_ip' => $hardware_ip,
-                'message' => "User {$user->username} added domain with ID {$domain_id} to hardware with IP {$hardware_ip}",
+                'message' => "User {$user->fullName} added domain with ID {$domain_id} to hardware with IP {$hardware_ip}",
             ]);
             return response()->json([
                 'message' => 'Domain added to hardware successfully',

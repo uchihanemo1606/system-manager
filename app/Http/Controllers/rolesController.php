@@ -43,7 +43,7 @@ class rolesController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'role_name' => $request->role_name,
-                'message' => " user {$user->username} created role '{$request->role_name}'.",
+                'message' => " user {$user->fullName} created role '{$request->role_name}'.",
                 'is_delete' => false
             ]);
 
@@ -106,7 +106,7 @@ class rolesController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'role_name' => $request->role_name,
-                'message' => " user {$user->username} deleted role '{$request->role_name}'.",
+                'message' => " user {$user->fullName} deleted role '{$request->role_name}'.",
                 'is_delete' => false
             ]);
 

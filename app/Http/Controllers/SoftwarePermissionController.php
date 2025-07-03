@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\permissionModel;
 use Illuminate\Http\Request;
 use App\Models\softwarePermissionModel;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use App\Http\Controllers\LogController;
+use App\Models\softwareModel;
+use App\Models\UserModel;
 
 class SoftwarePermissionController extends Controller
 {
@@ -28,7 +32,7 @@ class SoftwarePermissionController extends Controller
         ]);
 
         // Kiểm tra type của permission
-        $permission = DB::table('permissions')->where('permissions_name', $validated['permissions_name'])->first();
+        $permission = permissionModel::where('permissions_name', $validated['permissions_name'])->first();
         if (!$permission || $permission->type !== 'software') {
             return response()->json([
                 'status' => 'error',
@@ -58,7 +62,11 @@ class SoftwarePermissionController extends Controller
             'user_createdby' => $user->username,
             'assigned_at' => now(),
         ]);
-
+        logController::createLogAuto([
+            'username' => $user->username,
+            'software_id' => $validated['software_id'],
+            'message' => "{$user->fullName} đã thêm quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
+        ]);
         return response()->json([
             'message' => 'Software permission created successfully.',
             'data' => $permission,
@@ -171,8 +179,8 @@ class SoftwarePermissionController extends Controller
                 ], 400);
             }
 
-            $userExists = DB::table('users')->where('username', $username)->exists();
-            $softwareExists = DB::table('software')->where('id', $softwareId)->exists();
+            $userExists = UserModel::where('username', $username)->exists();
+            $softwareExists = softwareModel::where('id', $softwareId)->exists();
             if (!$userExists || !$softwareExists) {
                 return response()->json([
                     'status' => 'error',
@@ -192,6 +200,12 @@ class SoftwarePermissionController extends Controller
                 ], 404);
             }
 
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $softwareId,
+                'message' => "{$user->fullName} đã xóa quyền của người dùng {$username} trong phần mềm.",
+            ]);
+
             return response()->json([
                 'message' => 'User permissions removed successfully.',
                 'deleted_rows' => $deletedRows,
@@ -207,39 +221,51 @@ class SoftwarePermissionController extends Controller
         }
     }
 
-    public function getAllUserPermissionInSoftware(Request $request)
+    public function getAllUserPermissionInSoftware(Request $request, $softwareId)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            $username = $request->query('username') ?? $request->input('username');
-            if (!$username) {
+
+            if (!$softwareId) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'please input username'
+                    'message' => 'Vui lòng nhập software_id'
                 ], 400);
             }
-            $userExists = DB::table('users')->where('username', $username)->exists();
-            if (!$userExists) {
+
+            $softwareExists = softwareModel::where('id', $softwareId)->exists();
+            if (!$softwareExists) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User not found.'
+                    'message' => 'Software not found.'
                 ], 404);
             }
-            $permissions = softwarePermissionModel::where('user_name', $username)
-                ->with(['user', 'software'])
-                ->get();
+
+            // Lấy tất cả user và quyền của họ trong phần mềm này
+            $permissions = softwarePermissionModel::where('software_id', $softwareId)
+                ->with(['user'])
+                ->get()
+                ->groupBy('user_name')
+                ->map(function ($items, $userName) {
+                    return [
+                        'user_name' => $userName,
+                        'permissions' => $items->pluck('permissions_name'),
+                        'user_info' => $items->first()->user ?? null,
+                    ];
+                })
+                ->values();
 
             if ($permissions->isEmpty()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'No software permissions found for this user.'
+                    'message' => 'No users found for this software.'
                 ], 404);
             }
 
             return response()->json([
-                'message' => 'User software permissions retrieved successfully.',
+                'message' => 'All users and their permissions in software retrieved successfully.',
                 'data' => $permissions,
             ], 200);
         } catch (TokenExpiredException $e) {
@@ -249,7 +275,7 @@ class SoftwarePermissionController extends Controller
         } catch (JWTException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Could not retrieve user software permissions. ' . $e->getMessage()], 500);
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve users and permissions. ' . $e->getMessage()], 500);
         }
     }
 
@@ -290,6 +316,12 @@ class SoftwarePermissionController extends Controller
 
             $softwarePermission->permissions_name = $validated['permissions_name'];
             $softwarePermission->save();
+
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $validated['software_id'],
+                'message' => "{$user->fullName} đã cập nhật quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
+            ]);
 
             return response()->json([
                 'message' => 'Software permission updated successfully.',
@@ -349,6 +381,12 @@ class SoftwarePermissionController extends Controller
                 'permissions_name' => $validated['permissions_name'],
                 'user_createdby' => $user->username,
                 'assigned_at' => now(),
+            ]);
+
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $validated['software_id'],
+                'message' => "{$user->fullName} đã thêm quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
             ]);
 
             return response()->json([

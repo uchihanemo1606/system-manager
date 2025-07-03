@@ -20,7 +20,6 @@ public function up(): void
             $table->boolean('hidden')->default(false);
             $table->boolean('is_delete')->default(false);
             $table->string('department', 100)->nullable();
-            $table->foreign('department')->references('name')->on('departments')->onUpdate('cascade');
             $table->timestamps();
         });
 

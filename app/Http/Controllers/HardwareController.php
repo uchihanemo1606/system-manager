@@ -60,7 +60,7 @@ class HardwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'hardware_ip' => $hardware->ip,
-                'message' => "User {$user->username} Created new hardware with IP {$hardware->ip}",
+                'message' => "User {$user->fullName} Created new hardware with IP {$hardware->ip}",
             ]);
             return response()->json(['message' => 'Hardware created successfully', 'data' => $hardware], 201);
         } else {
@@ -244,7 +244,7 @@ class HardwareController extends Controller
         LogController::createLogAuto([
             'username' => $user->username,
             'hardware_ip' => $hardware->ip,
-            'message' => "User {$user->username} updated hardware with IP {$hardware->ip}. Changes: $changeString",
+            'message' => "User {$user->fullName} updated hardware with IP {$hardware->ip}. Changes: $changeString",
         ]);
 
         return response()->json(['message' => 'Hardware updated successfully', 'data' => $hardware]);
@@ -286,7 +286,7 @@ class HardwareController extends Controller
         LogController::createLogAuto([
             'username' => $user->username,
             'hardware_ip' => $hardware->ip,
-            'message' => "User {$user->username} deleted hardware with IP {$hardware->ip}",
+            'message' => "User {$user->fullName} deleted hardware with IP {$hardware->ip}",
         ]);
 
         return response()->json(['message' => 'Hardware deleted successfully']);
