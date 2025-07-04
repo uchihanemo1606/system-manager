@@ -32,13 +32,12 @@ window.initTypePermissionCreateModal = async function (data) {
     await loadUserList();
     renderPermissionCheckboxList();
     document.getElementById("addPermissionBtn").onclick = async () => {
-        const selectedItem = document.querySelector("#userListContainer .list-group-item.active");
-        if (!selectedItem) {
-            showToast({ message: "Vui lòng chọn người dùng!", type: "warning" });
+        const selectedItems = document.querySelectorAll("#userListContainer .list-group-item.active");
+        if (selectedItems.length === 0) {
+            showToast({ message: "Vui lòng chọn ít nhất một người dùng!", type: "warning" });
             return;
         }
 
-        const username = selectedItem.dataset.username;
         const { default: defaultPermissions, groupValues } = permissionSets[modalState.type];
 
         let selected = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"))
@@ -57,25 +56,27 @@ window.initTypePermissionCreateModal = async function (data) {
             return;
         }
 
+        const users = Array.from(selectedItems).map(item => ({
+            user_name: item.dataset.username,
+            permissions: selected
+        }));
+
         try {
             if (modalState.type === "hardware") {
                 await create_hardware_permission({
                     hardware_ip: modalState.targetId,
-                    users: [
-                        {
-                            user_name: username,
-                            permissions: selected
-                        }
-                    ]
+                    users
                 });
                 const event = new CustomEvent("hardware_permission_created");
                 window.dispatchEvent(event);
             } else {
-                await create_software_permission({
-                    software_id: modalState.targetId,
-                    user_name: username,
-                    permissions: selected
-                });
+                for (const user of users) {
+                    await create_software_permission({
+                        software_id: modalState.targetId,
+                        user_name: user.user_name,
+                        permissions: selected
+                    });
+                }
                 const event = new CustomEvent("software_permission_created");
                 window.dispatchEvent(event);
             }
@@ -85,6 +86,7 @@ window.initTypePermissionCreateModal = async function (data) {
             showToast({ message: "Lỗi khi thêm quyền: " + e.message, type: "error" });
         }
     };
+
 };
 
 async function loadUserList() {
@@ -128,16 +130,15 @@ function renderFilteredUserList() {
         item.dataset.username = user.username;
 
         item.onclick = () => {
-            container.querySelectorAll(".list-group-item").forEach(el => el.classList.remove("active"));
-            container.querySelectorAll(".mdi-check-circle").forEach(icon => icon.classList.add("d-none"));
-
-            item.classList.add("active");
-            item.querySelector(".mdi-check-circle").classList.remove("d-none");
+            item.classList.toggle("active");
+            const icon = item.querySelector(".mdi-check-circle");
+            icon.classList.toggle("d-none");
         };
 
         container.appendChild(item);
     });
 }
+
 
 document.getElementById("userSearchInput").addEventListener("input", renderFilteredUserList);
 

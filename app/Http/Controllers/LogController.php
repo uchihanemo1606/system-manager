@@ -34,10 +34,6 @@ class LogController extends Controller
         ];
         $logData = array_intersect_key($data, array_flip($fields));
 
-        // Thiết lập mặc định cho is_delete nếu chưa có
-        if (!isset($logData['is_delete'])) {
-            $logData['is_delete'] = false;
-        }
 
         try {
             logModel::create($logData);
@@ -55,28 +51,26 @@ class LogController extends Controller
                 return response()->json(['please login to use the function'], 404);
             }
 
-        $validator = Validator::make($request->all(), [
-            'username' => 'nullable|string|max:255',
-            'software_id' => 'nullable|integer',
-            'hardware_ip' => 'nullable|string|max:255',
-            'rule_id' => 'nullable|integer',
-            'message' => 'nullable|string|max:1000',
-            'software_file_id' => 'nullable|integer',
-            'link_domain' => 'nullable|string|max:255',
-            'sw_permission_user' => 'nullable|string|max:255',
-            'hw_permission_user' => 'nullable|string|max:255',
-            'permissions_name' => 'nullable|string|max:255',
-            'department' => 'nullable|string|max:255',
+            $validator = Validator::make($request->all(), [
+                'username' => 'nullable|string|max:255',
+                'software_id' => 'nullable|integer',
+                'hardware_ip' => 'nullable|string|max:255',
+                'rule_id' => 'nullable|integer',
+                'message' => 'nullable|string|max:1000',
+                'software_file_id' => 'nullable|integer',
+                'link_domain' => 'nullable|string|max:255',
+                'sw_permission_user' => 'nullable|string|max:255',
+                'hw_permission_user' => 'nullable|string|max:255',
+                'permissions_name' => 'nullable|string|max:255',
+                'department' => 'nullable|string|max:255',
 
-        ]);
+            ]);
 
             if ($validator->fails()) {
                 return response()->json(['error' => $validator->errors()], 422);
             }
 
             $logData = $validator->validated();
-            $logData['is_delete'] = $logData['is_delete'] ?? false;
-
             try {
                 logModel::create($logData);
                 return response()->json(['message' => 'Log created successfully'], 201);
@@ -101,8 +95,7 @@ class LogController extends Controller
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 404);
             }
-
-            $logs = logModel::where('is_delete', false)->get();
+            $logs = logModel::all(); 
             return response()->json($logs);
 
         } catch (TokenExpiredException $e) {
@@ -159,7 +152,7 @@ class LogController extends Controller
 
     public function getAllLog()
     {
-        $logs = logModel::where('is_delete', false)->get();
+        $logs = logModel::get();
         return response()->json($logs);
     }
 
@@ -256,7 +249,6 @@ class LogController extends Controller
             }
 
             $logs = logModel::where('username', $username)
-                ->where('is_delete', false)
                 ->get();
 
             if ($logs->isEmpty()) {
@@ -283,7 +275,6 @@ class LogController extends Controller
             }
 
             $logs = logModel::where('hardware_ip', $hardwareIP)
-                ->where('is_delete', false)
                 ->get();
 
             if ($logs->isEmpty()) {
@@ -292,11 +283,11 @@ class LogController extends Controller
 
             return response()->json($logs);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
         }
@@ -304,14 +295,12 @@ class LogController extends Controller
 
     public function getLogBySoftware(Request $request, $softwareId)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 404);
             }
 
             $logs = logModel::where('software_id', $softwareId)
-                ->where('is_delete', false)
                 ->get();
 
             if ($logs->isEmpty()) {
@@ -320,11 +309,11 @@ class LogController extends Controller
 
             return response()->json($logs);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
         }
