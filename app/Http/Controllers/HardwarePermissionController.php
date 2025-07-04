@@ -62,6 +62,12 @@ class HardwarePermissionController extends Controller
                 ]);
             }
         }
+        LogController::createLogAuto([
+            'username' => $user->username,
+            'hardware_ip' => $validated['hardware_ip'],
+            'message' => "User {$user->fullName} created hardware permissions for " . count($created) . " users.",
+        ]);
+
 
        return response()->json([
             'message' => 'Bulk hardware permission creation completed.',

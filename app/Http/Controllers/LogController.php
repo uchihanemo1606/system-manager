@@ -34,13 +34,13 @@ class LogController extends Controller
         ];
         $logData = array_intersect_key($data, array_flip($fields));
 
-
-        try {
-            logModel::create($logData);
-        } catch (\Exception $e) {
-            // Ghi log lỗi vào laravel.log để dễ debug
-            Log::error('Log ghi không thành công: ' . $e->getMessage(), $logData);
-        }
+    // Thiết lập mặc định cho is_delete nếu chưa có
+    try {
+        logModel::create($logData);
+    } catch (\Exception $e) {
+        // Ghi log lỗi vào laravel.log để dễ debug
+        Log::error('Log ghi không thành công: ' . $e->getMessage(), $logData);
+    }
     }
 
     public function createLogManual(Request $request)
