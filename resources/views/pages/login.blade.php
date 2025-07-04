@@ -25,7 +25,7 @@
                     <input type="checkbox" name="remember" class="mr-2">
                     <span>Nhớ tài khoản</span>
                 </label> --}}
-                <a class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
+                <a  href="/forgot_password"  class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
             </div>
         </div>
         <button type="submit" class="login-btn">Đăng Nhập</button>

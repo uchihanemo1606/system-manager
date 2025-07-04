@@ -463,7 +463,7 @@ class AuthController extends Controller
                     'otp_expiration' => now()->addMinutes(10)
                 ]
             );
-
+            
             // Gửi OTP qua email (chỉ truyền email, subject, message)
             $subject = 'Mã OTP đặt lại mật khẩu';
             $message = "
