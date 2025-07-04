@@ -34,8 +34,12 @@ class MailController extends Controller
                 Session::put('access_token', $this->client->getAccessToken());
             }
         } else {
+            $refreshToken = env('REFRESH_TOKEN');
+            if (empty($refreshToken)) {
+                throw new \Exception('REFRESH_TOKEN chưa được cấu hình trong file .env');
+            }
             $token = [
-                'refresh_token' => (env('REFRESH_TOKEN')),
+                'refresh_token' => $refreshToken,
                 'access_token' => '',
                 'expires_in' => 3600,
             ];

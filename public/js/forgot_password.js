@@ -5,7 +5,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const step3 = document.getElementById('step3');
     const errorDiv = document.getElementById('error');
     const successDiv = document.getElementById('success');
+    const loading = document.getElementById('loading');
     let email = '';
+
+    function showLoading() {
+        loading.classList.remove('d-none');
+    }
+
+    function hideLoading() {
+        loading.classList.add('d-none');
+    }
 
     step1.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -13,7 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
         successDiv.textContent = '';
         email = document.getElementById('email').value;
 
-        fetch('/sendotpresetpassword?email=' + encodeURIComponent(email))
+        showLoading();
+        fetch(`api/sendotpresetpassword?email=${encodeURIComponent(email)}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -27,7 +37,11 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(err => {
                 console.error(err);
                 errorDiv.textContent = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+            })
+            .finally(() => {
+                hideLoading();
             });
+
     });
 
     step2.addEventListener('submit', function (e) {
@@ -36,7 +50,8 @@ document.addEventListener('DOMContentLoaded', function () {
         successDiv.textContent = '';
         const otp = document.getElementById('otp').value;
 
-        fetch('/verifyotpresetpassword', {
+        showLoading();
+        fetch('api/verifyotpresetpassword', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
             body: JSON.stringify({ email, otp })
@@ -54,6 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(err => {
                 console.error(err);
                 errorDiv.textContent = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+            })
+            .finally(() => {
+                hideLoading();
             });
     });
 
@@ -64,8 +82,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const password = document.getElementById('password').value;
         const password_confirmation = document.getElementById('password_confirmation').value;
-
-        fetch('/resetpassword', {
+        
+        showLoading();
+        fetch('api/resetpassword', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
             body: JSON.stringify({ email, password, password_confirmation })
@@ -82,6 +101,9 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(err => {
                 console.error(err);
                 errorDiv.textContent = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+            })
+            .finally(() => {
+                hideLoading();
             });
     });
 });

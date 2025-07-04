@@ -8,6 +8,14 @@
     <div class="login-logo">
         <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo">
     </div>
+    <div class="d-none"  id="loading">
+        <div
+            style=" position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
 
     {{-- Bước 1: Gửi OTP --}}
     <form id="step1" autocomplete="off">
@@ -38,7 +46,8 @@
         </div>
         <div class="form-group">
             <label>Xác nhận mật khẩu:</label>
-            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required minlength="6">
+            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required
+                minlength="6">
         </div>
         <button type="submit" class="login-btn">Đặt lại mật khẩu</button>
     </form>

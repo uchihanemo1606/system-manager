@@ -161,7 +161,7 @@ class AuthController extends Controller
         //thêm kiểm tra tk bị khoá, xoá
 
         LogController::createLogAuto([
-            'username' => $request->username, 
+            'username' => $request->username,
             'message' => "{$user->fullName} đã đăng nhập vào hệ thống.",
         ]);
 
@@ -190,7 +190,7 @@ class AuthController extends Controller
             $token = $request->cookie('auth_token') ?? $request->bearerToken();
             if ($token) {
                 JWTAuth::setToken($token)->invalidate(); // Hủy token
-            } 
+            }
             $cookie = cookie()->forget('auth_token');
 
             return response()->json([
@@ -463,7 +463,7 @@ class AuthController extends Controller
                     'otp_expiration' => now()->addMinutes(10)
                 ]
             );
-            
+
             // Gửi OTP qua email (chỉ truyền email, subject, message)
             $subject = 'Mã OTP đặt lại mật khẩu';
             $message = "
@@ -493,62 +493,62 @@ class AuthController extends Controller
 
     public function verifyOTP(Request $request)
     {
-        try{
+        try {
             $request->validate([
-            'email' => 'required|email',
-            'otp' => 'required|string'
-        ]);
+                'email' => 'required|email',
+                'otp' => 'required|string'
+            ]);
 
-        $record = passwordResetModel::where('email', $request->email)->first();
+            $record = passwordResetModel::where('email', $request->email)->first();
 
-        if (!$record) {
-            return response()->json(['success' => false, 'message' => 'Không tìm thấy yêu cầu đặt lại mật khẩu!'], 404);
-        }
+            if (!$record) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy yêu cầu đặt lại mật khẩu!'], 404);
+            }
 
-        // Kiểm tra hết hạn
-        if (isset($record->otp_expiration) && now()->gt($record->otp_expiration)) {
-            return response()->json(['success' => false, 'message' => 'OTP đã hết hạn!'], 400);
-        }
+            // Kiểm tra hết hạn
+            if (isset($record->otp_expiration) && now()->gt($record->otp_expiration)) {
+                return response()->json(['success' => false, 'message' => 'OTP đã hết hạn!'], 400);
+            }
 
-        // So sánh OTP (so sánh hash)
-        if (!Hash::check($request->otp, $record->otp)) {
-            return response()->json(['success' => false, 'message' => 'OTP không đúng!'], 400);
-        }
+            // So sánh OTP (so sánh hash)
+            if (!Hash::check($request->otp, $record->otp)) {
+                return response()->json(['success' => false, 'message' => 'OTP không đúng!'], 400);
+            }
 
-        // Đánh dấu đã xác thực OTP (có thể lưu thêm cột is_verified = true hoặc trả về token tạm)
-        passwordResetModel::where('email', $request->email)->update(['isVerified' => true]);
+            // Đánh dấu đã xác thực OTP (có thể lưu thêm cột is_verified = true hoặc trả về token tạm)
+            passwordResetModel::where('email', $request->email)->update(['isVerified' => true]);
 
-        return response()->json(['success' => true, 'message' => 'OTP hợp lệ, bạn có thể đổi mật khẩu.']);
+            return response()->json(['success' => true, 'message' => 'OTP hợp lệ, bạn có thể đổi mật khẩu.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi khi xác thực OTP: ' . $e->getMessage()], 500);
         }
-        
+
     }
 
     public function resetPassword(Request $request)
     {
         try {
             $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6|confirmed'
-        ]);
+                'email' => 'required|email',
+                'password' => 'required|min:6|confirmed'
+            ]);
 
-        $record = passwordResetModel::where('email', $request->email)->first();
+            $record = passwordResetModel::where('email', $request->email)->first();
 
-        if (!$record || empty($record->isVerified)) {
-            return response()->json(['success' => false, 'message' => 'Bạn chưa xác thực OTP hoặc OTP không hợp lệ!'], 400);
-        }
+            if (!$record || empty($record->isVerified)) {
+                return response()->json(['success' => false, 'message' => 'Bạn chưa xác thực OTP hoặc OTP không hợp lệ!'], 400);
+            }
 
-        // Đổi mật khẩu
-        $user = UserModel::where('email', $request->email)->first();
-        $user->password = bcrypt($request->password);
-        $user->save();
+            // Đổi mật khẩu
+            $user = UserModel::where('email', $request->email)->first();
+            $user->password = bcrypt($request->password);
+            $user->save();
 
-        // Xóa dòng reset để bảo mật
-       passwordResetModel::where('email', $request->email)->delete();
+            // Xóa dòng reset để bảo mật
+            passwordResetModel::where('email', $request->email)->delete();
 
-        return response()->json(['success' => true, 'message' => 'Đổi mật khẩu thành công!']);
-    } catch (\Exception $e) {
+            return response()->json(['success' => true, 'message' => 'Đổi mật khẩu thành công!']);
+        } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi tạo lại mật khẩu: ' . $e->getMessage()], 500);
         }
     }
