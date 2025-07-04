@@ -118,7 +118,7 @@ class HardwareController extends Controller
 
                 $allowedIps = DB::table('hardware_permissions')
                     ->where('user_name', $user->username)
-                    ->where('permissions_name', 'hardware.get') // Lấy quyền xem
+                    ->where('permissions_name', 'hardware.get')
                     ->pluck('hardware_ip');
 
                 Log::info('Found allowed IPs for user', ['username' => $user->username, 'allowedIps' => $allowedIps->toArray()]);

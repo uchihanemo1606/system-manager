@@ -27,7 +27,7 @@ Route::get('/getalluserinsoftware/{softwareID}', [softwarePermissionController::
 
 Route::patch('/updatepermissionuserinsoftware', [softwarePermissionController::class, 'updatePermissionUserInSoftware'])
     ->middleware('check.permission')
-    ->name('softwarepermission.update');
+    ->name('softwarepermission.edit');
 
 Route::post('/addpermissionforuser', [softwarePermissionController::class, 'addPermissionForUser'])
     ->middleware('check.permission')
