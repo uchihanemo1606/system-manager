@@ -35,10 +35,6 @@ class LogController extends Controller
          $logData = array_intersect_key($data, array_flip($fields));
 
     // Thiết lập mặc định cho is_delete nếu chưa có
-    if (!isset($logData['is_delete'])) {
-        $logData['is_delete'] = false;
-    }
-
     try {
         logModel::create($logData);
     } catch (\Exception $e) {

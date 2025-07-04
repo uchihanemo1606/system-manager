@@ -159,105 +159,77 @@ class HardwareController extends Controller
         }
     }
     //update hardware
-    public function updateHardware(Request $request)
+    public function updateHardware(Request $request, $ip)
     {
-    try {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            Log::warning('User not authenticated in updateHardware');
-            return response()->json(['message' => 'Please login to use this function'], 401);
-        }
-
-        $ip = $request->query('ip') ?? $request->input('ip');
-        Log::info('Update hardware request received', [
-            'username' => $user->username,
-            'requested_ip' => $ip,
-            'request_payload' => $request->all() // Log toàn bộ payload để debug
-        ]);
-
-        if (!$ip) {
-            return response()->json(['status' => 'error', 'message' => 'IP is required'], 400);
-        }
-
-        $hardware = hardwareModel::where('ip', $ip)->first();
-        if (!$hardware) {
-            Log::warning('Hardware not found for update', ['ip' => $ip]);
-            return response()->json(['status' => 'error', 'message' => 'No hardware found'], 404);
-        }
-
-        // --- THÊM LOG TRƯỚC KHI CHECK POLICY ---
-        Log::info('Checking update permission for hardware', [
-            'username' => $user->username,
-            'hardware_ip' => $hardware->ip
-        ]);
-        // ----------------------------------------
-
-        if ($user->cannot('update', $hardware)) {
-            // --- THÊM LOG NẾU KHÔNG CÓ QUYỀN ---
-            Log::warning('User denied update permission by policy', [
-                'username' => $user->username,
-                'hardware_ip' => $hardware->ip
-            ]);
-            // -----------------------------------
-            return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this hardware.'], 403);
-        }
-
-
-        $oldData = $hardware->only([
-        'ip',
-        'dbname',
-        'dbversion',
-        'isVirtualServer',
-        'OS',
-        'OSver',
-        'hdd',
-        'ram',
-        'services',
-    ]);
-
-
-        // Cập nhật các trường nếu có truyền lên
-        $hardware->ip = $request->input('ip', $hardware->ip);
-        $hardware->OS = $request->input('OS', $hardware->OS);
-        $hardware->OSver = $request->input('OSver', $hardware->OSver);
-        $hardware->dbname = $request->input('dbname', $hardware->dbname);
-        $hardware->dbversion = $request->input('dbversion', $hardware->dbversion);
-        $hardware->isVirtualServer = $request->input('isVirtualServer', $hardware->isVirtualServer);
-        $hardware->hdd = $request->input('hdd', $hardware->hdd);
-        $hardware->ram = $request->input('ram', $hardware->ram);
-        $hardware->services = $request->input('services', $hardware->services);
-
-        $hardware->save();
-
-        $newData = $hardware->only([
-            'ip',
-            'dbname',
-            'dbversion',
-            'isVirtualServer',
-            'OS',
-            'OSver',
-            'hdd',
-            'ram',
-            'services',
-        ]);
-
-        // So sánh và tạo chuỗi thay đổi
-        $changes = [];
-        foreach ($oldData as $key => $oldValue) {
-            $newValue = $newData[$key];
-            if ($oldValue != $newValue) {
-                $changes[] = "$key: '$oldValue' => '$newValue'";
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                Log::warning('User not authenticated in updateHardware');
+                return response()->json(['message' => 'Please login to use this function'], 401);
             }
-        }
-        $changeString = $changes ? implode(', ', $changes) : 'No changes';
 
-        // Ghi log
-        LogController::createLogAuto([
-            'username' => $user->username,
-            'hardware_ip' => $hardware->ip,
-            'message' => "User {$user->fullName} updated hardware with IP {$hardware->ip}. Changes: $changeString",
-        ]);
+            if (!$ip) {
+                return response()->json(['status' => 'error', 'message' => 'IP (from URL) is required'], 400);
+            }
 
-        return response()->json(['message' => 'Hardware updated successfully', 'data' => $hardware]);
+            Log::info('Update hardware request received', [
+                'username' => $user->username,
+                'requested_ip' => $ip,
+                'request_payload' => $request->all()
+            ]);
+
+            $hardware = hardwareModel::where('ip', $ip)->first();
+            if (!$hardware) {
+                Log::warning('Hardware not found for update', ['ip' => $ip]);
+                return response()->json(['status' => 'error', 'message' => 'No hardware found'], 404);
+            }
+
+            if ($user->cannot('update', $hardware)) {
+                Log::warning('User denied update permission by policy', [
+                    'username' => $user->username,
+                    'hardware_ip' => $hardware->ip
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this hardware.'], 403);
+            }
+
+            $oldData = $hardware->only([
+                'ip', 'dbname', 'dbversion', 'isVirtualServer', 'OS', 'OSver', 'hdd', 'ram', 'services',
+            ]);
+
+            // Cập nhật các trường nếu có truyền lên (bao gồm cả ip mới nếu có)
+            $hardware->ip = $request->input('ip', $hardware->ip);
+            $hardware->OS = $request->input('OS', $hardware->OS);
+            $hardware->OSver = $request->input('OSver', $hardware->OSver);
+            $hardware->dbname = $request->input('dbname', $hardware->dbname);
+            $hardware->dbversion = $request->input('dbversion', $hardware->dbversion);
+            $hardware->isVirtualServer = $request->input('isVirtualServer', $hardware->isVirtualServer);
+            $hardware->hdd = $request->input('hdd', $hardware->hdd);
+            $hardware->ram = $request->input('ram', $hardware->ram);
+            $hardware->services = $request->input('services', $hardware->services);
+
+            $hardware->save();
+
+            $newData = $hardware->only([
+                'ip', 'dbname', 'dbversion', 'isVirtualServer', 'OS', 'OSver', 'hdd', 'ram', 'services',
+            ]);
+
+            // So sánh và tạo chuỗi thay đổi
+            $changes = [];
+            foreach ($oldData as $key => $oldValue) {
+                $newValue = $newData[$key];
+                if ($oldValue != $newValue) {
+                    $changes[] = "$key: '$oldValue' => '$newValue'";
+                }
+            }
+            $changeString = $changes ? implode(', ', $changes) : 'No changes';
+
+            // Ghi log
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'hardware_ip' => $hardware->ip,
+                'message' => "User {$user->fullName} updated hardware with IP {$hardware->ip}. Changes: $changeString",
+            ]);
+
+            return response()->json(['message' => 'Hardware updated successfully', 'data' => $hardware]);
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {

@@ -14,7 +14,7 @@ Route::get('/getallhardware', [HardwareController::class, 'getAllHardware'])
     ->middleware('check.permission')
     ->name('hardware.list');
 
-Route::patch('/updatehardware', [HardwareController::class, 'updateHardware'])
+Route::patch('/updatehardware/{ip}', [HardwareController::class, 'updateHardware'])
     ->middleware('check.permission')
     ->name('hardware.edit');
 
