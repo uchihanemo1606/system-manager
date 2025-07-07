@@ -18,14 +18,17 @@ return new class extends Migration
             $table->string('username', 100);
             $table->unsignedBigInteger('software_id')->nullable();
             $table->string('hardware_ip',25)->nullable();
-            $table->unsignedBigInteger('rule_id')->nullable(); // e.g., 'create', 'update', 'delete'
+            $table->unsignedBigInteger('rule_id')->nullable(); 
             $table->text('message');
             $table->unsignedBigInteger('software_file_id')->nullable();
             $table->string('link_domain', 500)->nullable();
             $table->string('sw_permission_user', 100)->nullable();
             $table->string('hw_permission_user', 100)->nullable();
             $table->string('permission_name', 100)->nullable();
+            $table->string('department', 100)->nullable();
             $table->unsignedBigInteger('role_id',)->nullable();
+            $table->string('category_rule', 300)->nullable();
+
             // Foreign keys
             $table->foreign('software_id')->references('id')->on('software')->onUpdate('cascade');
             $table->foreign('hardware_ip')->references('ip')->on('hardware')->onUpdate('cascade');
@@ -36,11 +39,12 @@ return new class extends Migration
             $table->foreign('hw_permission_user')->references('user_name')->on('hardware_permissions')->onUpdate('cascade');
             $table->foreign('permission_name')->references('permissions_name')->on('permissions')->onUpdate('cascade');
             $table->foreign('role_id')->references('id')->on('roles')->onUpdate('cascade');
+            $table->foreign('department')->references('name')->on('departments')->onUpdate('cascade');
             $table->foreign('link_domain')->references('link')->on('domain')->onUpdate('cascade');
+            $table->foreign('category_rule')->references('name')->on('category_rule')->onUpdate('cascade');
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

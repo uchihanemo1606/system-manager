@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class departmentModel extends Model
 {
     protected $table = 'departments';
-    protected $fillable = ['name', 'description'];
+    protected $fillable = [
+        'name',
+        'description',
+        'created_by',
+        'is_delete',
+        ];
     public $timestamps = true;
 
     /**

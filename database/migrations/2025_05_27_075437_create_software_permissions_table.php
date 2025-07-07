@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('create_by', 100);
             $table->string('user_name',100);
-            $table->string('permissions_name', 100);
+            $table->string('permissions_name', 100);    
             $table->unsignedBigInteger('software_id');
             $table->timestamp('assigned_at');
             $table->foreign('create_by')->references('username')->on('users')->onUpdate('cascade');

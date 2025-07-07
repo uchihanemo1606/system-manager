@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\SoftwareModel;
+use App\Models\softwarePermissionModel;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -21,13 +22,44 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            // Validate the request data
-            $request->validate([
-                'softwareName' => 'required|string|max:255',
-                'language' => 'required|string|max:100',
-                'version' => 'nullable|string|max:255',
-                'user_createby' => $user->username,
-                'description' => 'nullable|string|max:1000',
+        // Validate the request data
+        $request->validate([
+            'softwareName' => 'required|string|max:255',
+            'language' => 'required|string|max:100',
+            'version' => 'nullable|string|max:255',
+            'user_createby' => $user->username,
+            'description' => 'nullable|string|max:1000',
+        ]);
+
+        // Create a new software record
+        $software = new SoftwareModel();
+        $software->softwareName = $request->input('softwareName');
+        $software->language = $request->input('language');
+        $software->version = $request->input('version');
+        $software->description = $request->input('description');
+        $software->user_createby = $user->username;
+        $software->created_at = now();
+        $software->updated_at = now();
+
+        // Save the software record
+        if ($software->save()) {
+
+            $fullPermissions = ['xem phần mềm', 'sửa phần mềm', 'xóa phần mềm'];
+            foreach ($fullPermissions as $permission) {
+                softwarePermissionModel::create([
+                    'software_id' => $software->id,
+                    'user_name' => $user->username,
+                    'permissions_name' => $permission,
+                    'create_by' => $user->username,
+                    'assigned_at' => now(),
+                ]);
+            }
+
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $software->id,
+                'message' => " user {$user->fullName} created software '{$software->softwareName}'.",
+                'is_delete' => false
             ]);
 
             // Create a new software record
@@ -117,7 +149,7 @@ class SoftwareController extends Controller
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'software_id' => $software->id,
-                    'message' => "user {$user->username} is update software '{$software->softwareName}'.",
+                    'message' => "user {$user->fullName} is update software '{$software->softwareName}'.",
                     'is_delete' => false
                 ]);
                 return response()->json(['message' => 'Software updated successfully', 'data' => $software], 200);
@@ -244,7 +276,7 @@ class SoftwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'software_id' => $software->id,
-                'message' => "User '{$user->username}' delete software'{$software->softwareName}.'",
+                'message' => "User '{$user->fullName}' delete software'{$software->softwareName}.'",
                 'is_delete' => false
             ]);
 

@@ -15,16 +15,13 @@ Route::get('/getallsoftware', [SoftwareController::class, 'getAllSoftware'])
     ->name('software.list');
 Route::patch('/updatesoftware', [SoftwareController::class, 'updateSoftware'])
     ->middleware('check.permission')
-    ->name('software.update');
-Route::delete('/deleteSoftware', [SoftwareController::class, 'deleteSoftware'])
+    ->name('software.edit');
+Route::delete('/deleteSoftware', [SoftwareController::class,'deleteSoftware'])
     ->middleware('check.permission')
     ->name('software.delete');
 Route::get('/getsoftwarebyname', [SoftwareController::class, 'getSoftwareByName'])
     ->middleware('check.permission')
-    ->name('software.get');
-Route::get('/getsoftwarebyid', [SoftwareController::class, 'getSoftwareById'])
-    ->middleware('check.permission')
-    ->name('software.detail');
+    ->name('software.list');
 
 // =======================================================================================SOFTWARE FILE ROUTE============================================================================================================================
 

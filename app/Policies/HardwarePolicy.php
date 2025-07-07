@@ -23,8 +23,6 @@ class HardwarePolicy
      */
     public function viewAny(UserModel $user): bool
     {
-        // === BẮT ĐẦU PHẦN GỠ LỖI QUAN TRỌNG ===
-        // Lấy danh sách roles từ DB
         $rolesFromDb = DB::table('user_role')
             ->where('username', $user->username)
             ->pluck('role_name');

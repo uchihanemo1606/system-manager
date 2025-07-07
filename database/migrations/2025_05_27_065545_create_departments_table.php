@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name', 100)->unique();
             $table->string('description')->nullable();
+            $table->string('created_by',100);
+            $table->boolean('is_delete')->default(false);
             $table->timestamps();
         });
     }

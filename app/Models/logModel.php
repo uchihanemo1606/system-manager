@@ -19,6 +19,8 @@ class logModel extends Model
         'sw_permission_user',
         'hw_permission_user',
         'permission_name',
+        'is_delete',
+        'department',
     ];
     public function software()
     {
@@ -59,6 +61,10 @@ class logModel extends Model
     public function user()
     {
         return $this->belongsTo(UserModel::class, 'username', 'username');
+    }
+    public function department()
+    {
+        return $this->belongsTo(departmentModel::class, 'department', 'name');
     }
     protected function casts(): array
     {

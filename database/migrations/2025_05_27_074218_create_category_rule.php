@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('category_rule', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name',300)->unique();
             $table->string('description', 200)->nullable();
             $table->timestamps();
         });
