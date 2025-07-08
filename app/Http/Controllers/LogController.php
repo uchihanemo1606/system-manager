@@ -92,14 +92,32 @@ class LogController extends Controller
     }
 
     public function getAllLogs(Request $request)
-    {   try
-        {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 404);
-        }
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 404);
+            }
 
-        $logs = logModel::where('is_delete', false)->get();
-        return response()->json($logs);
+            $query = logModel::query();
+
+            // Lọc theo từ khoá nếu có
+            $keyword = $request->query('keyword');
+            $exact = $request->query('exact');
+            if ($keyword) {
+                // Mặc định là tìm đúng thứ tự
+                if (!isset($exact) || $exact == 1) {
+                    $query->where('message', 'like', '%' . $keyword . '%');
+                } else {
+                    // exact = 0 thì tìm từng từ (không cần đúng thứ tự)
+                    $keywords = array_filter(explode(' ', trim($keyword)));
+                    foreach ($keywords as $kw) {
+                        $query->where('message', 'like', '%' . $kw . '%');
+                    }
+                }
+            }
+
+            $logs = $query->get();
+            return response()->json($logs);
 
         } catch (TokenExpiredException $e) {
             return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
