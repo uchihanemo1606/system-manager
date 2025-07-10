@@ -75,14 +75,20 @@ class softwarefileController extends Controller
 
     }
 
-    public function updateSoftwareFile(Request $request)
+    public function updateSoftwareFile(Request $request, $softwareFileid)
     {
          try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            $softwareFileid = $request->query('id');
+            if (!$softwareFileid) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Software file ID is required.'
+                ], 400);
+            }
+
             $validated = $request->validate([
                 'software_id' => 'required|string|exists:hardware,ip|max:25',
                 'file_name' => 'required|string|max:255',
@@ -127,14 +133,20 @@ class softwarefileController extends Controller
 
     }
 
-    public function deleteSoftwareFile(Request $request)
+    public function deleteSoftwareFile(Request $request, $softwareFileid)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            $softwareFileid = $request->query('id');
+            if (!$softwareFileid) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Software file ID is required.'
+                ], 400);
+            }
+
             $softwareFile = softwareFileModel::findOrFail($softwareFileid);
 
             if(!$softwareFile) {
@@ -206,14 +218,19 @@ class softwarefileController extends Controller
         }
     }
 
-    public function getAllSoftwareFileBySoftwareId(Request $request)
+    public function getAllSoftwareFileBySoftwareId(Request $request, $softwareId)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-
-            $softwareId = $request->query('software_id');
+            
+            if (!$softwareId) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Software ID is required.'
+                ], 400);
+            }
             $softwareFiles = softwareFileModel::where('software_id', $softwareId)->with('software')->get();
 
             if ($softwareFiles->isEmpty()) {

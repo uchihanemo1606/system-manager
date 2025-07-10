@@ -206,48 +206,72 @@ class HardwarePermissionController extends Controller
     public function removeUserPermisionInHardware(Request $request)
     {
         try {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 401);
-        }
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
 
-        // Lấy user_name và hardware_ip từ query hoặc body
-        $username = $request->query('user_name') ?? $request->input('user_name');
-        $hardwareIp = $request->query('hardware_ip') ?? $request->input('hardware_ip');
+            // Lấy user_name và hardware_ip từ query hoặc body
+            $username = $request->query('user_name') ?? $request->input('user_name');
+            $hardwareIp = $request->query('hardware_ip') ?? $request->input('hardware_ip');
 
-        if (!$username || !$hardwareIp) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'user_name and hardware_ip are required.'
-            ], 400);
-        }
+            if (!$username || !$hardwareIp) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'user_name and hardware_ip are required.'
+                ], 400);
+            }
 
-        // Kiểm tra user và hardware tồn tại
-        $userExists = DB::table('users')->where('username', $username)->exists();
-        $hardwareExists = DB::table('hardwares')->where('ip', $hardwareIp)->exists();
-        if (!$userExists || !$hardwareExists) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User or hardware not found.'
-            ], 404);
-        }
+            // Lấy chủ phần cứng
+            $hardware = hardwareModel::find($hardwareIp);
+            if (!$hardware) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Hardware not found.'
+                ], 404);
+            }
 
-        // Xóa permission của user trên hardware này
-        $deletedRows = hardwarePemisssionModel::where([
+            // Không cho phép xóa quyền của chủ phần cứng
+            if ($username === $hardware->created_by) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không thể xóa quyền của chủ phần cứng!'
+                ], 403);
+            }
+
+            // Nếu user tự xóa quyền của mình
+            if ($username === $user->username) {
+                // Đếm số người còn quyền "sửa hardware" hoặc "xóa hardware" trên hardware này (trừ user hiện tại)
+                $ownerCount = hardwarePemisssionModel::where('hardware_ip', $hardwareIp)
+                    ->whereIn('permissions_name', ['sửa hardware', 'xóa hardware'])
+                    ->where('user_name', '!=', $username)
+                    ->distinct('user_name')
+                    ->count('user_name');
+
+                if ($ownerCount === 0) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Thiết bị này cần ít nhất 1 người có quyền sửa hoặc xóa. Vui lòng chuyển quyền chủ cho người khác trước khi xóa bản thân.'
+                    ], 400);
+                }
+            }
+
+            // Xóa tất cả quyền của user này trên hardware
+            $deletedRows = hardwarePemisssionModel::where([
                 'hardware_ip' => $hardwareIp,
                 'user_name' => $username,
             ])->delete();
 
-        if ($deletedRows === 0) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No permissions found to delete for this user on this hardware.'
-            ], 404);
-        }
+            if ($deletedRows === 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No permissions found to delete for this user on this hardware.'
+                ], 404);
+            }
 
-        return response()->json([
-            'message' => 'User permissions removed successfully.',
-            'deleted_rows' => $deletedRows,
-        ], 200);
+            return response()->json([
+                'message' => 'User permissions removed successfully.',
+                'deleted_rows' => $deletedRows,
+            ], 200);
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',

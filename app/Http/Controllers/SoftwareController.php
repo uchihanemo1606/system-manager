@@ -176,6 +176,61 @@ class SoftwareController extends Controller
         }
     }
 
+    public function getSoftwareActive(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            if ($user->cannot('viewAny', softwareModel::class)) {
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
+            }
+
+            $software = SoftwareModel::where('is_delete', false)->get();
+            return response()->json([
+                'status' => 'success',
+                'data' => $software
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve software. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getAllSoftwareIsDelte(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            if ($user->cannot('viewAny', softwareModel::class)) {
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
+            }
+
+            $software = SoftwareModel::where('is_delete', true)->get();
+            return response()->json([
+                'status' => 'success',
+                'data' => $software
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve software. ' . $e->getMessage()], 500);
+        }
+    }
+
+
     public function getSoftwareByName(Request $request)
     {
         try {

@@ -154,6 +154,39 @@ class domainController extends Controller
         }
     }
 
+    public function deleteDomain(Request $request, $link)
+    {
+        try{
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+            return response()->json(['message' => 'Please login to use this function'], 401);
+        }
+            $domain = DomainModel::where('link', $link)->first();
+            if (!$domain) {
+                return response()->json(['message' => 'Domain not found'], 404);
+            }
+            
+            // Log the deletion of the domain
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'domain_id' => $domain->id,
+                'message' => "User {$user->fullName} deleted domain '{$domain->name}'.",
+                'is_delete' => true
+            ]);
+            // Delete the domain
+            $domain->delete();
+            
+        return response()->json(['message' => 'Domain deleted successfully'], 200);
+        }catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not update domain. ' . $e->getMessage()], 500);   
+        }
+        }
+    
 
      public function createHardwareDomain(Request $request)
     {
@@ -342,6 +375,46 @@ class domainController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve domains. ' . $e->getMessage()], 500);
         }
+    }
+
+    public function removeHardwareInDomain(Request $request, $hardwareIp, $domainId)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+            $mapping = hardwareAccessDomainModel::where('hardware_ip', $hardwareIp)
+                ->where('domain_id', $domainId)
+                ->first();
+
+            if (!$mapping) {
+                return response()->json(['status' => 'error', 'message' => 'Mapping not found'], 404);
+            }
+
+            $domain = DomainModel::find($domainId);
+            $domainLink = $domain ? $domain->link : $domainId;
+
+            $mapping->delete();
+
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'hardware_ip' => $hardwareIp,
+                'link_domain' => $domainLink,
+                'message' => "User {$user->fullName} removed hardware with IP {$hardwareIp} from domain {$domainLink}",
+            ]);
+
+            return response()->json(['message' => 'Hardware removed from domain successfully'], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not remove hardware from domain. ' . $e->getMessage()], 500);
+        }
+            
     }
 
 }
