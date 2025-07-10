@@ -6,10 +6,8 @@ async function getSoftwarePermissions() {
         console.error("Thiếu tham số id trên URL");
         return;
     }
-    console.log("Fetching software permissions for ID:", id);
     const res = await get_all_user_permission_software(id); 
     const userListTbody = document.getElementById("user-list-software");
-    console.log("Software permissions:", res);
     if (!userListTbody) {
         console.error("Không tìm thấy phần tử tbody!");
         return;

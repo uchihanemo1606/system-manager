@@ -33,6 +33,17 @@ export const get_software_by_id = async ({ id }) => {
     }
     return [];
 };
+export async function delete_software({ id }) {
+    const res = await fetch(`/api/deleteSoftware?id=${id}`, {
+        method: "DELETE",
+        headers: defaultHeaders(), // đảm bảo có Authorization + Content-Type: application/json
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi xóa phần mềm");
+    return result;
+}
+
 export async function update_software({ id, ...data }) {
     const res = await fetch(`/api/updatesoftware/${id}`, {
         method: "PATCH",
@@ -98,8 +109,7 @@ export async function remove_user_permission_in_software({ username, softwareId 
     const res = await fetch(`/api/deletesoftwarepermission?user_name=${encodeURIComponent(username)}&software_id=${encodeURIComponent(softwareId)}`, {
         method: "DELETE",
         headers: defaultHeaders(),
-    });
-
+    }); 
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Lỗi khi xóa quyền người dùng phần mềm.");
     return result;
@@ -112,4 +122,20 @@ export async function get_all_permission_software_by_user({ username, softwareId
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Lỗi khi lấy quyền.");
     return result.data || [];
+}
+export async function create_software_file({ software_id, file_name, file_path, description }) {
+    const res = await fetch("/api/createsoftwarefile", {
+        method: "POST",
+        headers: defaultHeaders(),
+        body: JSON.stringify({
+            software_id,
+            file_name,
+            file_path,
+            description, // thêm nếu cần
+        }),
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi khi tạo tệp phần mềm.");
+    return result;
 }

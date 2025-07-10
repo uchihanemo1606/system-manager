@@ -22,7 +22,7 @@ class softwarefileController extends Controller
             }
 
            $validated = $request->validate([
-            'software_id' => 'required|string|exists:hardware,ip|max:25',
+            'software_id' => 'required|string|max:25', //exists:hardware,ip|
             'file_name' => 'required|string|max:255',
             'file_path' => 'required|string|max:10000',
             'description' => 'nullable|string|max:10000',

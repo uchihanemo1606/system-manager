@@ -11,7 +11,7 @@
         </button>
         @endhasPermission
         @hasPermission('software.delete')
-        <button id="toggle-edit-btn" class="btn btn-primary">
+        <button id="software-delete-btn" class="btn btn-primary">
             <i class="mdi mdi-pencil"></i> Xóa
         </button>
         @endhasPermission
@@ -99,63 +99,20 @@
 
                 </div>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title mb-4">Danh sách file của phần mềm</h4>
-                    <div class="table-responsive">
-                        <table class="table table-nowrap table-centered table-hover mb-0">
-                            <tbody>
-                                <tr>
-                                    <td style="width: 45px;">
-                                        <div class="avatar-sm">
-                                            <span
-                                                class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
-                                                <i class="bx bxs-file-doc"></i>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <h5 class="font-size-14 mb-1"><a href="#" class="text-dark">Skote
-                                                Landing.Zip</a></h5>
-                                        <small>Size : 3.25 MB</small>
-                                    </td>
-                                    <td>
-                                        <div class="text-center">
-                                            <a href="#" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="avatar-sm">
-                                            <span
-                                                class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
-                                                <i class="bx bxs-file-doc"></i>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <h5 class="font-size-14 mb-1"><a href="#" class="text-dark">Skote
-                                                Admin.Zip</a></h5>
-                                        <small>Size : 3.15 MB</small>
-                                    </td>
-                                    <td>
-                                        <div class="text-center">
-                                            <a href="#" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+
+            @include('components.file_list', ['type' => 'software'])
+            @vite('resources/js/component/file/software_file.js')
 
             @include('components.log_by_type', ['type' => 'software'])
             @vite('resources/js/component/log/software_log.js')
         </div>
     </div>
 </div>
+<div id="software-deleted-warning" class="d-none text-center my-5">
+    <h2 class="text-danger">Phần mềm này đã bị xóa</h2>
+    <p class="text-muted">Thông tin chi tiết không còn khả dụng.</p>
+</div>
+
 @vite('resources/js/pages/software_detail.js')
 @endhasPermission
 @endsection

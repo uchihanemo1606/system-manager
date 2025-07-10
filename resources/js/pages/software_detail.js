@@ -1,5 +1,5 @@
 import { get_domain_software } from "../api/domain";
-import { get_software_by_id, update_software } from "../api/software";
+import { delete_software, get_software_by_id, update_software } from "../api/software";
 import { renderDomainList } from "../component/domain/render_domain_list";
 import { showToast } from "../component/toast";
 
@@ -24,6 +24,19 @@ if (id) {
 }
 
 toggleBtn?.addEventListener("click", handleToggleEdit);
+document.getElementById("software-delete-btn")?.addEventListener("click", async () => {
+    if (!confirm("Bạn có chắc muốn xóa phần mềm này?")) return;
+
+    try {
+        await delete_software({ id });
+        showToast({ message: "Xóa phần mềm thành công!", type: "success" });
+
+        // Redirect hoặc reload
+        // window.location.href = "/software_list"; // hoặc nơi bạn muốn quay lại
+    } catch (err) {
+        showToast({ message: err.message || "Lỗi khi xóa phần mềm.", type: "error" });
+    }
+});
 
 function handleToggleEdit() {
     isEditMode = !isEditMode;
@@ -46,9 +59,19 @@ function loadDomainList(softwareId) {
 function loadSoftware(softwareId) {
     get_software_by_id({ id: softwareId })
         .then(({ data }) => {
-            if (!data) return showToast({ message: "Không tìm thấy phần mềm.", type: "error" }); 
+            if (!data) return showToast({ message: "Không tìm thấy phần mềm.", type: "error" });
+            if (data.is_delete) {
+                document.getElementById("software-deleted-warning").classList.remove("d-none");
+                detailBlock.style.display = "none";
+                document.getElementById("toggle-edit-btn")?.classList.add("d-none");
+                document.getElementById("software-delete-btn")?.classList.add("d-none");
+                return;
+            }
+
+            // Nếu chưa bị xóa → render info
             renderSoftwareInfo(data);
             detailBlock.style.display = "block";
+
             document.getElementById("add_domain").dataset.software = JSON.stringify(data);
             if (isEditParam) {
                 isEditMode = true;

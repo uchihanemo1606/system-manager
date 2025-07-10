@@ -54,7 +54,7 @@ class SoftwareController extends Controller
                         'permissions_name' => $permission,
                         'assigned_at' => now(),
                     ]);
-                } 
+                }
                 LogController::createLogAuto([
                     'username' => $userName,
                     'software_id' => $software->id,
@@ -227,7 +227,7 @@ class SoftwareController extends Controller
         }
     }
 
-    public function deleteSoftware(Request $request, $id)
+    public function deleteSoftware(Request $request)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {

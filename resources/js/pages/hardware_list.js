@@ -7,14 +7,23 @@ async function loadHardware() {
     container.innerHTML = ""; // Xóa cũ
 
     try {
-        const allHardware = await get_all_hardware(); 
+        const allHardware = await get_all_hardware();
         allHardwareCache = allHardware?.data || [];
 
         allHardwareCache.sort((a, b) => {
             return (b.is_active === true) - (a.is_active === true);
         });
 
-        renderHardware(allHardwareCache);
+        const isDeleteFilter = document.getElementById("filter-delete")?.value;
+        console.log(allHardwareCache);
+        // Nếu không chọn trạng thái xóa → chỉ hiển thị phần cứng chưa xóa
+        if (!isDeleteFilter) {
+            const filtered = allHardwareCache.filter(hw => !hw.is_delete);
+            renderHardware(filtered);
+        } else {
+            applyFilter(); // nếu có chọn trạng thái xóa → áp dụng toàn bộ filter
+        }
+
     } catch (err) {
         console.error("Lỗi khi tải danh sách phần cứng:", err);
         container.innerHTML = `<div class="col-12 text-center text-danger">Lỗi khi tải dữ liệu!</div>`;
@@ -34,10 +43,25 @@ function renderHardware(data) {
         const cssActive = !hw.is_active && "bg-light text-muted";
         const cssbadge = !hw.is_active ? "badge-Secondary" : "badge-primary";
         const badgeStyle = hw.is_active ? "opacity: 1;" : "opacity: 0.5;";
+        const OSverDeleteCss = hw.is_delete ? "top: 24px;" : "top: 4px;";
+        const deleteLabel = hw.is_delete
+            ? `<div style="
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    background: red;
+                    color: white;
+                    font-size: 12px;
+                    padding: 2px 6px;
+                    font-weight: bold;
+                    border-bottom-left-radius: 5px;
+                ">ĐÃ XÓA</div>`
+            : "";
+
         const card = `
-    <div class="col-xl-3 col-sm-6 mb-3 ">
-        <div class="card shadow-sm h-100 position-relative   ${cssActive} border ">
-        
+        <div class="col-xl-3 col-sm-6 mb-3 ">
+         <div class="card shadow-sm h-100 position-relative ${cssActive} border">
+               ${deleteLabel}
             <!-- IP Góc trên trái --> 
             <div class="position-absolute" style="top: 4px; left: 4px; font-size: 13px;">
                 IP: 
@@ -45,8 +69,8 @@ function renderHardware(data) {
                     ${hw.ip}
                 </span>
             </div>
-            <div class="position-absolute" style="top: 4px; right: 4px; font-size: 13px;"> 
-                <span class="badge  " style="font-size: 12px; ${badgeStyle}">
+            <div class="position-absolute" style="${OSverDeleteCss} right: 4px; font-size: 13px; z-index: 5;">
+                <span class="badge" style="font-size: 12px; ${badgeStyle}">
                     ${hw.OSver || "N/A"}
                 </span>
             </div>
@@ -59,27 +83,23 @@ function renderHardware(data) {
                 </div>
                 
                 <h5 class="font-size-15 mb-1">
-                    <a href="#" class="text-dark font-weight-bold">${hw.OS} - ${
-            hw.dbname
-        }</a>
+                    <a href="#" class="text-dark font-weight-bold">${hw.OS} - ${hw.dbname
+            }</a>
                 </h5>
 
                 <div class="d-flex justify-content-center mb-2">
-                    <span class="badge badge-light mr-1 medium">RAM: ${
-                        hw.ram
-                    }</span>
+                    <span class="badge badge-light mr-1 medium">RAM: ${hw.ram
+            }</span>
                     <span class="badge badge-light medium">HDD: ${hw.hdd}</span>
                 </div>
 
                 <div class="d-flex justify-content-center flex-wrap mb-2">
-                    <span class="badge badge-${
-                        hw.isVirtualServer ? "secondary" : "info"
-                    } m-1">
+                    <span class="badge badge-${hw.isVirtualServer ? "secondary" : "info"
+            } m-1">
                         ${hw.isVirtualServer ? "Máy ảo" : "Máy vật lý"}
                     </span>
-                    <span class="badge badge-${
-                        hw.is_active ? "success" : "secondary"
-                    } m-1">
+                    <span class="badge badge-${hw.is_active ? "success" : "secondary"
+            } m-1">
                         ${hw.is_active ? "Đang hoạt động" : "Không hoạt động"}
                     </span>
                 </div>
@@ -89,17 +109,15 @@ function renderHardware(data) {
 
             <div class="card-footer border-top ${cssActive}" style="background-color: white;">
                 <div class="d-flex justify-content-around font-size-18">
-                    <a  href="/hardware_detail?id=${
-                        hw.ip
-                    }&edit=true" title="Sửa"  class="text-primary">
+                    <a  href="/hardware_detail?id=${hw.ip
+            }&edit=true" title="Sửa"  class="text-primary">
                         <i class="bx bx-wrench"></i>
                     </a>
                     <a href="#" title="Xem log" class="text-primary">
                         <i class="bx bx-pie-chart-alt"></i>
                     </a>
-                    <a href="/hardware_detail?id=${
-                        hw.ip
-                    }" title="Chi tiết" class="text-primary">
+                    <a href="/hardware_detail?id=${hw.ip
+            }" title="Chi tiết" class="text-primary">
                         <i class="bx bx-user-circle"></i>
                     </a>
                 </div>

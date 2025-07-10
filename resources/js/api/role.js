@@ -244,6 +244,7 @@ export const permissionTypes = [
     "quyền người dùng",
     "quyền hệ thống",
     "tên miền",
+    "tệp tin phần mềm",
     "phần cứng vào domain",
 ];
 export const permissionActions = [

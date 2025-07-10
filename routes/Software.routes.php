@@ -31,4 +31,4 @@ Route::get('/getsoftwarebyid', [SoftwareController::class, 'getSoftwareById'])
 
 Route::post('/createsoftwarefile', [softwarefileController::class, 'createSoftwarefile'])
     ->middleware('check.permission')
-    ->name('softwarefile.create');
+    ->name('software.edit');
