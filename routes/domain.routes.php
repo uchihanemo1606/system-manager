@@ -20,6 +20,11 @@ Route::patch('/updatedomain', [domainController::class, 'updateDomain'])
     ->middleware('check.permission')
     ->name('domain.edit');
 
+Route::delete('/deletedomain', [domainController::class, 'deleteDomain'])
+    ->middleware('check.permission')
+    ->name('domain.delete');
+
+//====================================================================================================================================================================================================
 
 // hardware domain
 Route::post('/createhardwaredomain', [domainController::class, 'createHardwareDomain'])
@@ -32,8 +37,9 @@ Route::get('/gethardwaresoftwareindomain', [domainController::class, 'getHardwar
 
 Route::get('/getdomainbyhardware', [domainController::class, 'getdomainbyhardware'])
     ->middleware('check.permission')
-    ->name('hardwaredomain.list'); 
-    
-Route::get('/getdomainsbyhardware', [domainController::class, 'getdomainsbyhardware'])
+    ->name('hardwaredomain.list');
+
+Route::delete('/removehardwareindomain/{hardwareIp}/{domainId}',[domainController::class, 'removeHardwareInDomain'])
     ->middleware('check.permission')
-    ->name('hardwaredomain.list'); 
+    ->name('hardwaredomain.delete');
+    

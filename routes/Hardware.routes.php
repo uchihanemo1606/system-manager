@@ -42,3 +42,4 @@ Route::get('/getdetailuserpermissioninhardware', [HardwarePermissionController::
 Route::get('/getalluserpermissioninhardware/{hardwareIP}', [HardwarePermissionController::class, 'getUserInHardwarePermission'])
     ->middleware('check.permission')
     ->name('hardwarepermission.list');
+
