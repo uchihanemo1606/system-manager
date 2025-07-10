@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('email')->index();
             $table->string('otp')->nullable();
             $table->dateTime('otp_expiration')->nullable();
+            $table->integer('otp_attempts')->default(0);
             $table->boolean('isVerified')->default(false);
             $table->foreign('email')->references('email')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
