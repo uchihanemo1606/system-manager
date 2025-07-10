@@ -16,3 +16,8 @@
          </table>
      </div>
  </div>
+<script>
+    window.permissions = {
+        canCreateHardwareDomain: @json(auth()->user()?->can('hardwaredomain.create'))
+    };
+</script>

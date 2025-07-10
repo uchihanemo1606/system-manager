@@ -1,3 +1,4 @@
+import { data } from "autoprefixer";
 import { defaultHeaders } from "../config/api_config";
 export async function create_software(data) {
     const res = await fetch("/api/createsoftware", {
@@ -16,6 +17,49 @@ export const get_all_software = async () => {
     const data = await res.json();
     if (res.ok) {
         return data.software || data;
+    }
+    return [];
+};
+export const update_software_file_by_id = async (id, data) => {
+    try {
+        const res = await fetch(`/api/updatesoftwarefile/${id}`, {
+            method: "PATCH",
+            headers: defaultHeaders(),
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message || "Lỗi không xác định");
+        }
+
+        const result = await res.json();
+        return result;
+    } catch (err) {
+        console.error("Lỗi khi cập nhật tập tin phần mềm:", err);
+        throw err;
+    }
+};
+export async function delete_software_file_by_id(id ) {
+    const res = await fetch(`/api/deletesoftwarefile/${id}`, {
+        method: "DELETE",
+        headers: defaultHeaders(), // đảm bảo có Authorization + Content-Type: application/json
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi xóa tài liệu thành công");
+    return result;
+}
+export const get_all_software_file_by_id = async (id) => {
+    const res = await fetch(
+        `/api/getallsoftwarefilebysoftwareid/${encodeURIComponent(id)}`,
+        {
+            headers: defaultHeaders(),
+        }
+    );
+    const data = await res.json();
+    if (res.ok) {
+        return data;
     }
     return [];
 };
@@ -109,7 +153,7 @@ export async function remove_user_permission_in_software({ username, softwareId 
     const res = await fetch(`/api/deletesoftwarepermission?user_name=${encodeURIComponent(username)}&software_id=${encodeURIComponent(softwareId)}`, {
         method: "DELETE",
         headers: defaultHeaders(),
-    }); 
+    });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Lỗi khi xóa quyền người dùng phần mềm.");
     return result;

@@ -192,12 +192,13 @@ class domainController extends Controller
         }
     }
 
-    public function deleteDomain(Request $request, $link)
+    public function deleteDomain(Request $request)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
+            $link = $request->query('link') ?? $request->input('link');
             $domain = DomainModel::where('link', $link)->first();
             if (!$domain) {
                 return response()->json(['message' => 'Domain not found'], 404);
@@ -469,7 +470,7 @@ class domainController extends Controller
         } catch (JWTException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Could not remove hardware from domain. ' . $e->getMessage()], 500);
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve domains. ' . $e->getMessage()], 500);
         }
     }
     public function removeHardwareInDomain(Request $request, $hardwareIp, $domainId)
@@ -511,5 +512,4 @@ class domainController extends Controller
         }
 
     }
-
 }

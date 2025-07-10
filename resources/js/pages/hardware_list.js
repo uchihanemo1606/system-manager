@@ -1,5 +1,10 @@
 import { get_all_hardware } from "../api/hardware";
-
+import {
+    get_all_hardware_database,
+    get_versions_by_dbname,
+    get_all_hardware_os,
+    get_versions_by_os
+} from "../api/hardware_data";
 let allHardwareCache = []; // Lưu dữ liệu tạm để lọc
 
 async function loadHardware() {
@@ -128,6 +133,81 @@ function renderHardware(data) {
         container.insertAdjacentHTML("beforeend", card);
     });
 }
+function applySort(data) {
+    const sortOption = document.getElementById("sort-option").value;
+    const key = sortOption.replace("-", "");
+    const asc = !sortOption.startsWith("-");
+    return data.sort((a, b) => {
+        const valA = a[key]?.toString().toLowerCase() || "";
+        const valB = b[key]?.toString().toLowerCase() || "";
+        return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+}
+async function initHardwareFilterSelects() {
+    const dbSelect = document.getElementById("filter-dbname");
+    const dbverSelect = document.getElementById("filter-dbversion");
+    const osSelect = document.getElementById("filter-os");
+    const osverSelect = document.getElementById("filter-osver"); 
+
+    // Tắt version ban đầu
+    dbverSelect.disabled = true;
+    osverSelect.disabled = true;
+
+    // Lấy tất cả tên CSDL & OS
+    const dbs = await get_all_hardware_database();
+    const oss = await get_all_hardware_os();
+
+    const uniqueDbNames = [...new Set(dbs.data.map(d => d.dbname))];
+    const uniqueOSNames = [...new Set(oss.data.map(o => o.OS))];
+
+    dbSelect.innerHTML = `<option></option>` + uniqueDbNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    osSelect.innerHTML = `<option></option>` + uniqueOSNames.map(n => `<option value="${n}">${n}</option>`).join('');
+
+    // Gắn select2
+    [dbSelect, dbverSelect, osSelect, osverSelect].forEach(el => {
+        $(el).select2({
+            placeholder: "Chọn hoặc tìm...",
+            allowClear: true,
+            width: "100%",
+            dropdownParent: $('#hardware-container').parent()
+
+        });
+    });
+
+    // Khi chọn dbname → load dbversion
+    $(dbSelect).on("change", async function () {
+        const val = this.value;
+        dbverSelect.innerHTML = `<option></option>`;
+        $(dbverSelect).val(null).trigger("change");
+        dbverSelect.disabled = true;
+        if (!val) return;
+
+        try {
+            const res = await get_versions_by_dbname(val);
+            dbverSelect.innerHTML = `<option></option>` + res.data.map(v => `<option value="${v}">${v}</option>`).join('');
+            dbverSelect.disabled = false;
+        } catch (err) {
+            console.error("Lỗi khi lấy DB version:", err);
+        }
+    });
+
+    // Khi chọn OS → load OSver
+    $(osSelect).on("change", async function () {
+        const val = this.value;
+        osverSelect.innerHTML = `<option></option>`;
+        $(osverSelect).val(null).trigger("change");
+        osverSelect.disabled = true;
+        if (!val) return;
+
+        try {
+            const res = await get_versions_by_os(val);
+            osverSelect.innerHTML = `<option></option>` + res.data.map(v => `<option value="${v}">${v}</option>`).join('');
+            osverSelect.disabled = false;
+        } catch (err) {
+            console.error("Lỗi khi lấy OS version:", err);
+        }
+    });
+}
 
 function applyFilter() {
     const ip = document.getElementById("filter-ip").value.toLowerCase();
@@ -178,12 +258,15 @@ window.addEventListener("hardwareCreated", loadHardware);
 loadHardware();
 
 // Gắn sự kiện cho tất cả input/select để lọc tự động
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+
+    await initHardwareFilterSelects(); // Bắt buộc gọi ở đây
+
     const inputs = document.querySelectorAll(
         "#filter-ip, #filter-dbname, #filter-dbversion, #filter-virtual, #filter-os, #filter-osver, #filter-hdd, #filter-ram, #filter-delete, #filter-services, #filter-createdby, #filter-createdat, #filter-updatedat"
     );
 
     inputs.forEach((input) => {
-        input.addEventListener("input", applyFilter);
+        input.addEventListener("change", applyFilter);
     });
 });

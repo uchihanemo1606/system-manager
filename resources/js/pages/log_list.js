@@ -38,17 +38,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadAllLogs();
 
+    function removeAccents(str) {
+        return str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+    }
+
+    function fuzzyIncludes(text, keywords) {
+        const normalized = removeAccents(text || "");
+        return keywords.every(kw => normalized.includes(kw));
+    }
+
     function applyFilters() {
         const filters = {
-            username: usernameInput.value.trim().toLowerCase(),
-            hardware_ip: hardwareIpInput.value.trim().toLowerCase(),
+            username: usernameInput.value.trim(),
+            hardware_ip: hardwareIpInput.value.trim(),
             software_id: softwareIdInput.value.trim(),
-            permission_name: permissionNameInput.value.trim().toLowerCase(),
-            message: messageInput.value.trim().toLowerCase(),
-            link_domain: domainInput.value.trim().toLowerCase(),
-            department: departmentInput.value.trim().toLowerCase(),
-            sw_permission_user: swPermissionInput.value.trim().toLowerCase(),
-            hw_permission_user: hwPermissionInput.value.trim().toLowerCase(),
+            permission_name: permissionNameInput.value.trim(),
+            message: messageInput.value.trim(),
+            link_domain: domainInput.value.trim(),
+            department: departmentInput.value.trim(),
+            sw_permission_user: swPermissionInput.value.trim(),
+            hw_permission_user: hwPermissionInput.value.trim(),
             from_date: fromDateInput.value,
             to_date: toDateInput.value
         };
@@ -70,15 +79,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const to = filters.to_date ? new Date(filters.to_date) : null;
 
         const filtered = data.filter(log => {
-            if (filters.username && !(log.username || "").toLowerCase().includes(filters.username)) return false;
-            if (filters.hardware_ip && !(log.hardware_ip || "").toLowerCase().includes(filters.hardware_ip)) return false;
+            const test = (val, key) => {
+                const keywords = removeAccents(filters[key]).split(/\s+/).filter(Boolean);
+                return keywords.length === 0 || fuzzyIncludes(val, keywords);
+            };
+
+            if (!test(log.username, "username")) return false;
+            if (!test(log.hardware_ip, "hardware_ip")) return false;
+            if (!test(log.permission_name, "permission_name")) return false;
+            if (!test(log.message, "message")) return false;
+            if (!test(log.link_domain, "link_domain")) return false;
+            if (!test(log.department, "department")) return false;
+            if (!test(log.sw_permission_user, "sw_permission_user")) return false;
+            if (!test(log.hw_permission_user, "hw_permission_user")) return false;
             if (filters.software_id && String(log.software_id || "") !== filters.software_id) return false;
-            if (filters.permission_name && !(log.permission_name || "").toLowerCase().includes(filters.permission_name)) return false;
-            if (filters.message && !(log.message || "").toLowerCase().includes(filters.message)) return false;
-            if (filters.link_domain && !(log.link_domain || "").toLowerCase().includes(filters.link_domain)) return false;
-            if (filters.department && !(log.department || "").toLowerCase().includes(filters.department)) return false;
-            if (filters.sw_permission_user && !(log.sw_permission_user || "").toLowerCase().includes(filters.sw_permission_user)) return false;
-            if (filters.hw_permission_user && !(log.hw_permission_user || "").toLowerCase().includes(filters.hw_permission_user)) return false;
 
             if (from || to) {
                 const logDate = new Date(log.created_at);
@@ -115,11 +129,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderTable(logs) {
+        logs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         allLogs = logs;
         currentPage = 1;
         renderPage();
     }
-
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
     function renderPage() {
         tbody.innerHTML = "";
 
@@ -136,22 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         pageLogs.forEach(log => {
-            let resource = "-";
-            if (log.link_domain) {
-                resource = `Domain: <strong>${log.link_domain}</strong>`;
-            } else if (log.software_id) {
-                resource = `Phần mềm ID: <strong>${log.software_id}</strong>`;
-                if (log.sw_permission_user) {
-                    resource += `<br><small>Quyền phần mềm: ${log.sw_permission_user}</small>`;
-                }
-            } else if (log.hardware_ip) {
-                resource = `Phần cứng IP: <strong>${log.hardware_ip}</strong>`;
-                if (log.hw_permission_user) {
-                    resource += `<br><small>Quyền phần cứng: ${log.hw_permission_user}</small>`;
-                }
-            }
-
             const tr = document.createElement("tr");
+           const safeLogJson = escapeHtml(JSON.stringify(log));
             tr.innerHTML = `
                 <td>${log.id}</td>
                 <td>${log.username || ""}</td>
@@ -161,19 +168,51 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${log.message || ""}</td>
                 <td>${formatDatetime(log.created_at)}</td>
                 <td>
-                    <button class="btn btn-sm btn-info btn-detail" >Chi tiết</button>
+                    <button class="btn btn-sm btn-info btn-detail" data-log='${safeLogJson}'>Xem</button>
                 </td>
             `;
-            // data-log='${JSON.stringify(log)}'
             tbody.appendChild(tr);
         });
 
+        // 🛠 Di chuyển đoạn này VÀO renderPage để kích hoạt nút sau khi render
         document.querySelectorAll(".btn-detail").forEach(btn => {
-            btn.addEventListener("click", () => showDetail(JSON.parse(btn.dataset.log)));
+            btn.addEventListener("click", () => {
+                const log = JSON.parse(btn.dataset.log);
+                showDetail(log);
+            });
         });
 
         renderPagination(totalPages);
         paginationInfo.textContent = `Trang ${currentPage} / ${totalPages}, Tổng ${allLogs.length} bản ghi`;
+    }
+
+    function showDetail(log) {
+        const map = {
+            "detail-id": log.id,
+            "detail-username": log.username,
+            "detail-hardware": log.hardware_ip,
+            "detail-software": log.software_id,
+            "detail-permission": log.permission_name,
+            "detail-message": log.message,
+            "detail-domain": log.link_domain,
+            "detail-created": formatDatetime(log.created_at),
+            "detail-updated": formatDatetime(log.updated_at),
+            "detail-department": log.department,
+            "detail-role-id": log.role_id,
+            "detail-category-rule": log.category_rule,
+            "detail-rule-id": log.rule_id,
+            "detail-sw-permission": log.sw_permission_user,
+            "detail-hw-permission": log.hw_permission_user,
+            "detail-software-file-id": log.software_file_id
+        };
+
+        Object.entries(map).forEach(([id, value]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value ?? "(trống)";
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById("logDetailModal"));
+        modal.show();
     }
 
     function renderPagination(totalPages) {
@@ -203,21 +242,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentPage < totalPages) {
             pagination.appendChild(createPageItem(currentPage + 1, "»"));
         }
-    }
-
-    function showDetail(log) {
-        document.getElementById("detail-id").textContent = log.id || "";
-        document.getElementById("detail-username").textContent = log.username || "";
-        document.getElementById("detail-hardware").textContent = log.hardware_ip || "";
-        document.getElementById("detail-software").textContent = log.software_id || "";
-        document.getElementById("detail-permission").textContent = log.permission_name || "";
-        document.getElementById("detail-message").textContent = log.message || "";
-        document.getElementById("detail-domain").textContent = log.link_domain || "";
-        document.getElementById("detail-created").textContent = formatDatetime(log.created_at);
-        document.getElementById("detail-updated").textContent = formatDatetime(log.updated_at);
-
-        const modal = new bootstrap.Modal(document.getElementById("logDetailModal"));
-        modal.show();
     }
 
     function formatDatetime(datetimeStr) {

@@ -2,7 +2,7 @@
 @section('content')
 @hasPermission('hardware.detail')
 <div id="hardware-detail" style="display: none;">
-    <div class="row">
+    <div class="row" style=" position: absolute;">
         <div class="col-12">
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="mb-0 font-size-18">Chi tiết phần cứng</h4>
@@ -80,10 +80,10 @@
                                 <div class="d-flex align-items-center justify-content-between mt-3">
                                     <h6 class="text-primary mb-0 d-flex align-items-center">
                                         <span class="fw-bold mr-2">Domain:</span>
-                                        <button class="btn btn-outline-primary btn-sm mr-3" id="add-hardware-domain-btn"
+                                        <!-- <button class="btn btn-outline-primary btn-sm mr-3" id="add-hardware-domain-btn"
                                             type="button">
                                             <i class="mdi mdi-plus-circle-outline mr-1"></i> Liên kết tên miền
-                                        </button>
+                                        </button> -->
                                         <button class="btn btn-outline-primary btn-sm" id="view-domain-btn"
                                             type="button">
                                             Xem tên miền đã liên kết <i class="mdi mdi-arrow-right ml-1"></i>
@@ -223,8 +223,8 @@
                     </div>
                 </div>
             </div>
-            @include('components.rule_by_type', ['type' => 'hardware'])
-            @vite('resources/js/component/rule/hardware_rule.js')
+            <!-- @include('components.rule_by_type', ['type' => 'hardware'])
+            @vite('resources/js/component/rule/hardware_rule.js') -->
             @include('components.log_by_type', ['type' => 'hardware'])
             @vite('resources/js/component/log/hardware_log.js')
         </div>

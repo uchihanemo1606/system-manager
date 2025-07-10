@@ -134,6 +134,7 @@
             </div>
         </div>
     </nav>
+  
 </body>
 <script src="{{ asset('js/style/bar.js') }}"></script>
 <script src="{{ asset('js/bar.js') }}"></script>

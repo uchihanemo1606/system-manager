@@ -28,13 +28,13 @@ async function initSoftwareFileCreateModal(data) {
                 // nếu cần gửi thêm description, thêm dòng này:
                 description,
             });
-
+            window.dispatchEvent(new Event("softwareFileCreated"));
             showToast({
                 message: "Tạo tập tin thành công!",
                 type: "success",
                 timeout: 2000,
             });
-            if (window.closeModal) window.closeModal(); // giả sử bạn có hàm đóng modal
+
         } catch (err) {
             console.error(err);
             showToast({

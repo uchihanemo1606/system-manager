@@ -43,15 +43,16 @@ export async function create_domain(data) {
     if (!res.ok) throw new Error(result.message || "Lỗi tạo tên miền");
     return result;
 }
-export async function delete_domain_by_name(name) {
-    const res = await fetch(`/api/deletedomain?name=${name}`, {
+export async function delete_domain_by_name(link) {
+    const res = await fetch(`/api/deletedomain?link=${encodeURIComponent(link)}`, {
         method: "DELETE",
         headers: defaultHeaders(),
     });
     const result = await res.json();
-    if (!res.ok) throw new Error(result.message || "Lỗi xóa tên miền " + name);
+    if (!res.ok) throw new Error(result.message || "Lỗi xóa tên miền " + link);
     return result;
 }
+
 export const get_domain_software = async (id) => {
     const res = await fetch("/api/getalldomain", {
         headers: defaultHeaders(),
@@ -103,4 +104,16 @@ export async function create_domain_hardware(data) {
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Lỗi thêm tên miền cho phần cứng");
     return result;
+}
+// domain.js
+export async function remove_hardware_in_domain(hardwareIp, domainId) {
+    const res = await fetch(`/api/removehardwareindomain/${encodeURIComponent(hardwareIp)}/${encodeURIComponent(domainId)}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (!res.ok) throw new Error(`Failed to remove ${hardwareIp} from domain ${domainId}`);
+    return res.json();
 }

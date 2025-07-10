@@ -1,7 +1,8 @@
-import { get_hardware_software_by_domain, delete_domain_by_name, update_domain_by_name } from "../api/domain";
+import { get_hardware_software_by_domain, delete_domain_by_name, update_domain_by_name, remove_hardware_in_domain } from "../api/domain";
 import { showToast } from "../component/toast";
 
-function renderHardwareList(hardwareList) {
+
+function renderHardwareList(hardwareList, fullDomain) {
     const tbody = document.querySelector("#hardware-list tbody");
     tbody.innerHTML = "";
 
@@ -9,8 +10,10 @@ function renderHardwareList(hardwareList) {
         tbody.innerHTML = `<tr><td class="text-center text-muted">Chưa có phần cứng nào sử dụng tên miền này.</td></tr>`;
         return;
     }
+
     hardwareList.forEach(hw => {
         const tr = document.createElement("tr");
+
         tr.innerHTML = `
             <td>
                 <div class="d-flex justify-content-between align-items-start">
@@ -18,12 +21,23 @@ function renderHardwareList(hardwareList) {
                         <strong>${hw.ip}</strong><br>
                         <small>${hw.OS} - ${hw.OSver}</small>
                     </div>
-                    <a href="/hardware_detail?id=${encodeURIComponent(hw.ip)}" class="btn btn-sm btn-outline-primary ms-2" title="Đi đến phần cứng">
-                        <i class="bx bx-right-arrow-circle"></i>
-                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/hardware_detail?id=${encodeURIComponent(hw.ip)}"
+                           class="btn btn-sm btn-outline-primary"
+                           title="Đi đến phần cứng">
+                            <i class="bx bx-right-arrow-circle"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger"
+                                data-ip="${hw.ip}"
+                                title="Xoá liên kết"
+                                onclick="unlinkHardwareFromDomain(this, '${fullDomain.id}')">
+                            <i class="mdi mdi-link-off"></i>
+                        </button>
+                    </div>
                 </div>
             </td>
         `;
+
         tbody.appendChild(tr);
     });
 }
@@ -79,10 +93,37 @@ async function initDomainDetailModal(domain) {
         }
 
         // // Danh sách phần cứng
-        renderHardwareList(hardware);
+        renderHardwareList(hardware, fullDomain);
+
     } catch (err) {
         console.error(err);
     }
+    window.unlinkHardwareFromDomain = async function (btn, domainId) {
+        const ip = btn.dataset.ip;
+        if (!ip || !domainId) return;
+
+        const confirmed = confirm(`Bạn có chắc chắn muốn xoá liên kết IP "${ip}" khỏi tên miền?`);
+        if (!confirmed) return;
+
+        try {
+            await remove_hardware_in_domain(ip, domainId); 
+
+            showToast({ message: `Đã xoá liên kết IP "${ip}" khỏi tên miền.`, type: "success" });
+
+            // Xoá row khỏi bảng luôn
+            btn.closest("tr").remove();
+
+            // Nếu không còn phần cứng nào, hiển thị thông báo
+            const tbody = document.querySelector("#hardware-list tbody");
+            if (tbody.children.length === 0) {
+                tbody.innerHTML = `<tr><td class="text-center text-muted">Chưa có phần cứng nào sử dụng tên miền này.</td></tr>`;
+            }
+        } catch (err) {
+            console.error(err);
+            showToast({ message: err.message || "Không thể xoá liên kết phần cứng.", type: "error" });
+        }
+    };
+
     document.getElementById("delete-domain-btn").addEventListener("click", async () => {
         if (!domain || !domain.name) {
             showToast({ message: "Không tìm thấy thông tin tên miền.", type: "error" });
@@ -92,18 +133,18 @@ async function initDomainDetailModal(domain) {
         if (!confirm(`Bạn có chắc chắn muốn xóa tên miền "${domain.name}" không?`)) {
             return;
         }
-        return showToast({
+        showToast({
             message: "Tính năng bảo trì?",
             type: "warning",
             timeout: 3000,
         })
         try {
-            await delete_domain_by_name({ name: domain.name });
+            await delete_domain_by_name(domain.link);
             showToast({ message: "Xóa tên miền thành công!", type: "success" });
             window.location.reload(); // Hoặc chuyển trang nếu cần
         } catch (err) {
             console.error(err);
-            showToast({ message: err.message || "Lỗi khi xóa tên miền.", type: "error" });
+            showToast({ message: "err.message lỗi ràng buộc khóa" || "Lỗi khi xóa tên miền.", type: "error" });
         }
     });
     document.getElementById("edit-domain-btn").addEventListener("click", async () => {
@@ -156,9 +197,9 @@ async function initDomainDetailModal(domain) {
                     nameView.textContent = newName;
                     linkView.textContent = newLink;
                     linkView.href = newLink;
-                    window.dispatchEvent(new CustomEvent("domainUpdated")); 
+                    window.dispatchEvent(new CustomEvent("domainUpdated"));
                     showToast({ message: "Cập nhật tên miền thành công!", type: "success" });
-                } 
+                }
             } catch (err) {
                 console.error(err);
                 showToast({ message: err.message || "Lỗi khi cập nhật tên miền.", type: "error" });

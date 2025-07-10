@@ -30,7 +30,7 @@ async function getSoftwarePermissions() {
             });
 
             if (remainingCount > 0) {
-                permissionsHTML += `<span class="badge bg-secondary text-white">+${remainingCount}</span>`;
+                permissionsHTML += `<span class=" text-primary  ">+</span>`;//${remainingCount}
             }
 
             permissionsHTML += `</div>`;

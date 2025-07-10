@@ -9,30 +9,10 @@
 
         <div class="table-responsive">
             <table class="table table-nowrap table-centered table-hover mb-0">
-                <tbody>
-                    <tr>
-                        <td style="width: 45px;">
-                            <div class="avatar-sm">
-                                <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-24">
-                                    <i class="bx bxs-file-doc"></i>
-                                </span>
-                            </div>
-                        </td>
-                        <td>
-                            <h5 class="font-size-14 mb-1">
-                                <a href="#" class="text-dark">Skote Landing.Zip</a>
-                            </h5>
-                            <small>Link</small>
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <a href="#" class="text-dark">
-                                    <i class="bx bx-dots-horizontal-rounded h3 m-0"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr> 
+                <tbody id="software-file-list">
+                    <!-- Danh sách tập tin sẽ được chèn ở đây -->
                 </tbody>
+
             </table>
         </div>
     </div>

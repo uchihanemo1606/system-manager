@@ -245,14 +245,14 @@ class HardwareController extends Controller
         }
     }
     //delete hardware
-    public function deleteHardware(Request $request)
-    {   
+public function deleteHardware(Request $request)
+{
     try {
         if (!$user = JWTAuth::parseToken()->authenticate()) {
             return response()->json(['message' => 'Please login to use this function'], 401);
         }
 
-        // Lấy ip từ query hoặc body
+        // Lấy IP từ query hoặc body
         $ip = $request->query('ip') ?? $request->input('ip');
         if (!$ip) {
             return response()->json(['status' => 'error', 'message' => 'IP is required'], 400);
@@ -267,25 +267,27 @@ class HardwareController extends Controller
             return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this hardware.'], 403);
         }
 
-        $hardware->delete();
+        // Cập nhật is_delete thay vì xóa
+        $hardware->is_delete = true;
+        $hardware->save();
 
         LogController::createLogAuto([
             'username' => $user->username,
             'hardware_ip' => $hardware->ip,
-            'message' => "User {$user->fullName} deleted hardware with IP {$hardware->ip}",
+            'message' => "User {$user->fullName} marked hardware with IP {$hardware->ip} as deleted",
         ]);
 
-        return response()->json(['message' => 'Hardware deleted successfully']);
-        } catch (TokenExpiredException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
-        } catch (TokenInvalidException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
-        } catch (JWTException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Could not delete hardware. ' . $e->getMessage()], 500);
-        }
+        return response()->json(['message' => 'Hardware marked as deleted successfully']);
+    } catch (TokenExpiredException $e) {
+        return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+    } catch (TokenInvalidException $e) {
+        return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+    } catch (JWTException $e) {
+        return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => 'Could not delete hardware. ' . $e->getMessage()], 500);
     }
+}
 
     public function getHardwareByIP(Request $request)
     {

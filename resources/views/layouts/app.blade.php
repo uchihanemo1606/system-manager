@@ -25,11 +25,13 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     @if ($cssPath && file_exists(public_path($cssPath)))
         <link href="{{ asset($cssPath) }}" rel="stylesheet" />
     @endif
+    @yield('css')
 </head>
 
 <body>
@@ -57,15 +59,15 @@
 
 
     @include('layouts.navbar')
-    <main class="main-content" id="layout-main-content">
+    <main class="main-content" style="min-height: 90dvh;" id="layout-main-content">
         @include('layouts.main_modal')
         @yield('content')
     </main>
-
+    @include('layouts.footer')
 </body>
 <!-- script modal -->
-
-<script src="assets\libs\jquery\jquery.min.js"></script>
+<!-- 
+<script src="assets\libs\jquery\jquery.min.js"></script> -->
 <script src="assets\libs\bootstrap\js\bootstrap.bundle.min.js"></script>
 <script>
     // console.log("menu:", @json($permissionsRoute));

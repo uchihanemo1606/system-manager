@@ -3,17 +3,17 @@
     <form id="profile-form" class="modal-content p-4" novalidate>
         <h4 class="modal-title mb-4 w-full text-center">Thông tin cá nhân</h4>
         <div class="form-group">
-            <label for="username">Tên đăng nhập</label>
+            <label class="required" for="username">Tên đăng nhập</label>
             <input type="text" id="username" name="username" class="form-control" readonly>
         </div>
 
         <div class="form-group">
-            <label for="fullName">Họ và tên</label>
+            <label class="required" for="fullName">Họ và tên</label>
             <input type="text" id="fullName" name="fullName" class="form-control" readonly>
         </div>
 
         <div class="form-group">
-            <label for="email">Email</label>
+            <label class="required" for="email">Email</label>
             <input type="email" id="email" name="email" class="form-control" readonly>
         </div>
 

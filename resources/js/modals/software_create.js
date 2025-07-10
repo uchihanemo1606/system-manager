@@ -19,10 +19,21 @@ async function initSoftwareCreateModal() {
             showToast({
                 message: res.message || "Tạo phần mềm thành công!",
                 type: "success",
-                timeout: 2000,
+                timeout: 1000,
             });
-            form.reset();
-            window.dispatchEvent(new CustomEvent("softwareCreated"));
+
+            // Nếu API trả về ID phần mềm vừa tạo
+            console.log(res)
+            if (res.data.id) {
+                const id = res.data.id;
+                setTimeout(() => {
+                    window.location.href = `/software_detail?id=${encodeURIComponent(id)}`;
+                }, 1000); // chờ hiển thị toast xong rồi mới chuyển trang
+            } else {
+                // fallback nếu không có ID trả về
+                form.reset();
+                window.dispatchEvent(new CustomEvent("softwareCreated"));
+            }
         } catch (err) {
             showToast({
                 message: err?.message || "Có lỗi xảy ra!",
@@ -30,6 +41,7 @@ async function initSoftwareCreateModal() {
                 timeout: 2000,
             });
         }
+
     });
 }
 

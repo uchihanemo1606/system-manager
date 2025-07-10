@@ -1,183 +1,191 @@
 import {
     create_domain_hardware,
-    get_all_domain,
     get_domain_by_hardware,
+    remove_hardware_in_domain,
 } from "../api/domain";
 import { showToast } from "../component/toast";
-
-let allDomains = [];
-let selectedDomainId = null;
+import { get_all_hardware } from "../api/hardware";
 
 async function initHardwareDomainCreateModal(data) {
-    const nameInput = document.getElementById("hardware-domain-search-name");
-    const linkInput = document.getElementById("hardware-domain-search-link");
-    const createByInput = document.getElementById(
-        "hardware-domain-search-createby"
-    );
-    const dateInput = document.getElementById("hardware-domain-search-date");
-    const saveBtn = document.getElementById("hardware-domain-save");
-    const listContainer = document.getElementById("domain-list-container");
-    console.log(data);
-    selectedDomainId = null;
-    saveBtn.disabled = true;
+    console.log(data)
+    const selectedIPs = new Set(); // user chọn
+    const linkedIPs = new Set();   // đã liên kết
 
-    listContainer.innerHTML = `<p class="text-center text-muted mt-2">Đang tải dữ liệu...</p>`;
+    const table = document.querySelector("#hardware-select-table tbody");
+    const selectAllCheckbox = document.querySelector("#select-all-hw");
+    const linkButton = document.querySelector("#link-selected-hardware");
 
-    let myDomainIds = [];
+    const filterDeleted = document.querySelector("#filter-deleted");
+    const filterIP = document.querySelector("#filter-ip");
+    const filterOS = document.querySelector("#filter-os");
+    const filterDB = document.querySelector("#filter-db");
 
-    const [allRes, myDomainRes] = await Promise.all([
-        get_all_domain(),
-        get_domain_by_hardware({ ip: data.ip }),
-    ]);
+    if (!table) return;
 
-    allDomains = allRes.data || [];
-    let availableDomains = []; // <-- Sửa thành let
+    table.innerHTML = `
+        <tr>
+            <td colspan="5" class="text-center text-muted">
+                <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                Đang tải danh sách phần cứng...
+            </td>
+        </tr>
+    `;
 
-    if (!allDomains || allDomains.length === 0) {
-        listContainer.innerHTML = `<p class="text-center text-muted mt-2">Không có tên miền nào để gán.</p>`;
-        return;
-    } 
-    if (myDomainRes?.data && myDomainRes?.data?.domains) {
-        const myDomainIds = (myDomainRes.data.domains || []).map((d) => d.id);
-        // Lọc bỏ những domain đã gán
-        availableDomains = allDomains.filter(
-            (d) => !myDomainIds.includes(d.id)
+    try {
+        const resAll = await get_all_hardware();
+        const hardwareList = resAll.data || [];
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    <div class="spinner-border spinner-border-sm text-info me-2"></div>
+                    Đang kiểm tra domain đã liên kết trong phần cứng...
+                </td>
+            </tr>
+        `;
+
+        await Promise.all(
+            hardwareList.map(hw =>
+                get_domain_by_hardware({ ip: hw.ip }).then(res => {
+                    const domains = res?.data?.domains || [];
+                    if (domains.some(d => d.id == data.id)) {
+                        linkedIPs.add(hw.ip);
+                        selectedIPs.add(hw.ip); // Mặc định các IP đã liên kết cũng được chọn
+                    }
+                })
+            )
         );
-    } else {
-        availableDomains = allDomains;
-    } 
-    renderDomainList(availableDomains); 
-    const applyFilter = () => {
-        const nameKeyword = nameInput.value.toLowerCase();
-        const linkKeyword = linkInput.value.toLowerCase();
-        const createByKeyword = createByInput.value.toLowerCase();
-        const dateFilter = dateInput.value;
 
-        const filtered = allDomains
-            .filter((d) => !myDomainIds.includes(d.id)) // Vẫn giữ lọc bỏ domain đã gán
-            .filter((d) => {
-                const matchesName = d.name.toLowerCase().includes(nameKeyword);
-                const matchesLink = d.link.toLowerCase().includes(linkKeyword);
-                const matchesCreateBy = (d.createBy || "")
-                    .toLowerCase()
-                    .includes(createByKeyword);
+        function renderTable(filteredList) {
+            table.innerHTML = filteredList.length
+                ? filteredList.map(hw => {
+                    const isChecked = selectedIPs.has(hw.ip);
+                    const checkedAttr = isChecked ? 'checked' : '';
 
-                let matchesDate = true;
-                if (dateFilter) {
-                    const createdDate = new Date(d.created_at)
-                        .toISOString()
-                        .slice(0, 10);
-                    matchesDate = createdDate === dateFilter;
+                    const isDeleted = hw.is_delete;
+                    const rowClass = isDeleted ? "bg-light text-muted" : "";
+                    const disabled = isDeleted ? "disabled" : "";
+
+                    return `
+                        <tr class="hardware-row ${rowClass}" data-ip="${hw.ip}">
+                            <td><input type="checkbox" class="hw-checkbox" data-ip="${hw.ip}" ${checkedAttr} ${disabled}></td>
+                            <td>${hw.ip}</td>
+                            <td>${hw.OS || "?"}</td>
+                            <td>${hw.dbname || "?"} - ${hw.dbversion || ""}</td>
+                            <td><a href="/hardware_detail?id=${encodeURIComponent(hw.ip)}" target="_blank" class="btn btn-sm btn-link">Xem</a></td>
+                        </tr>`;
+                }).join("")
+                : `<tr><td colspan="5" class="text-center text-muted">Không có phần cứng nào.</td></tr>`;
+
+            // Cập nhật sự kiện click cho row và checkbox
+            table.querySelectorAll(".hardware-row").forEach(row => {
+                const cb = row.querySelector(".hw-checkbox");
+                const ip = row.dataset.ip;
+
+                // Row click để toggle checkbox
+                row.addEventListener("click", e => {
+                    if (e.target.tagName === "INPUT" || e.target.tagName === "A") return;
+                    if (cb && !cb.disabled) {
+                        cb.checked = !cb.checked;
+                        if (cb.checked) selectedIPs.add(ip);
+                        else selectedIPs.delete(ip);
+                    }
+                });
+
+                // Khi người dùng click trực tiếp vào checkbox
+                cb?.addEventListener("change", () => {
+                    if (cb.checked) selectedIPs.add(ip);
+                    else selectedIPs.delete(ip);
+                });
+            });
+        }
+
+        function applyFilter() {
+            const ipVal = filterIP.value.toLowerCase();
+            const osVal = filterOS.value.toLowerCase();
+            const dbVal = filterDB.value.toLowerCase();
+            const deletedVal = filterDeleted.value;
+
+            const filtered = hardwareList.filter(hw =>
+                (!ipVal || hw.ip.toLowerCase().includes(ipVal)) &&
+                (!osVal || (hw.OS || "").toLowerCase().includes(osVal)) &&
+                (!dbVal || `${hw.dbname || ""} ${hw.dbversion || ""}`.toLowerCase().includes(dbVal)) &&
+                (
+                    deletedVal === "all" ||
+                    (deletedVal === "true" && hw.is_delete === true) ||
+                    (deletedVal === "false" && hw.is_delete === false)
+                )
+            );
+
+            renderTable(filtered);
+        }
+
+        // Gán sự kiện lọc
+        [filterIP, filterOS, filterDB, filterDeleted].forEach(input => {
+            input.addEventListener("input", applyFilter);
+            input.addEventListener("change", applyFilter);
+        });
+
+        // Chọn tất cả
+        selectAllCheckbox.onclick = () => {
+            document.querySelectorAll(".hw-checkbox:not(:disabled)").forEach(cb => {
+                const ip = cb.dataset.ip;
+                cb.checked = selectAllCheckbox.checked;
+                if (cb.checked) selectedIPs.add(ip);
+                else selectedIPs.delete(ip);
+            });
+        };
+
+        // Render ban đầu
+        applyFilter();
+
+        // Xử lý khi click liên kết
+        linkButton.onclick = async () => {
+            if (!hardwareList.length) {
+                return showToast({ message: "Không có phần cứng nào để xử lý.", type: "warning" });
+            }
+
+            let successCreate = 0, failCreate = 0;
+            let successRemove = 0, failRemove = 0;
+
+            for (const hw of hardwareList) {
+                const ip = hw.ip;
+                const shouldBeLinked = selectedIPs.has(ip);
+                const isLinked = linkedIPs.has(ip);
+
+                if (shouldBeLinked && !isLinked) {
+                    try {
+                        await create_domain_hardware({ hardware_ip: ip, domain_id: data.id });
+                        successCreate++;
+                    } catch (err) {
+                        console.error(`Lỗi tạo domain cho ${ip}`, err);
+                        failCreate++;
+                    }
                 }
 
-                return (
-                    matchesName && matchesLink && matchesCreateBy && matchesDate
-                );
-            });
+                if (!shouldBeLinked && isLinked) {
+                    try {
+                        await remove_hardware_in_domain(ip, data.id);
+                        successRemove++;
+                    } catch (err) {
+                        console.error(`Lỗi gỡ domain khỏi ${ip}`, err);
+                        failRemove++;
+                    }
+                }
+            }
 
-        renderDomainList(filtered);
-    };
-
-    nameInput.addEventListener("input", applyFilter);
-    linkInput.addEventListener("input", applyFilter);
-    createByInput.addEventListener("input", applyFilter);
-    dateInput.addEventListener("change", applyFilter);
-
-    saveBtn.onclick = async () => {
-        if (!selectedDomainId) {
-            showToast({ message: "Vui lòng chọn tên miền.", type: "error" });
-            return;
-        }
-
-        try {
-            await create_domain_hardware({
-                hardware_ip: data.ip,
-                domain_id: selectedDomainId,
-            });
-            showToast({ message: "Gán tên miền thành công!", type: "success" });
-            // closeModal();
-        } catch (err) {
             showToast({
-                message: err.message || "Lỗi khi gán tên miền.",
-                type: "error",
+                message: `Liên kết: ${successCreate}, Gỡ bỏ: ${successRemove}, lỗi: ${failCreate + failRemove}`,
+                type: (failCreate || failRemove) ? "warning" : "success",
+                timeout: 6000,
             });
-        }
-    };
-}
 
-function renderDomainList(domains) {
-    const listContainer = document.getElementById("domain-list-container");
-
-    if (domains.length === 0) {
-        listContainer.innerHTML = `<p class="text-center text-muted mt-2">Không tìm thấy tên miền nào.</p>`;
-        return;
+            window.dispatchEvent(new CustomEvent("domainUpdated"));
+        };
+    } catch (err) {
+        table.innerHTML = `<tr><td colspan="5" class="text-danger text-center">Lỗi khi tải danh sách phần cứng.</td></tr>`;
+        console.error(err);
     }
-
-    listContainer.innerHTML = domains
-        .map((d) => {
-            const link = d.link
-                ? `<a href="${d.link}" target="_blank" class="badge badge-info ml-2">${d.link}</a>`
-                : `<span class="badge badge-secondary ml-2">Không có liên kết</span>`;
-            const createdBy = d.createBy || "Không rõ";
-            const createdAt = d.created_at
-                ? new Date(d.created_at).toLocaleDateString("vi-VN")
-                : "Không rõ";
-
-            const activeClass =
-                d.id == selectedDomainId ? "border-primary" : "border-light";
-
-            return `
-            <div class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center domain-item ${activeClass}" style="cursor:pointer;" data-id="${d.id}" data-name="${d.name}" data-link="${d.link}">
-                <div style="flex:1;">
-                    <strong>${d.name}</strong>
-                    ${link}
-                    <div class="small text-muted">Người tạo: ${createdBy} | Ngày tạo: ${createdAt}</div>
-                </div>
-                <div class="d-flex flex-column align-items-end">
-                    <i class="mdi mdi-checkbox-blank-circle-outline text-muted mb-2 select-indicator"></i>
-                    <button type="button" class="btn btn-sm btn-outline-primary btn-view-domain">
-                        <i class="mdi mdi-eye-outline"></i> Xem
-                    </button>
-                </div>
-            </div>
-        `;
-        })
-        .join("");
-
-    // Gán lại sự kiện click cho từng thẻ
-    listContainer.querySelectorAll(".domain-item").forEach((item) => {
-        const id = item.dataset.id;
-        const name = item.dataset.name;
-        const link = item.dataset.link;
-
-        // Bấm chọn domain
-        item.addEventListener("click", (e) => {
-            if (e.target.closest(".btn-view-domain")) return; // Không chọn khi bấm nút Xem
-
-            selectedDomainId = id;
-
-            listContainer.querySelectorAll(".domain-item").forEach((el) => {
-                el.classList.remove("border-primary");
-                el.querySelector(".select-indicator").className =
-                    "mdi mdi-checkbox-blank-circle-outline text-muted select-indicator";
-            });
-
-            item.classList.add("border-primary");
-            item.querySelector(".select-indicator").className =
-                "mdi mdi-check-circle text-success select-indicator";
-
-            document.getElementById("hardware-domain-save").disabled = false;
-        });
-
-        // Bấm nút "Xem"
-        item.querySelector(".btn-view-domain").addEventListener("click", () => {
-            loadModal("domain_detail", {
-                id: id,
-                name: name,
-                link: link,
-            });
-        });
-    });
 }
 
 window.initHardwareDomainCreateModal = initHardwareDomainCreateModal;

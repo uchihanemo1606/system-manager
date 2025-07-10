@@ -52,7 +52,7 @@ class rolepermissionController extends Controller
             } elseif (str_contains($roleName, 'quản lý hệ thống') || str_contains($roleName, 'system')) {
                 $roleType = 'system';
             }
-            if ($roleType && $roleType !== $permissionType) {
+            if ($roleType && $roleType !== $permissionType && $permissionType !=="softwarefile") {
 
                 if (
                     in_array($roleType, ['admin', 'quản trị', 'quản trị viên'])

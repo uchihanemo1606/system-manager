@@ -9,7 +9,7 @@ const isEditParam = urlParams.get("edit") === "true";
 
 const detailBlock = document.getElementById("hardware-detail");
 const toggleBtn = document.getElementById("toggle-edit-btn");
-const addDomainBtn = document.getElementById("add-hardware-domain-btn");
+// const addDomainBtn = document.getElementById("add-hardware-domain-btn");
 const viewDomainBtn = document.getElementById("view-domain-btn");
 
 detailBlock.style.display = "none";
@@ -21,13 +21,23 @@ if (ip) {
                 showToast({ message: "Không tìm thấy thông tin phần cứng cho IP này.", type: "error" });
                 return;
             }
-
+            // Nếu phần cứng đã bị xóa
+            if (hardware.is_delete) {
+                detailBlock.innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <i class="mdi mdi-alert-circle-outline mr-2"></i>
+                    Phần cứng với IP <strong>${hardware.ip}</strong> đã bị xóa khỏi hệ thống.
+                </div>
+            `;
+                detailBlock.style.display = "block";
+                return;
+            }
             renderHardwareInfo(hardware);
             detailBlock.style.display = "block";
 
-            addDomainBtn.addEventListener("click", () => {
-                loadModal("hardware_domain_create", { ip: hardware.ip });
-            });
+            // addDomainBtn.addEventListener("click", () => {
+            //     loadModal("hardware_domain_create", { ip: hardware.ip });
+            // });
 
             viewDomainBtn.addEventListener("click", () => {
                 loadModal("hardware_list_domain", { ip: hardware.ip });
