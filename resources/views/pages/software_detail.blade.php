@@ -10,6 +10,11 @@
             <i class="mdi mdi-pencil"></i> Sửa
         </button>
         @endhasPermission
+        @hasPermission('software.delete')
+        <button id="toggle-edit-btn" class="btn btn-primary">
+            <i class="mdi mdi-pencil"></i> Xóa
+        </button>
+        @endhasPermission
     </div>
     <div class="row">
         <div class="col-lg-7">

@@ -106,6 +106,27 @@ function showField(field) {
         inputEl.classList.remove("d-none");
     }
 }
+const deleteBtn = document.getElementById("delete-hardware-btn");
+
+deleteBtn.addEventListener("click", () => {
+    if (!ip) {
+        showToast({ message: "Không lấy được địa chỉ IP của phần cứng.", type: "error" });
+        return;
+    }
+
+    if (!confirm("Bạn có chắc chắn muốn xóa phần cứng này không?")) return;
+
+    import("../api/hardware").then(({ delete_hardware }) => {
+        delete_hardware(ip)
+            .then(() => {
+                showToast({ message: "Xóa phần cứng thành công!", type: "success" });
+                window.location.href = "/hardware_list"; // Điều hướng về danh sách hoặc trang phù hợp
+            })
+            .catch(err => {
+                showToast({ message: err.message || "Đã xảy ra lỗi khi xóa.", type: "error" });
+            });
+    });
+});
 
 function hideField(field) {
     const viewEl = document.getElementById(`hardware-${field}-view`);
@@ -142,11 +163,18 @@ function saveData() {
         return;
     }
 
-    update_hardware(data)
+    update_hardware(data, ip)
         .then(() => {
             showToast({ message: "Cập nhật thành công!", type: "success" });
 
-            // Gọi lại dữ liệu từ server
+            const newIp = data.ip;
+            if (newIp !== ip) {
+                // Nếu IP thay đổi, chuyển hướng trang
+                window.location.href = `/hardware_detail?id=${encodeURIComponent(newIp)}`;
+                return;
+            }
+
+            // IP không đổi, chỉ cần load lại dữ liệu
             get_hardware_by_ip({ ip })
                 .then((hardware) => {
                     renderHardwareInfo(hardware);
@@ -173,6 +201,7 @@ function saveData() {
             })
         );
 }
+
 
 function setText(id, text, colorClass = "") {
     const el = document.getElementById(id);

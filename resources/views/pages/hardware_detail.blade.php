@@ -9,11 +9,20 @@
             </div>
         </div>
     </div>
+
+    @hasPermission('hardware.delete')
+    <div class="w-full d-flex justify-content-end mb-3">
+        <button id="delete-hardware-btn" class="btn btn-danger">
+            <i class="mdi mdi-delete"></i> Xóa
+        </button>
+    </div>
+    @endhasPermission
     <div class="row">
         <div class="col-xl-7">
             <div class="card overflow-hidden shadow-sm border">
                 <div class="bg-soft-primary p-3">
                     <div class="row">
+
                         <div class="col-4">
                             <div class="text-primary">
                                 <h6 class="mb-1 ">Máy ảo</h6>
@@ -210,7 +219,7 @@
                             cung cấp máy ảo VPS, server hosting,.. sẵn sàng hỗ trợ các bạn tận tâm. chúng tôi vui lòng
                             tiếp nhận
                         </p>
-                        <textarea id="hardware-services-input" class="form-control d-none"></textarea> 
+                        <textarea id="hardware-services-input" class="form-control d-none"></textarea>
                     </div>
                 </div>
             </div>

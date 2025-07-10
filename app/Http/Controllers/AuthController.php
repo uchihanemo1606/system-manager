@@ -84,11 +84,17 @@ class AuthController extends Controller
             $usercreate = UserModel::create([
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
+                'fullName' => $request->fullName,
+                'email' => $request->email,
+                'phone_number' => $request->phone_number,
+                'department' => $request->department,
             ]);
-
+            // Nếu là user đầu tiên thì $user sẽ không tồn tại
             LogController::createLogAuto([
-                'username' => $user->username,
-                'message' => "{$user->fullName} đã tạo tài khoản có username là '{$usercreate->username}'",
+                'username' => $userCount > 0 ? $user->username : $usercreate->username,
+                'message' => ($userCount > 0
+                    ? "{$user->fullName} đã tạo tài khoản có username là '{$usercreate->username}'"
+                    : "Tài khoản đầu tiên '{$usercreate->username}' đã được tạo"),
             ]);
 
             return response()->json([

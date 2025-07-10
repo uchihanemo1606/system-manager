@@ -9,6 +9,15 @@ export async function create_hardware(data) {
     if (!res.ok) throw new Error(result.message || "Lỗi tạo phần cứng   ");
     return result;
 }
+export async function delete_hardware(ip) {
+    const res = await fetch(`/api/deletehardware?ip=${ip}`, {
+        method: "DELETE",
+        headers: defaultHeaders(),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi xóa phần cứng   ");
+    return result;
+}
 export const get_all_hardware = async () => {
     const res = await fetch("api/getallhardware", {
         headers: defaultHeaders(),
@@ -33,13 +42,12 @@ export const get_hardware_by_ip = async ({ ip }) => {
     return [];
 };
 
-export async function update_hardware(data) {
-    const res = await fetch("/api/updatehardware", {
+export async function update_hardware(data,oldIp) {
+    const res = await fetch(`/api/updatehardware/${oldIp}`, {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
-    });
-
+    }); 
     let result;
     try {
         result = await res.json();
