@@ -181,7 +181,6 @@ class domainController extends Controller
                     return response()->json(['message' => 'Failed to update domain'], 500);
                 }
             }
-        }
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
@@ -511,6 +510,5 @@ class domainController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not remove hardware from domain. ' . $e->getMessage()], 500);
         }
-
     }
 }
