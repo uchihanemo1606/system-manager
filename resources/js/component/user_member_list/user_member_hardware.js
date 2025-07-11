@@ -1,4 +1,3 @@
- 
 import { get_all_user_permission_hardware } from "../../api/hardware.js";
 
 async function getHardwarePermissions() {
@@ -24,40 +23,59 @@ async function getHardwarePermissions() {
 
             const permissions = item.permissions || [];
             const visiblePermissions = permissions.slice(0, 2);
-            const remainingCount = permissions.length - visiblePermissions.length;
+            const hiddenPermissions = permissions.slice(2);
+            const remainingCount = hiddenPermissions.length;
 
-            let permissionsHTML = `<div class="d-flex flex-wrap gap-1 ">`;
+            // Tạo HTML badge
+            let permissionsHTML = `<div class="d-flex flex-wrap align-items-start">`;
 
             visiblePermissions.forEach(p => {
-                permissionsHTML += `<span class="badge bg-primary text-white">${p}</span>`;
+                permissionsHTML += `
+                    <span class="badge badge-primary mr-1 mb-1 px-2 py-1" style="font-size: 0.85rem;">
+                        ${p}
+                    </span>`;
             });
 
             if (remainingCount > 0) {
-                permissionsHTML += `<span class="badge bg-secondary text-white">+${remainingCount}</span>`;
+                permissionsHTML += `
+                    <span class="badge badge-light border mr-1 mb-1 px-2 py-1 text-primary"
+                          data-toggle="tooltip"
+                          title="${hiddenPermissions.join(", ")}"
+                          style="font-size: 0.85rem; cursor: pointer;">
+                        +${remainingCount}
+                    </span>`;
             }
 
             permissionsHTML += `</div>`;
 
-
             tr.innerHTML = `
                 <td>${index + 1}</td>
                 <td>
-                    <div class="fw-bold">${item.user_info.fullName}</div>   
+                    <div class="font-weight-bold">${item.user_info.fullName}</div>   
                     <small class="text-muted">(${item.user_info.username})</small>
                 </td>
                 <td>${permissionsHTML}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm" onclick="loadModal('user_hardware_permission_edit', { username: '${item.user_info.username}', ip: '${ip}' })">
+                    <button class="btn btn-primary btn-sm"
+                        onclick="loadModal('user_hardware_permission_edit', { username: '${item.user_info.username}', ip: '${ip}' })">
                         <i class="mdi mdi-pencil"></i> Sửa
                     </button>
                 </td>
-            `; 
+            `;
+
             userListTbody.appendChild(tr);
         });
+
+        // Kích hoạt tooltip Bootstrap
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
     } else {
         userListTbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Không có dữ liệu</td></tr>`;
     }
-} 
+}
+
 getHardwarePermissions();
 window.addEventListener("hardware_permission_created", () => {
     getHardwarePermissions();

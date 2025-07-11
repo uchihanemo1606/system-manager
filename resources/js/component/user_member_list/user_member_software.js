@@ -1,4 +1,4 @@
-import { get_all_user_permission_software } from "../../api/software"; 
+import { get_all_user_permission_software } from "../../api/software";
 
 async function getSoftwarePermissions() {
     const id = new URLSearchParams(window.location.search).get("id");
@@ -6,7 +6,7 @@ async function getSoftwarePermissions() {
         console.error("Thiếu tham số id trên URL");
         return;
     }
-    const res = await get_all_user_permission_software(id); 
+    const res = await get_all_user_permission_software(id);
     const userListTbody = document.getElementById("user-list-software");
     if (!userListTbody) {
         console.error("Không tìm thấy phần tử tbody!");
@@ -23,31 +23,38 @@ async function getSoftwarePermissions() {
             const visiblePermissions = permissions.slice(0, 2);
             const remainingCount = permissions.length - visiblePermissions.length;
 
-            let permissionsHTML = `<div class="d-flex flex-wrap gap-1">`;
+            let permissionsHTML = `<div class="d-flex flex-wrap align-items-start">`;
 
             visiblePermissions.forEach(p => {
-                permissionsHTML += `<span class="badge bg-primary text-white">${p}</span>`;
+                permissionsHTML += `<span class="badge badge-primary mr-1 mb-1 px-2 py-1 font-weight-normal" style="font-size: 0.85rem;">${p}</span>`;
             });
 
             if (remainingCount > 0) {
-                permissionsHTML += `<span class=" text-primary  ">+</span>`;//${remainingCount}
+                const remaining = permissions.slice(2).join(", ");
+                permissionsHTML += `
+        <span class="badge badge-light border mr-1 mb-1 px-2 py-1 text-primary" 
+              data-toggle="tooltip" 
+              title="${remaining}" 
+              style="font-size: 0.85rem; cursor: pointer;">+${remainingCount}</span>`;
             }
 
             permissionsHTML += `</div>`;
 
+
             tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>
-                    <div class="fw-bold">${item.user_info.fullName}</div>   
-                    <small class="text-muted">(${item.user_info.username})</small>
-                </td>
-                <td>${permissionsHTML}</td>
-                <td>
-                    <button class="btn btn-primary btn-sm" onclick="loadModal('user_software_permission_edit', { username: '${item.user_info.username}', targetId: '${id}' })">
-                        <i class="mdi mdi-pencil"></i> Sửa  
-                    </button>
-                </td>
-            `;
+    <td>${index + 1}</td>
+    <td>
+        <div class="fw-bold">${item.user_info.fullName}</div>   
+        <small class="text-muted">(${item.user_info.username})</small>
+    </td>
+    <td>${permissionsHTML}</td>
+    <td>
+        <button class="btn btn-primary btn-sm" onclick="loadModal('user_software_permission_edit', { username: '${item.user_info.username}', targetId: '${id}' })">
+            <i class="mdi mdi-pencil"></i> Sửa  
+        </button>
+    </td>
+`;
+
 
             userListTbody.appendChild(tr);
         });

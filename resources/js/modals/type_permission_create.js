@@ -34,8 +34,82 @@ window.initTypePermissionCreateModal = async function (data) {
     await loadUserList();
     renderFilteredUserList();
     renderSelectedUsers();
-};
+    const searchInput = document.getElementById("userSearchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", renderFilteredUserList);
+    }
+    document.getElementById("addPermissionBtn").onclick = async () => {
+        const button = document.getElementById("addPermissionBtn");
+        const spinner = document.getElementById("addPermissionSpinner");
 
+        // Bắt đầu loading
+        button.disabled = true;
+        spinner.classList.remove("d-none");
+
+        const users = Object.entries(modalState.selectedUsers).map(([username, data]) => ({
+            user_name: username,
+            permissions: data.permissions
+        }));
+
+        if (users.length === 0) {
+            showToast({ message: "Vui lòng chọn ít nhất một người dùng!", type: "warning" });
+            spinner.classList.add("d-none");
+            button.disabled = false;
+            return;
+        }
+
+        if (users.some(u => u.permissions.length === 0)) {
+            showToast({ message: "Vui lòng chọn quyền cho tất cả người dùng!", type: "warning" });
+            spinner.classList.add("d-none");
+            button.disabled = false;
+            return;
+        }
+
+        try {
+            if (modalState.type === "hardware") {
+                await create_hardware_permission({
+                    hardware_ip: modalState.targetId,
+                    users
+                });
+                window.dispatchEvent(new CustomEvent("hardware_permission_created"));
+                showToast({ message: "Thêm quyền thành công!", type: "success" });
+            } else {
+                let successCount = 0;
+                let failCount = 0;
+
+                for (const user of users) {
+                    try {
+                        await create_software_permission({
+                            software_id: modalState.targetId,
+                            user_name: user.user_name,
+                            permissions: user.permissions
+                        });
+                        successCount++;
+                    } catch (err) {
+                        console.error(`❌ Lỗi với ${user.user_name}: ${err.message}`);
+                        failCount++;
+                    }
+                }
+
+                window.dispatchEvent(new CustomEvent("software_permission_created"));
+
+                if (successCount > 0) {
+                    showToast({ message: `Đã thêm ${successCount} người dùng. ${failCount > 0 ? `Thất bại ${failCount} người.` : ''}`, type: "success" });
+                } else {
+                    showToast({ message: "Không thể thêm quyền cho bất kỳ người dùng nào.", type: "error" });
+                }
+            }
+        } catch (e) {
+            showToast({ message: "Lỗi khi thêm quyền: " + e.message, type: "error" });
+        }
+
+        // Kết thúc loading
+        spinner.classList.add("d-none");
+        button.disabled = false;
+    };
+
+};
+// document.getElementById("userSearchInput").addEventListener("input", renderFilteredUserList);
 async function loadUserList() {
     try {
         const res = await get_all_user();
@@ -45,19 +119,16 @@ async function loadUserList() {
         showToast({ message: "Lỗi tải danh sách người dùng: " + e.message, type: "error" });
     }
 }
-
 function renderFilteredUserList() {
     const container = document.getElementById("userListContainer");
     const keyword = document.getElementById("userSearchInput").value.trim().toLowerCase();
     container.innerHTML = "";
 
-    const filtered = modalState.allUsers
-        .filter(user => !modalState.selectedUsers[user.username]) // lọc đã chọn
-        .filter(user =>
-            user.username.toLowerCase().includes(keyword) ||
-            user.fullName.toLowerCase().includes(keyword) ||
-            (user.email && user.email.toLowerCase().includes(keyword))
-        );
+    const filtered = modalState.allUsers.filter(user => {
+        const notSelected = !modalState.selectedUsers[user.username];
+        const text = `${user.username} ${user.fullName} ${user.email || ''}`.toLowerCase();
+        return notSelected && text.includes(keyword);
+    });
 
     if (filtered.length === 0) {
         container.innerHTML = `<div class="text-muted text-center">Không tìm thấy người dùng phù hợp</div>`;
@@ -83,14 +154,13 @@ function renderFilteredUserList() {
                     permissions: []
                 };
                 renderSelectedUsers();
-                renderFilteredUserList(); // cập nhật danh sách bên trái
+                renderFilteredUserList(); // cập nhật lại bên trái
             }
         };
 
         container.appendChild(item);
     });
 }
-
 
 function renderSelectedUsers() {
     const container = document.getElementById("selectedUsersContainer");
@@ -160,48 +230,8 @@ function removeSelectedUser(username) {
     renderFilteredUserList(); // hiển thị lại user ở bên trái
 }
 
+window.removeSelectedUser = removeSelectedUser;
 
-document.getElementById("userSearchInput").addEventListener("input", renderFilteredUserList);
-
-document.getElementById("addPermissionBtn").onclick = async () => {
-    const users = Object.entries(modalState.selectedUsers).map(([username, data]) => ({
-        user_name: username,
-        permissions: data.permissions
-    }));
-
-    if (users.length === 0) {
-        showToast({ message: "Vui lòng chọn ít nhất một người dùng!", type: "warning" });
-        return;
-    }
-
-    if (users.some(u => u.permissions.length === 0)) {
-        showToast({ message: "Vui lòng chọn quyền cho tất cả người dùng!", type: "warning" });
-        return;
-    }
-
-    try {
-        if (modalState.type === "hardware") {
-            await create_hardware_permission({
-                hardware_ip: modalState.targetId,
-                users
-            });
-            window.dispatchEvent(new CustomEvent("hardware_permission_created"));
-        } else {
-            for (const user of users) {
-                await create_software_permission({
-                    software_id: modalState.targetId,
-                    user_name: user.user_name,
-                    permissions: user.permissions
-                });
-            }
-            window.dispatchEvent(new CustomEvent("software_permission_created"));
-        }
-
-        showToast({ message: "Thêm quyền thành công!", type: "success" });
-    } catch (e) {
-        showToast({ message: "Lỗi khi thêm quyền: " + e.message, type: "error" });
-    }
-};
 
 
 
