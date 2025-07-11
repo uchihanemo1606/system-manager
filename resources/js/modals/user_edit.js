@@ -31,11 +31,7 @@ function initUserEditModal(data) {
         document.getElementById("fullName").value = userData.fullName || "";
         document.getElementById("email").value = userData.email || "";
         document.getElementById("phone_number").value =
-            userData.phone_number || "";
-        // document.getElementById("created_at").value = userData.created_at || "";
-        document.getElementById("created_at").innerText = formatDateTime(
-            userData.created_at
-        );
+            userData.phone_number || ""; 
     }
 
     function setReadOnly(isReadOnly) {

@@ -2,6 +2,6 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content" id="modalContent">
             <!-- Nội dung modal được chèn ở đây -->
-        </div>
+        </div>  
     </div>
 </div>

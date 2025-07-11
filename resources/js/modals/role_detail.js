@@ -421,7 +421,7 @@ async function initRoleDetailModal(data) {
         const activeElement = document.activeElement;
         if (
             activeElement &&
-            activeElement.classList.contains("create-role-permission-btn")
+            activeElement.classList.contains("create-missing-permission-btn")
         ) {
             return;
         }

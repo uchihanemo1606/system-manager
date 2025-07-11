@@ -33,7 +33,7 @@ class SoftwarePermissionController extends Controller
 
         // Kiểm tra type của permission
         $permission = permissionModel::where('permissions_name', $validated['permissions_name'])->first();
-        if (!$permission || $permission->type !== 'software') {
+        if (!$permission ||( $permission->type !== 'software' && $permission->type !== 'softwarepermission')) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Permission type is not suitable for software.'
@@ -60,7 +60,7 @@ class SoftwarePermissionController extends Controller
             'user_name' => $validated['user_name'],
             'permissions_name' => $validated['permissions_name'],
             'create_by' => $user->username,
-            'created_at' => now(),
+            'assigned_at' => now(),
         ]);
         logController::createLogAuto([
             'username' => $user->username,
@@ -179,12 +179,27 @@ class SoftwarePermissionController extends Controller
                 ], 400);
             }
 
-            $userExists = UserModel::where('username', $username)->exists();
-            $softwareExists = softwareModel::where('id', $softwareId)->exists();
-            if (!$userExists || !$softwareExists) {
+            $software = softwareModel::find($softwareId);
+            if (!$software) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User or software not found.'
+                    'message' => 'Software not found.'
+                ], 404);
+            }
+
+            // Không cho phép xóa quyền của chủ phần mềm
+            if ($username === $software->user_createby) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không thể xóa quyền của chủ phần mềm!'
+                ], 403);
+            }
+
+            $userExists = UserModel::where('username', $username)->exists();
+            if (!$userExists) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.'
                 ], 404);
             }
 

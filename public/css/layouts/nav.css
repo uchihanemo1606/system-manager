@@ -3,11 +3,17 @@
      padding: 0;
      box-sizing: border-box; 
  }
+ 
 .limit-3-lines {
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp:1;
     -webkit-box-orient: vertical;
+}
+label.required::after {
+    content: " *";
+    color: red;
+    margin-left: 4px;
 }
 
  body {
@@ -230,6 +236,7 @@
      margin-left: 270px;
      /* Initial margin for the open sidebar */
      padding: 20px;
+     padding-bottom: 0px;
      transition: all 0.4s ease;
      width: calc(100% - 270px);
      /* Initial width for content */

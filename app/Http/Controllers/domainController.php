@@ -36,7 +36,7 @@ class domainController extends Controller
             $domain = new DomainModel();
             $domain->name = $request->input('name');
             $domain->link = $request->input('link', '');
-            $domain->software_id = $request->input('software_id',);
+            $domain->software_id = $request->input('software_id', );
             $domain->createBy = $user->username;
             $domain->created_at = now();
             $domain->updated_at = now();
@@ -89,54 +89,17 @@ class domainController extends Controller
 
     public function updateDomain(Request $request)
     {
-    try {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 401);
-        }
-
-        // Validate the request data
-        $request->validate([
-            'id' => 'required|integer|exists:domain,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'link' => 'required|string|max:255',
-        ]);
-
-        // Find the domain record
-        $domain = DomainModel::find($request->input('id'));
-        if (!$domain) {
-            return response()->json(['message' => 'Domain not found'], 404);
-        }
-
-        // Lưu thông tin cũ
-        $oldData = $domain->only(['name', 'link', 'description']);
-
-        // Update the domain record
-        $domain->name = $request->input('name');
-        $domain->link = $request->input('link', '');
-        $domain->description = $request->input('description');
-        $domain->updated_at = now();
-
-        // Save the updated domain record
-        if ($domain->save()) {
-            // Lấy thông tin mới
-            $newData = $domain->only(['name', 'link', 'description']);
-
-            // So sánh và tạo chuỗi thay đổi
-            $changes = [];
-            foreach ($oldData as $key => $oldValue) {
-                $newValue = $newData[$key];
-                if ($oldValue != $newValue) {
-                    $changes[] = "$key: '$oldValue' => '$newValue'";
-                }
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            // Log the update of the domain
-            LogController::createLogAuto([
-                'username' => $user->username,
-                'domain_id' => $domain->id,
-                'message' => "User {$user->fullName} updated domain '{$domain->name}'. Changes: $changeString",
-                'is_delete' => false
+            // Validate the request data
+            $request->validate([
+                'id' => 'required|integer|exists:domain,id',
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string|max:1000',
+                'link' => 'required|string|max:255',
             ]);
 
             // Find the domain record
@@ -167,20 +130,92 @@ class domainController extends Controller
                         $changes[] = "$key: '$oldValue' => '$newValue'";
                     }
                 }
-                $changeString = $changes ? implode(', ', $changes) : 'No changes';
 
-                // Log the update of the domain
-                LogController::createLogAuto([
-                    'username' => $user->username,
-                    'domain_id' => $domain->id,
-                    'message' => "User {$user->username} updated domain '{$domain->name}'. Changes: $changeString",
-                    'is_delete' => false
+                // Validate the request data
+                $request->validate([
+                    'id' => 'required|integer|exists:domain,id',
+                    'name' => 'required|string|max:255',
+                    'description' => 'nullable|string|max:1000',
+                    'link' => 'required|string|max:255',
                 ]);
-                return response()->json(['message' => 'Domain updated successfully', 'data' => $domain], 200);
-            } else {
-                return response()->json(['message' => 'Failed to update domain'], 500);
+
+                // Find the domain record
+                $domain = DomainModel::find($request->input('id'));
+                if (!$domain) {
+                    return response()->json(['message' => 'Domain not found'], 404);
+                }
+
+                // Lưu thông tin cũ
+                $oldData = $domain->only(['name', 'link', 'description']);
+
+                // Update the domain record
+                $domain->name = $request->input('name');
+                $domain->link = $request->input('link', '');
+                $domain->description = $request->input('description');
+                $domain->updated_at = now();
+
+                // Save the updated domain record
+                if ($domain->save()) {
+                    // Lấy thông tin mới
+                    $newData = $domain->only(['name', 'link', 'description']);
+
+                    // So sánh và tạo chuỗi thay đổi
+                    $changes = [];
+                    foreach ($oldData as $key => $oldValue) {
+                        $newValue = $newData[$key];
+                        if ($oldValue != $newValue) {
+                            $changes[] = "$key: '$oldValue' => '$newValue'";
+                        }
+                    }
+                    $changeString = $changes ? implode(', ', $changes) : 'No changes';
+
+                    // Log the update of the domain
+                    LogController::createLogAuto([
+                        'username' => $user->username,
+                        'domain_id' => $domain->id,
+                        'message' => "User {$user->username} updated domain '{$domain->name}'. Changes: $changeString",
+                        'is_delete' => false
+                    ]);
+                    return response()->json(['message' => 'Domain updated successfully', 'data' => $domain], 200);
+                } else {
+                    return response()->json(['message' => 'Failed to update domain'], 500);
+                }
             }
         }
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not update domain. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function deleteDomain(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+            $link = $request->query('link') ?? $request->input('link');
+            $domain = DomainModel::where('link', $link)->first();
+            if (!$domain) {
+                return response()->json(['message' => 'Domain not found'], 404);
+            }
+
+            // Log the deletion of the domain
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'domain_id' => $domain->id,
+                'message' => "User {$user->fullName} deleted domain '{$domain->name}'.",
+                'is_delete' => true
+            ]);
+            // Delete the domain
+            $domain->delete();
+
+            return response()->json(['message' => 'Domain deleted successfully'], 200);
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
@@ -438,5 +473,44 @@ class domainController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve domains. ' . $e->getMessage()], 500);
         }
+    }
+    public function removeHardwareInDomain(Request $request, $hardwareIp, $domainId)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+            $mapping = hardwareAccessDomainModel::where('hardware_ip', $hardwareIp)
+                ->where('domain_id', $domainId)
+                ->first();
+
+            if (!$mapping) {
+                return response()->json(['status' => 'error', 'message' => 'Mapping not found'], 404);
+            }
+
+            $domain = DomainModel::find($domainId);
+            $domainLink = $domain ? $domain->link : $domainId;
+
+            $mapping->delete();
+
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'hardware_ip' => $hardwareIp,
+                'link_domain' => $domainLink,
+                'message' => "User {$user->fullName} removed hardware with IP {$hardwareIp} from domain {$domainLink}",
+            ]);
+
+            return response()->json(['message' => 'Hardware removed from domain successfully'], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not remove hardware from domain. ' . $e->getMessage()], 500);
+        }
+
     }
 }

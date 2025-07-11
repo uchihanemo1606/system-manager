@@ -12,7 +12,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>Laravel</title>
     <link href="assets\css\bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css">
     <link href="assets\css\app.min.css" id="app-style" rel="stylesheet" type="text/css">
@@ -24,35 +25,49 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     @if ($cssPath && file_exists(public_path($cssPath)))
         <link href="{{ asset($cssPath) }}" rel="stylesheet" />
     @endif
+    @yield('css')
 </head>
 
 <body>
     <!-- content -->
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-        <div id="liveToast" class="toast align-items-center text-bg-primary border-0" role="alert">
-            <div class="d-flex">
-                <div class="toast-body" id="toast-message">
-                    Thông báo mẫu
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="liveToast" class="toast ...">
+            ...
+        </div>
+    </div>
+    <div id="globalLoading" class="d-none">
+        <div style=" 
+        position: fixed;
+        z-index: 1050;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(255, 255, 255, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    ">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
         </div>
-    </div> 
+    </div>
+
+
     @include('layouts.navbar')
-    <main class="main-content" id="layout-main-content">
+    <main class="main-content" style="min-height: 90dvh;" id="layout-main-content">
         @include('layouts.main_modal')
         @yield('content')
     </main>
-
+    @include('layouts.footer')
 </body>
 <!-- script modal -->
-
-<script src="assets\libs\jquery\jquery.min.js"></script>
+<!-- 
+<script src="assets\libs\jquery\jquery.min.js"></script> -->
 <script src="assets\libs\bootstrap\js\bootstrap.bundle.min.js"></script>
 <script>
     // console.log("menu:", @json($permissionsRoute));
@@ -81,4 +96,5 @@
 <script src="assets\libs\summernote\email-summernote.init.js"></script>
 {{-- toast notification --}}
 @vite('resources/js/component/toast.js')
+
 </html>

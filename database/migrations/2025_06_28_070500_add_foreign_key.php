@@ -26,10 +26,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('departments', function (Blueprint $table) {
-            $table->dropForeign(['created_by']);
-        });
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['department']);
-        });
+        // Nếu lỗi vẫn xảy ra, dùng tên key tường minh:
+        // $table->dropForeign('departments_created_by_foreign');
+        $table->dropForeign(['created_by']);
+    });
+    Schema::table('users', function (Blueprint $table) {
+        // $table->dropForeign('users_department_foreign');
+        $table->dropForeign(['department']);
+    });
     }
 };

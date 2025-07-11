@@ -1,16 +1,42 @@
-export function renderDomainList(domains) {
+
+export function renderDomainList(domains, is_Delete_Hardware_Domain = false) {
     const tbody = document.querySelector("#domain_list tbody");
     if (!tbody) return;
 
-    tbody.innerHTML = ""; // Xóa dữ liệu cũ
+    tbody.innerHTML = "";
 
     if (domains.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Chưa có tên miền nào.</td></tr>`;
         return;
     }
 
+    const canCreate = window.permissions?.canCreateHardwareDomain;
+
     domains.forEach((domain) => {
         const tr = document.createElement("tr");
+
+        let connectButton = "";
+        if (canCreate) {
+            connectButton = `
+                <button class="btn btn-sm btn-outline-primary me-2"
+                    data-name="${domain.name}"
+                    data-link="${domain.link}"
+                    data-id="${domain.id}"
+                    onclick="loadModal('hardware_domain_create', {
+                        name: this.dataset.name,
+                        link: this.dataset.link,
+                        id: this.dataset.id
+                    })"
+                >Kết nối</button>
+            `;
+        }
+
+        const deleteButton = is_Delete_Hardware_Domain
+            ? `<button class="btn btn-sm btn-outline-danger"
+                onclick="deleteDomain('${domain.link}')">
+            Xoá
+       </button>`
+            : "";
 
         tr.innerHTML = `
             <td style="width: 10px;"> 
@@ -25,13 +51,23 @@ export function renderDomainList(domains) {
                 </h5>
                 <small>Ngày tạo: ${formatDate(domain.created_at)}</small>
             </td> 
-            <td style="width: 40px;" class="text-center">
-                <button class="btn btn-link p-0 dropdown-toggle"
-                    type="button"
+            <td class="text-right text-nowrap">
+                <button class="btn btn-sm btn-light me-2"
                     data-domain='${JSON.stringify(domain)}'
                     onclick="loadModal('domain_detail', JSON.parse(this.dataset.domain))">
-                    <i class="mdi mdi-dots-horizontal font-size-18"></i>
+                    Chi tiết
                 </button>
+                <button
+                    class="btn btn-link p-0 dropdown-toggle mr-2"
+                    type="button"
+                    data-name="${JSON.stringify(domain.name)}"
+                    data-link="${JSON.stringify(domain.link)}"
+                    data-id="${JSON.stringify(domain.id)}"
+                     onclick="loadModal('hardware_domain_create', { name: this.dataset.name, link: this.dataset.link ,id: this.dataset.id})"
+                >
+                    Kết nối
+                </button>
+                ${deleteButton} 
             </td>
         `;
 
@@ -44,3 +80,4 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN");
 }
+

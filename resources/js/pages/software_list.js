@@ -14,7 +14,16 @@ async function loadSoftware() {
         }
 
         allSoftwareCache = res.data || [];
-        renderSoftware(allSoftwareCache);
+
+        // Nếu người dùng chưa chọn bộ lọc trạng thái xóa, thì mặc định chỉ lấy phần mềm chưa xóa
+        const isDeleteFilter = document.getElementById("filter-delete").value; 
+        if (!isDeleteFilter) {
+            const filtered = allSoftwareCache.filter(sw => !sw.is_delete);
+            renderSoftware(filtered);
+        } else {    
+            applyFilter(); // Nếu có bộ lọc đang được chọn thì apply toàn bộ
+        }
+
     } catch (err) {
         console.error(err);
         showToast({
@@ -71,7 +80,22 @@ function applyFilter() {
 function renderSoftwareCard(software) {
     return `
     <div class="col-12 col-sm-6 col-lg-4 mb-4">
-        <div class="card">
+        <div class="card position-relative ${software.is_delete ? 'border-danger' : ''}">
+    ${software.is_delete ? `
+        <div style="
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: red;
+            color: white;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: bold;
+            border-bottom-left-radius: 4px;
+        ">
+            ĐÃ XÓA
+        </div>` : ""}
+
             <div class="card-body">
                 <div class="media">
                     <div class="avatar-md mr-4">
@@ -82,9 +106,8 @@ function renderSoftwareCard(software) {
                     <div class="media-body overflow-hidden">
                         <h5 class="font-size-15 mb-2 text-truncate">
                             <span class="font-weight-normal text-muted">Tên:</span>
-                            <a href="software_detail?id=${
-                                software.id
-                            }" class="text-dark font-weight-bold">
+                            <a href="software_detail?id=${software.id
+        }" class="text-dark font-weight-bold">
                                 ${software.softwareName}
                             </a>
                         </h5> 
@@ -95,9 +118,8 @@ function renderSoftwareCard(software) {
                             </div>
                             <div class="mb-1">
                                 <span class="text-muted">Tạo bởi:</span>
-                                <span class="text-success font-weight-bold">${
-                                    software.user_createby
-                                }</span>
+                                <span class="text-success font-weight-bold">${software.user_createby
+        }</span>
                             </div>
                         </div>
 
@@ -111,28 +133,25 @@ function renderSoftwareCard(software) {
             <div class="px-4 py-3 border-top d-flex justify-content-between">
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item mr-3">
-                        <span class="badge badge-primary">${
-                            software.version || "N/A"
-                        }</span>
+                        <span class="badge badge-primary">${software.version || "N/A"
+        }</span>
                     </li>
                     <li class="list-inline-item mr-3" data-toggle="tooltip" title="Ngày tạo">
                         <i class="bx bx-calendar mr-1"></i> ${formatDate(
-                            software.created_at
-                        )}
+            software.created_at
+        )}
                     </li>
                 </ul>
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item mr-3">
-                        <a href="/software_detail?id=${
-                            software.id
-                        }&edit=true" title="Sửa" class="text-primary d-inline-flex align-items-center">
+                        <a href="/software_detail?id=${software.id
+        }&edit=true" title="Sửa" class="text-primary d-inline-flex align-items-center">
                             <i class="bx bx-wrench mr-1"></i> Sửa
                         </a>
                     </li>
                     <li class="list-inline-item">
-                        <a href="/software_detail?id=${
-                            software.id
-                        }" title="Chi tiết" class="text-muted d-inline-flex align-items-center">
+                        <a href="/software_detail?id=${software.id
+        }" title="Chi tiết" class="text-muted d-inline-flex align-items-center">
                             <i class="bx bx-link-external mr-1"></i> Chi tiết
                         </a>
                     </li>

@@ -1,56 +1,43 @@
 import { get_hardware_by_ip, update_hardware } from "../api/hardware";
+import { validateHardwareDataUpdate } from "../component/requiredFields/hardware_required";
 import { showToast } from "../component/toast";
 
 let isEditMode = false;
 const urlParams = new URLSearchParams(window.location.search);
 const ip = urlParams.get("id");
-const detailBlock = document.getElementById("hardware-detail");
-detailBlock.style.display = "none"; 
 const isEditParam = urlParams.get("edit") === "true";
-const toggleBtn = document.getElementById("toggle-edit-btn"); 
-const addDomainBtn = document.getElementById("add-hardware-domain-btn");
-const viewDomainBtn = document.getElementById("view-domain-btn"); 
+
+const detailBlock = document.getElementById("hardware-detail");
+const toggleBtn = document.getElementById("toggle-edit-btn");
+// const addDomainBtn = document.getElementById("add-hardware-domain-btn");
+const viewDomainBtn = document.getElementById("view-domain-btn");
+
+detailBlock.style.display = "none";
+
 if (ip) {
     get_hardware_by_ip({ ip })
         .then((hardware) => {
             if (!hardware) {
-                showToast({
-                    message: "Không tìm thấy thông tin phần cứng cho IP này.",
-                    type: "error",
-                });
+                showToast({ message: "Không tìm thấy thông tin phần cứng cho IP này.", type: "error" });
                 return;
             }
-
-            // Hiển thị thông tin
-            setTextOrCreate("hardware-ip-view", hardware.ip || "N/A");
-            setTextOrCreate("hardware-os-view", hardware.OS || "N/A");
-            setTextOrCreate("hardware-osver-view", hardware.OSver || "N/A");
-            setTextOrCreate("hardware-domain-view", hardware.domain || "N/A");
-            setTextOrCreate("hardware-hdd-view", hardware.hdd || "N/A");
-            setTextOrCreate("hardware-ram-view", hardware.ram || "N/A");
-            setTextOrCreate("hardware-db-view", hardware.dbname || "N/A");
-            setTextOrCreate("hardware-dbver-view", hardware.dbversion || "N/A");
-            setTextOrCreate(
-                "hardware-services-view",
-                hardware.services || "N/A"
-            );
-            setTextOrCreate(
-                "hardware-updated",
-                formatDate(hardware.updated_at)
-            );
-            setTextOrCreate("hardware-createdby", hardware.created_by || "N/A");
-            setTextOrCreate(
-                "hardware-is-active",
-                hardware.is_active ? "Hoạt động" : "Dừng hoạt động",
-                hardware.is_active ? "text-success" : "text-danger"
-            );
-
+            // Nếu phần cứng đã bị xóa
+            if (hardware.is_delete) {
+                detailBlock.innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <i class="mdi mdi-alert-circle-outline mr-2"></i>
+                    Phần cứng với IP <strong>${hardware.ip}</strong> đã bị xóa khỏi hệ thống.
+                </div>
+            `;
+                detailBlock.style.display = "block";
+                return;
+            }
+            renderHardwareInfo(hardware);
             detailBlock.style.display = "block";
 
-            // Chỉ bắt sự kiện sau khi có dữ liệu chính xác
-            addDomainBtn.addEventListener("click", () => {
-                loadModal("hardware_domain_create", { ip: hardware.ip });
-            });
+            // addDomainBtn.addEventListener("click", () => {
+            //     loadModal("hardware_domain_create", { ip: hardware.ip });
+            // });
 
             viewDomainBtn.addEventListener("click", () => {
                 loadModal("hardware_list_domain", { ip: hardware.ip });
@@ -58,116 +45,209 @@ if (ip) {
 
             if (isEditParam) {
                 isEditMode = true;
-                toggleBtn.innerHTML = `<i class="mdi mdi-content-save"></i> Lưu`;
-                switchToEdit();
+                showInputFields();
+                updateToggleBtn();
             }
         })
         .catch((err) => {
             console.error("Lỗi lấy dữ liệu phần cứng:", err);
-            showToast({
-                message:
-                    "Lỗi khi lấy thông tin phần cứng. Vui lòng thử lại sau.",
-                type: "error",
-                timeout: 3000,
-            });
+            showToast({ message: "Lỗi khi lấy thông tin phần cứng. Vui lòng thử lại sau.", type: "error" });
         });
 }
 
-viewDomainBtn.addEventListener("click", function () {
-    if (!ip) {
-        showToast({
-            message: "Không lấy được địa chỉ ip của máy.",
-            type: "error",
-            timeout: 3000,
-        });
-        return;
-    }
-    loadModal("hardware_list_domain", { ip: ip });
-});
-
-function setTextOrCreate(id, text, colorClass = "") {
-    let el = document.getElementById(id);
-    if (el) {
-        el.textContent = text;
-        el.classList.remove("text-success", "text-danger"); // Xóa class cũ
-        if (colorClass) el.classList.add(colorClass); // Thêm class mới nếu có
-    } else {
-        console.warn(`Phần tử với id ${id} không tồn tại.`);
-    }
-}
-function formatDate(dateString) {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN");
-}
 toggleBtn.addEventListener("click", () => {
     isEditMode = !isEditMode;
-    const url = new URL(window.location);
-    url.searchParams.set("edit", isEditMode ? "true" : "false");
-    window.history.replaceState({}, "", url);
+    updateURLParam("edit", isEditMode);
+
     if (isEditMode) {
-        toggleBtn.innerHTML = `<i class="mdi mdi-content-save"></i> Lưu`;
-        switchToEdit();
+        showInputFields();
     } else {
-        toggleBtn.innerHTML = `<i class="mdi mdi-pencil"></i> Sửa`;
         saveData();
     }
+    updateToggleBtn();
 });
 
-function switchToEdit() {
-    toggleDisplay("hardware-ip");
-    toggleDisplay("hardware-os");
-    toggleDisplay("hardware-osver");
-    toggleDisplay("hardware-domain");
-    toggleDisplay("hardware-hdd");
-    toggleDisplay("hardware-ram");
-    toggleDisplay("hardware-db");
-    toggleDisplay("hardware-dbver");
-    toggleDisplay("hardware-services");
+viewDomainBtn.addEventListener("click", () => {
+    if (!ip) {
+        showToast({ message: "Không lấy được địa chỉ ip của máy.", type: "error" });
+        return;
+    }
+    loadModal("hardware_list_domain", { ip });
+});
+
+function renderHardwareInfo(hardware) {
+    setText("hardware-ip-view", hardware.ip);
+    setText("hardware-os-view", hardware.OS);
+    setText("hardware-osver-view", hardware.OSver);
+    setText("hardware-domain-view", hardware.domain);
+    setText("hardware-hdd-view", hardware.hdd);
+    setText("hardware-ram-view", hardware.ram);
+    setText("hardware-db-view", hardware.dbname);
+    setText("hardware-dbver-view", hardware.dbversion);
+    setText("hardware-services-view", hardware.services);
+    setText("hardware-updated", formatDate(hardware.updated_at));
+    setText("hardware-createdby", hardware.created_by);
+    setText("hardware-is-active", hardware.is_active ? "Hoạt động" : "Dừng hoạt động", hardware.is_active ? "text-success" : "text-danger");
 }
 
-function toggleDisplay(field) {
-    const viewEl = document.getElementById(`${field}-view`);
-    const inputEl = document.getElementById(`${field}-input`);
+function showInputFields() {
+    ["ip", "os", "osver", "domain", "hdd", "ram", "db", "dbver", "services"].forEach(showField);
+}
 
-    if (viewEl && inputEl) {
+function hideInputFields() {
+    ["ip", "os", "osver", "domain", "hdd", "ram", "db", "dbver", "services"].forEach(hideField);
+}
+
+function showField(field) {
+    const viewEl = document.getElementById(`hardware-${field}-view`);
+    const inputEl = document.getElementById(`hardware-${field}-input`);
+    const groupEl = document.getElementById(`hardware-${field}-input-group`);
+    const unitEl = document.getElementById(`hardware-${field}-unit`);
+
+    if (groupEl && unitEl) {
+        const [value, unit] = (viewEl.textContent || "").trim().split(" ");
+        inputEl.value = parseInt(value) || "";
+        unitEl.value = unit || "GB";
+        viewEl.classList.add("d-none");
+        groupEl.classList.remove("d-none");
+    } else if (viewEl && inputEl) {
         inputEl.value = viewEl.textContent;
-        viewEl.classList.toggle("d-none");
-        inputEl.classList.toggle("d-none");
+        viewEl.classList.add("d-none");
+        inputEl.classList.remove("d-none");
+    }
+}
+const deleteBtn = document.getElementById("delete-hardware-btn");
+
+deleteBtn.addEventListener("click", () => {
+    if (!ip) {
+        showToast({ message: "Không lấy được địa chỉ IP của phần cứng.", type: "error" });
+        return;
+    }
+
+    if (!confirm("Bạn có chắc chắn muốn xóa phần cứng này không?")) return;
+
+    import("../api/hardware").then(({ delete_hardware }) => {
+        delete_hardware(ip)
+            .then(() => {
+                showToast({ message: "Xóa phần cứng thành công!", type: "success" });
+                window.location.href = "/hardware_list"; // Điều hướng về danh sách hoặc trang phù hợp
+            })
+            .catch(err => {
+                showToast({ message: err.message || "Đã xảy ra lỗi khi xóa.", type: "error" });
+            });
+    });
+});
+
+function hideField(field) {
+    const viewEl = document.getElementById(`hardware-${field}-view`);
+    const inputEl = document.getElementById(`hardware-${field}-input`);
+    const groupEl = document.getElementById(`hardware-${field}-input-group`);
+    const unitEl = document.getElementById(`hardware-${field}-unit`);
+
+    if (groupEl && unitEl) {
+        viewEl.classList.remove("d-none");
+        groupEl.classList.add("d-none");
+    } else if (viewEl && inputEl) {
+        viewEl.classList.remove("d-none");
+        inputEl.classList.add("d-none");
     }
 }
 
 function saveData() {
     const data = {
-        ip: getInputValue("hardware-ip"),
-        OS: getInputValue("hardware-os"),
-        OSver: getInputValue("hardware-osver"),
-        domain: getInputValue("hardware-domain"),
-        hdd: getInputValue("hardware-hdd"),
-        ram: getInputValue("hardware-ram"),
-        dbname: getInputValue("hardware-db"),
-        dbversion: getInputValue("hardware-dbver"),
-        services: getInputValue("hardware-services"),
+        ip: getValue("ip"),
+        OS: getValue("os"),
+        OSver: getValue("osver"),
+        domain: getValue("domain"),
+        hdd: `${getValue("hdd")} ${getUnit("hdd")}`,
+        ram: `${getValue("ram")} ${getUnit("ram")}`,
+        dbname: getValue("db"),
+        dbversion: getValue("dbver"),
+        services: getValue("services"),
     };
-    // Ẩn input, hiện text
-    switchToEdit();
 
-    // Cập nhật giao diện
-    for (let key in data) {
-        const viewEl = document.getElementById(`${key}-view`);
-        const inputEl = document.getElementById(`${key}-input`);
-        if (viewEl && inputEl) {
-            viewEl.textContent = data[key];
-        }
+    if (!validateHardwareDataUpdate(data)) {
+        isEditMode = true;
+        updateURLParam("edit", true);
+        updateToggleBtn();
+        return;
     }
-    update_hardware(data)
-        .then((res) =>
-            showToast({ message: "Cập nhật thành công!", type: "success" })
-        )
-        .catch((err) => showToast({ message: err.message, type: "error" }));
+
+    update_hardware(data, ip)
+        .then(() => {
+            showToast({ message: "Cập nhật thành công!", type: "success" });
+
+            const newIp = data.ip;
+            if (newIp !== ip) {
+                // Nếu IP thay đổi, chuyển hướng trang
+                window.location.href = `/hardware_detail?id=${encodeURIComponent(newIp)}`;
+                return;
+            }
+
+            // IP không đổi, chỉ cần load lại dữ liệu
+            get_hardware_by_ip({ ip })
+                .then((hardware) => {
+                    renderHardwareInfo(hardware);
+                    hideInputFields();
+                    isEditMode = false;
+                    updateURLParam("edit", false);
+                    updateToggleBtn();
+                    if (typeof window.fetchHardwareLogs === "function") {
+                        window.fetchHardwareLogs();
+                    }
+                })
+                .catch((err) => {
+                    console.error("Lỗi lấy lại dữ liệu sau khi cập nhật:", err);
+                    showToast({
+                        message: "Đã lưu nhưng lỗi khi lấy lại dữ liệu. Vui lòng tải lại trang.",
+                        type: "warning",
+                    });
+                });
+        })
+        .catch(err =>
+            showToast({
+                message: err.message || "Đã xảy ra lỗi khi cập nhật.",
+                type: "error",
+            })
+        );
 }
 
-function getInputValue(field) {
-    const el = document.getElementById(`${field}-input`);
-    return el ? el.value : "";
+
+function setText(id, text, colorClass = "") {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = text || "N/A";
+        el.classList.remove("text-success", "text-danger");
+        if (colorClass) el.classList.add(colorClass);
+    }
+}
+
+function getValue(field) {
+    const el = document.getElementById(`hardware-${field}-input`);
+    return el ? el.value.trim() : "";
+}
+
+function getUnit(field) {
+    const el = document.getElementById(`hardware-${field}-unit`);
+    return el ? el.value : "GB";
+}
+
+function formatDate(dateString) {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN");
+}
+
+function updateToggleBtn() {
+    toggleBtn.innerHTML = isEditMode ? `<i class="mdi mdi-content-save"></i> Lưu` : `<i class="mdi mdi-pencil"></i> Sửa`;
+}
+
+function updateURLParam(key, value) {
+    const url = new URL(window.location);
+    if (value) {
+        url.searchParams.set(key, "true");
+    } else {
+        url.searchParams.delete(key);
+    }
+    window.history.replaceState({}, "", url);
 }

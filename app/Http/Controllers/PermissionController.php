@@ -308,6 +308,8 @@ class PermissionController extends Controller
             $resourceMap = [
 
                 'phần mềm' => 'software',
+                'tệp tin phần mềm' => 'softwarefile',
+                'softwarefile' => 'softwarefile',
                 'software' => 'software',
                 'người dùng' => 'user',
                 'user' => 'user',

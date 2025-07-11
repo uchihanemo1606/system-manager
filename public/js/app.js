@@ -7,13 +7,18 @@ if (token) {
         return originalFetch(url, options);
     };
 }
-function loadModal(modalName, data = null) {
+function loadModal(modalName, data = null, modalSize = 'lg') {
     console.log("Loading modal:", modalName, "with data:", data);
     fetch("/modal/" + modalName)
         .then(res => res.text())
         .then(html => {
             document.getElementById("modalContent").innerHTML = html;
 
+            const modalDialog = document.querySelector("#modalContainer .modal-dialog"); 
+            modalDialog.classList.remove("modal-sm", "modal-lg", "modal-xl", "modal-xxl"); 
+            if (["sm", "lg", "xl", "xxl"].includes(modalSize)) {
+                modalDialog.classList.add("modal-" + modalSize);
+            } 
             const modal = new bootstrap.Modal(document.getElementById("modalContainer"));
             modal.show();
 

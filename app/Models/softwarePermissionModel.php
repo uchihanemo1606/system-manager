@@ -9,6 +9,7 @@ class softwarePermissionModel extends Model
     protected $table = 'software_permissions';
     protected $fillable = [
         'software_id',
+        'create_by',
         'user_name',
         'create_by',
         'permissions_name',

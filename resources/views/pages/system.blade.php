@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <div class="container-fluid">
     <div class="page-title-box d-flex align-items-center justify-content-between">

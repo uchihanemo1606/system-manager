@@ -12,7 +12,7 @@
         @csrf
         <div class="form-group">
             <input type="text" name="username" required class="form-input" placeholder=" " autocomplete="username">
-            <label class="form-label">Username</label>
+            <label class="form-label">Tên đăng nhập</label>
         </div>
         <div class="form-group">
             <input type="password" name="password" required class="form-input" placeholder=" "
@@ -25,7 +25,7 @@
                     <input type="checkbox" name="remember" class="mr-2">
                     <span>Nhớ tài khoản</span>
                 </label> --}}
-                <a class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
+                <a  href="/forgot_password"  class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
             </div>
         </div>
         <button type="submit" class="login-btn">Đăng Nhập</button>

@@ -6,7 +6,7 @@
         <form id="permission-form" class="d-flex flex-column" style="flex-grow: 1; overflow: hidden;">
             <!-- Tên Role -->
             <div class="form-group mb-2">
-                <label for="role-name" class="font-weight-bold text-dark">
+                <label for="role-name" class="font-weight-bold text-dark required">
                     <i class="mdi mdi-shield-account text-info mr-2"></i> Tên Vai trò
                 </label>
                 <input type="text" id="role-name" class="form-control font-weight-bold"
