@@ -573,6 +573,20 @@ class AuthController extends Controller
             return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi tạo lại mật khẩu: ' . $e->getMessage()], 500);
         }
     }
-
-
+    public function deleteUser(Request $request)
+    {
+        try {
+            $request->validate([
+                'username' => 'required|string|max:255'
+            ]);
+            $user = UserModel::where('username', $request->username)->first();
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'User not found.'], 404);
+            }
+            $user->delete();
+            return response()->json(['success' => true, 'message' => 'User deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi khi xóa tài khoản: ' . $e->getMessage()], 500);
+        }
+    }
 }

@@ -21,7 +21,7 @@ Route::patch('/changepassword', [AuthController::class, 'changePassword']);
 route::get('/getallusers', [UserController::class, 'getAllUsers'])->middleware('check.permission')->name('user.list');
 route::get('/getuserbyname', [UserController::class, 'getUserByName']);
 route::get('/getuserbyusername', [UserController::class,'getUserByUsername']);
-
+route::delete('/deleteuser', [AuthController::class, 'deleteUser']);
 route::get('/sendmail', [MailController::class, 'sendEmail']);
 
 Route::get('/getmypermissions', [PermissionController::class, 'getMyPermissions']);
