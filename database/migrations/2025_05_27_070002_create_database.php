@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('database', function (Blueprint $table) {
             $table->id();
-            $table->string('dbname')->unique();
+            $table->string('dbname',100)->unique();
             $table->string('created_by',100);
             $table->string('decription')->nullable();
             $table->boolean('is_delete')->default(true);
