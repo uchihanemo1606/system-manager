@@ -36,7 +36,7 @@
                 <div class="col-md-3 mb-2">
                     <label class="fw-semibold">Loại máy</label>
                     <select id="filter-virtual" class="form-control">
-                        <option value="">-- Loại máy --</option>
+                        <option value="">-- Tất cả --</option>
                         <option value="true">Máy ảo</option>
                         <option value="false">Máy vật lý</option>
                     </select>
@@ -71,9 +71,9 @@
                     <div class="col-md-3 mb-2">
                         <label class="fw-semibold">Trạng thái xóa</label>
                         <select id="filter-delete" class="form-control">
-                            <option value="">-- Trạng thái xóa --</option>
-                            <option value="true">Đã xóa</option>
                             <option value="false">Chưa xóa</option>
+                            <option value="true">Đã xóa</option>
+
                         </select>
                     </div>
                     <div class="col-md-3 mb-2">
@@ -98,11 +98,13 @@
                 </div>
             </div>
 
-            <div class="mt-2">
+            <div class="mt-2 d-flex w-full justify-content-between ">
                 <button class="btn btn-link text-primary p-0" type="button" onclick="toggleAdvancedFilters()">
                     <span id="toggle-text">Hiện thêm bộ lọc nâng cao</span>
                 </button>
+                <button class="btn btn-primary" onclick="applyFilter()">Tìm</button>
             </div>
+
         </div>
     </div>
 

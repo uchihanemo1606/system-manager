@@ -98,11 +98,7 @@ function renderSoftwareCard(software) {
 
             <div class="card-body">
                 <div class="media">
-                    <div class="avatar-md mr-4">
-                        <span class="avatar-title rounded-circle bg-light text-primary font-size-16">
-                            <img src="images/img-1.jpg" alt="" height="30">
-                        </span>
-                    </div>
+
                     <div class="media-body overflow-hidden">
                         <h5 class="font-size-15 mb-2 text-truncate">
                             <span class="font-weight-normal text-muted">Tên:</span>

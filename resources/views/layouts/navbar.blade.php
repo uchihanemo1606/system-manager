@@ -129,7 +129,7 @@
                 <a class="dropdown-item" href="#" onclick="loadModal('profile')"><i
                         class="bx bx-user font-size-16 align-middle mr-1"></i> Hồ Sơ</a>
                 <a class="dropdown-item" href="#" onclick="loadModal('chane_password')"><i
-                        class="mdi mdi-shield-account text-info font-size-16 align-middle mr-1"></i> Bảo mật</a>
+                        class="mdi mdi-shield-account text-info font-size-16 align-middle mr-1"></i>Đổi mật khẩu</a>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item text-danger coru" id="logout"><i
                         class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i>Đăng Xuất</button>

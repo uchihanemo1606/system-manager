@@ -13,13 +13,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laravel</title>
     <link href="assets\css\bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css">
     <link href="assets\css\app.min.css" id="app-style" rel="stylesheet" type="text/css">
     <link href="assets\css\icons.min.css" rel="stylesheet" type="text/css">
     <link href="assets\css\boxicons.min.css" rel="stylesheet" type="text/css">
     <link href="assets/css/materialdesignicons.min.css" rel="stylesheet">
+
     <!-- role detail -->
     <link href="assets\libs\summernote\summernote-bs4.min.css" rel="stylesheet" type="text/css">
 
@@ -38,7 +39,6 @@
     <!-- content -->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
         <div id="liveToast" class="toast ...">
-            ...
         </div>
     </div>
     <div id="globalLoading" class="d-none">
