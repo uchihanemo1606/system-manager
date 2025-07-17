@@ -203,6 +203,133 @@ class HardwarePermissionController extends Controller
         }
     }
 
+    public function removePermissionsForUsersInHardware(Request $request, $hardwareIP)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            if (!$hardwareIP) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'hardware_ip is required.'
+                ], 400);
+            }
+
+            $users = $request->input('users'); // array: [{user_name, permissions: []}, ...]
+            if (!is_array($users) || empty($users)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'users is required and must be an array.'
+                ], 400);
+            }
+
+            $hardware = hardwareModel::find($hardwareIP);
+            if (!$hardware) {
+                return response()->json([
+                    'status' => 'not_found',
+                    'message' => 'Hardware not found.'
+                ], 404);
+            }
+
+            $results = [];
+            // Lấy danh sách user hiện đang giữ quyền sửa và xóa
+            $currentEditUsers = hardwarePemisssionModel::where('hardware_ip', $hardwareIP)
+                ->where('permissions_name', 'sửa hardware')
+                ->pluck('user_name')
+                ->toArray();
+
+            $currentDeleteUsers = hardwarePemisssionModel::where('hardware_ip', $hardwareIP)
+                ->where('permissions_name', 'xóa hardware')
+                ->pluck('user_name')
+                ->toArray();
+
+            foreach ($users as $userData) {
+                $username = $userData['user_name'] ?? null;
+                $permissions = $userData['permissions'] ?? [];
+
+                if (!$username || !is_array($permissions) || empty($permissions)) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'error',
+                        'message' => 'user_name and permissions are required.'
+                    ];
+                    continue;
+                }
+
+                // Không cho phép xóa quyền của chủ phần cứng
+                if ($username === $hardware->created_by) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Không thể xóa quyền của chủ phần cứng!'
+                    ];
+                    continue;
+                }
+
+                // Kiểm tra logic giữ lại ít nhất 1 quyền sửa và 1 quyền xóa
+                $editWillRemove = in_array('sửa hardware', $permissions) && in_array($username, $currentEditUsers);
+                $deleteWillRemove = in_array('xóa hardware', $permissions) && in_array($username, $currentDeleteUsers);
+
+                // Nếu xóa quyền sửa mà chỉ còn 1 người giữ quyền sửa (là user này) thì không cho xóa
+                if ($editWillRemove && count($currentEditUsers) == 1) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Thiết bị này cần ít nhất 1 người giữ quyền sửa hardware!'
+                    ];
+                    continue;
+                }
+                // Nếu xóa quyền xóa mà chỉ còn 1 người giữ quyền xóa (là user này) thì không cho xóa
+                if ($deleteWillRemove && count($currentDeleteUsers) == 1) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Thiết bị này cần ít nhất 1 người giữ quyền xóa hardware!'
+                    ];
+                    continue;
+                }
+
+                // Thực hiện xóa các quyền chỉ định
+                $deletedRows = hardwarePemisssionModel::where([
+                        'hardware_ip' => $hardwareIP,
+                        'user_name' => $username,
+                    ])
+                    ->whereIn('permissions_name', $permissions)
+                    ->delete();
+
+                // Nếu xóa thành công thì cập nhật lại danh sách người giữ quyền sửa/xóa
+                if ($deletedRows > 0) {
+                    if ($editWillRemove) {
+                        $currentEditUsers = array_diff($currentEditUsers, [$username]);
+                    }
+                    if ($deleteWillRemove) {
+                        $currentDeleteUsers = array_diff($currentDeleteUsers, [$username]);
+                    }
+                }
+
+                $results[] = [
+                    'user_name' => $username,
+                    'deleted_rows' => $deletedRows,
+                    'status' => $deletedRows > 0 ? 'success' : 'error',
+                    'message' => $deletedRows > 0 ? 'Permissions removed.' : 'No permissions found to delete.'
+                ];
+            }
+
+            return response()->json([
+                'message' => 'Bulk permission removal completed.',
+                'results' => $results,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not remove permissions. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function removeUserPermisionInHardware(Request $request)
     {
         try {
@@ -225,7 +352,7 @@ class HardwarePermissionController extends Controller
             $hardware = hardwareModel::find($hardwareIp);
             if (!$hardware) {
                 return response()->json([
-                    'status' => 'error',
+                    'status' => 'not_found',
                     'message' => 'Hardware not found.'
                 ], 404);
             }
@@ -233,7 +360,7 @@ class HardwarePermissionController extends Controller
             // Không cho phép xóa quyền của chủ phần cứng
             if ($username === $hardware->created_by) {
                 return response()->json([
-                    'status' => 'error',
+                    'status' => 'forbidden',
                     'message' => 'Không thể xóa quyền của chủ phần cứng!'
                 ], 403);
             }

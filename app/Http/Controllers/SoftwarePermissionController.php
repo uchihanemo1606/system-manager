@@ -236,6 +236,131 @@ class SoftwarePermissionController extends Controller
         }
     }
 
+    public function removePermissionsForUsersInSoftware(Request $request, $softwareId)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            if (!$softwareId) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'software_id is required.'
+                ], 400);
+            }
+
+            $users = $request->input('users'); // array: [{user_name, permissions: []}, ...]
+            if (!is_array($users) || empty($users)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'users is required and must be an array.'
+                ], 400);
+            }
+
+            $software = softwareModel::find($softwareId);
+            if (!$software) {
+                return response()->json([
+                    'status' => 'not_found',
+                    'message' => 'Software not found.'
+                ], 404);
+            }
+
+            $results = [];
+            // Lấy danh sách user hiện đang giữ quyền sửa và xóa
+            $currentEditUsers = softwarePermissionModel::where('software_id', $softwareId)
+                ->where('permissions_name', 'sửa phần mềm')
+                ->pluck('user_name')
+                ->toArray();
+
+            $currentDeleteUsers = softwarePermissionModel::where('software_id', $softwareId)
+                ->where('permissions_name', 'xóa phần mềm')
+                ->pluck('user_name')
+                ->toArray();
+
+            foreach ($users as $userData) {
+                $username = $userData['user_name'] ?? null;
+                $permissions = $userData['permissions'] ?? [];
+
+                if (!$username || !is_array($permissions) || empty($permissions)) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'error',
+                        'message' => 'user_name and permissions are required.'
+                    ];
+                    continue;
+                }
+
+                // Không cho phép xóa quyền của chủ phần mềm
+                if ($username === $software->user_createby) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Không thể xóa quyền của chủ phần mềm!'
+                    ];
+                    continue;
+                }
+
+                // Kiểm tra logic giữ lại ít nhất 1 quyền sửa và 1 quyền xóa
+                $editWillRemove = in_array('sửa phần mềm', $permissions) && in_array($username, $currentEditUsers);
+                $deleteWillRemove = in_array('xóa phần mềm', $permissions) && in_array($username, $currentDeleteUsers);
+
+                if ($editWillRemove && count($currentEditUsers) == 1) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Phần mềm này cần ít nhất 1 người giữ quyền sửa phần mềm!'
+                    ];
+                    continue;
+                }
+                if ($deleteWillRemove && count($currentDeleteUsers) == 1) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Phần mềm này cần ít nhất 1 người giữ quyền xóa phần mềm!'
+                    ];
+                    continue;
+                }
+
+                // Thực hiện xóa các quyền chỉ định
+                $deletedRows = softwarePermissionModel::where([
+                        'software_id' => $softwareId,
+                        'user_name' => $username,
+                    ])
+                    ->whereIn('permissions_name', $permissions)
+                    ->delete();
+
+                // Nếu xóa thành công thì cập nhật lại danh sách người giữ quyền sửa/xóa
+                if ($deletedRows > 0) {
+                    if ($editWillRemove) {
+                        $currentEditUsers = array_diff($currentEditUsers, [$username]);
+                    }
+                    if ($deleteWillRemove) {
+                        $currentDeleteUsers = array_diff($currentDeleteUsers, [$username]);
+                    }
+                }
+
+                $results[] = [
+                    'user_name' => $username,
+                    'deleted_rows' => $deletedRows,
+                    'status' => $deletedRows > 0 ? 'success' : 'error',
+                    'message' => $deletedRows > 0 ? 'Permissions removed.' : 'No permissions found to delete.'
+                ];
+            }
+
+            return response()->json([
+                'message' => 'Bulk permission removal completed.',
+                'results' => $results,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not remove permissions. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function getAllUserPermissionInSoftware(Request $request, $softwareId)
     {
         try {

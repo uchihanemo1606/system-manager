@@ -43,3 +43,6 @@ Route::get('/getalluserpermissioninhardware/{hardwareIP}', [HardwarePermissionCo
     ->middleware('check.permission')
     ->name('hardwarepermission.list');
 
+Route::delete('/removepermissionforuserinhardware/{hardware_ip}', [HardwarePermissionController::class, 'removePermissionsForUsersInHardware'])
+    ->middleware('check.permission')
+    ->name('hardwarepermission.delete');
