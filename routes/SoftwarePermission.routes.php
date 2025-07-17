@@ -32,3 +32,7 @@ Route::patch('/updatepermissionuserinsoftware', [softwarePermissionController::c
 Route::post('/addpermissionforuser', [softwarePermissionController::class, 'addPermissionForUser'])
     ->middleware('check.permission')
     ->name('softwarepermission.create');
+
+Route::delete('/removepermissionforuserinsoftware/{softwareID}', [softwarePermissionController::class, 'removePermissionsForUsersInSoftware'])
+    ->middleware('check.permission')
+    ->name('softwarepermission.delete');

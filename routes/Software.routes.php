@@ -41,16 +41,16 @@ Route::post('/createsoftwarefile', [softwarefileController::class, 'createSoftwa
 
 Route::patch('/updatesoftwarefile/{softwareFileid}', [softwarefileController::class, 'updateSoftwarefile'])
     ->middleware('check.permission')
-    ->name('softwarefile.edit');
+    ->name('software.edit');
 
 Route::delete('/deletesoftwarefile/{softwareFileid}', [softwarefileController::class, 'deleteSoftwarefile'])
     ->middleware('check.permission')
-    ->name('softwarefile.delete');
+    ->name('software.delete');
 
 Route::get('/getallsoftwarefilebysoftwareid/{getAllSoftwareFileBySoftwareId}', [softwarefileController::class, 'getAllSoftwareFileBySoftwareId'])
     ->middleware('check.permission')
-    ->name('softwarefile.list');
+    ->name('software.list');
 
 Route::get('/getallsoftwarefile', [softwarefileController::class, 'getAllSoftwareFile'])
     ->middleware('check.permission')
-    ->name('softwarefile.list');
+    ->name('software.list');
