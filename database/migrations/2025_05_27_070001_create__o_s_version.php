@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('os_name',100);
             $table->string('version',100);
-            $table->string('version_description')->nullable();
             $table->string('created_by',100)->nullable();
             $table->string('description')->nullable();
             $table->boolean('is_delete')->default(true);

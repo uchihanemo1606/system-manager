@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('dbname',100);
             $table->string('version',100);
-            $table->string('version_description')->nullable();
             $table->string('created_by',100);
             $table->string('decription')->nullable();
             $table->boolean('is_delete')->default(true);
