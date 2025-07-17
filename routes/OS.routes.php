@@ -61,7 +61,7 @@ Route::get('/getallosversion', [OSController::class, 'getAllOSVersions'])
 Route::get('/getallversionofos/{osName}', [OSController::class, 'getAllVersionOfOS'])
     ->middleware('check.permission')
     ->name('hardware.list');
-
+    
 Route::get('/getallversionofosactive/{osName}', [OSController::class, 'getAllOSVersionByNameActive'])
     ->middleware('check.permission')
     ->name('hardware.list');

@@ -214,7 +214,6 @@ class SoftwarePermissionController extends Controller
                     'message' => 'No permissions found to delete for this user on this software.'
                 ], 404);
             }
-
             logController::createLogAuto([
                 'username' => $user->username,
                 'software_id' => $softwareId,

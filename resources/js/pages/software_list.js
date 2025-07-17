@@ -79,8 +79,8 @@ function applyFilter() {
 
 function renderSoftwareCard(software) {
     return `
-    <div class="col-12 col-sm-6 col-lg-4 mb-4">
-        <div class="card position-relative ${software.is_delete ? 'border-danger' : ''}">
+    <div class="col-12 col-sm-6 col-lg-3 mb-2">
+        <div class="card position-relative m-0 ${software.is_delete ? 'border-danger' : ''}">
     ${software.is_delete ? `
         <div style="
             position: absolute;

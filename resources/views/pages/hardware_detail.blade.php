@@ -11,7 +11,7 @@
     </div>
 
     @hasPermission('hardware.delete')
-    <div class="w-full d-flex justify-content-end mb-3">
+    <div class="w-full d-flex justify-content-end">
         <button id="delete-hardware-btn" class="btn btn-danger">
             <i class="mdi mdi-delete"></i> Xóa
         </button>

@@ -1,24 +1,23 @@
 @extends('layouts.app')
 @section('content')
 @hasPermission('software.detail')
-<div class="container-fluid" id="software-detail" style="display: none;">
-
-    <div class="d-flex justify-content-between mb-3">
-        <h4 class="mb-0 font-size-18">Chi tiết phần mềm</h4>
-        @hasPermission('software.update')
-        <button id="toggle-edit-btn" class="btn btn-primary">
-            <i class="mdi mdi-pencil"></i> Sửa
-        </button>
-        @endhasPermission
-        @hasPermission('software.delete')
-        <button id="software-delete-btn" class="btn btn-primary">
-            <i class="mdi mdi-pencil"></i> Xóa
-        </button>
-        @endhasPermission
-    </div>
+<div id="software-detail" style="display: none;">
+    <h4 class="mb-0 font-size-18 pb-2">Chi tiết phần mềm</h4> 
     <div class="row">
         <div class="col-lg-7">
-            <div class="card">
+            <div class="card position-relative">
+                <div class="position-absolute bottom-2 right-2" style="bottom: 0.5rem; right: 0.5rem;"> 
+                    @hasPermission('software.update')
+                    <button id="toggle-edit-btn" class="btn btn-primary">
+                        <i class="mdi mdi-pencil"></i> Sửa
+                    </button>
+                    @endhasPermission
+                    @hasPermission('software.delete')
+                    <button id="software-delete-btn" class="btn btn-danger ml-2">
+                        <i class="mdi mdi-pencil"></i> Xóa
+                    </button>
+                    @endhasPermission
+                </div>
                 <div class="card-body">
                     <div class="media mb-3">
                         <img src="/images/software_default.png" alt="" class="avatar-sm mr-3">

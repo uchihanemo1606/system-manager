@@ -69,18 +69,19 @@
                         </a>
                     </li>
                     @endhasPermission
+                    
                     <li class="item">
                         <a data-key="log" class="link flex">
                             <i class="bx bxs-magic-wand"></i>
                             <span>Bản ghi hệ thống</span>
                         </a>
                     </li>
-                    {{-- <li class="item">
+                    <li class="item">
                         <a data-key="rule" class="link flex">
                             <i class="bx bxs-magic-wand"></i>
-                            <span>rule</span>
+                            <span>Loại pháp lý</span>
                         </a>
-                    </li> --}}
+                    </li>
                 </ul>
                 <ul class="menu_item">
                     <div class="menu_title flex">
