@@ -28,6 +28,8 @@ return new class extends Migration
             $table->string('department', 100)->nullable();
             $table->unsignedBigInteger('role_id',)->nullable();
             $table->string('category_rule', 300)->nullable();
+            $table->string('database_name',100)->nullable();
+            $table->string('os_name',100)->nullable();
 
             // Foreign keys
             $table->foreign('software_id')->references('id')->on('software')->onUpdate('cascade');
@@ -42,6 +44,8 @@ return new class extends Migration
             $table->foreign('department')->references('name')->on('departments')->onUpdate('cascade');
             $table->foreign('link_domain')->references('link')->on('domain')->onUpdate('cascade');
             $table->foreign('category_rule')->references('name')->on('category_rule')->onUpdate('cascade');
+            $table->foreign('database_name')->references('dbname')->on('database')->onUpdate('cascade');
+            $table->foreign('os_name')->references('name')->on('os')->onUpdate('cascade');
             $table->timestamps();
         });
     }

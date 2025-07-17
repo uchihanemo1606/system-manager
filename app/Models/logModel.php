@@ -19,7 +19,8 @@ class logModel extends Model
         'sw_permission_user',
         'hw_permission_user',
         'permission_name',
-        'is_delete',
+        'os_name',
+        'database_name',
         'department',
     ];
     public function software()
