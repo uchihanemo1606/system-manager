@@ -12,7 +12,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
+use App\Policies\HardwarePolicy;
+use App\Http\Controllers\LogController;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -25,6 +27,8 @@ class HardwarePermissionController extends Controller
             return response()->json(['message' => 'Please login to use this function'], 401);
         }
 
+
+
         $validated = $request->validate([
             'hardware_ip' => 'required|string|exists:hardware,ip|max:25',
             'users' => 'required|array|min:1',
@@ -32,6 +36,15 @@ class HardwarePermissionController extends Controller
             'users.*.permissions' => 'required|array|min:1',
             'users.*.permissions.*' => 'required|string|max:255',
         ]);
+        $hardware = hardwareModel::where('ip', $validated['hardware_ip'])->first();
+
+        if ($user->cannot('createPermission', $hardware)) {
+            Log::warning('User denied create permission by policy', [
+                'username' => $user->username,
+                'hardware_ip' => $hardware->ip
+            ]);
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to create this hardware.'], 403);
+        }
 
         $created = [];
         $skipped = [];
@@ -62,6 +75,7 @@ class HardwarePermissionController extends Controller
                 ]);
             }
         }
+
         LogController::createLogAuto([
             'username' => $user->username,
             'hardware_ip' => $validated['hardware_ip'],
@@ -233,6 +247,15 @@ class HardwarePermissionController extends Controller
                 ], 404);
             }
 
+            if ($user->cannot('deletePermission', $hardware)) {
+                Log::warning('User denied delete permission by policy', [
+                    'username' => $user->username,
+                    'hardware_ip' => $hardware->ip,
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this hardware.'], 403);
+            }
+
+
             $results = [];
             // Lấy danh sách user hiện đang giữ quyền sửa và xóa
             $currentEditUsers = hardwarePemisssionModel::where('hardware_ip', $hardwareIP)
@@ -355,6 +378,13 @@ class HardwarePermissionController extends Controller
                     'status' => 'not_found',
                     'message' => 'Hardware not found.'
                 ], 404);
+            }
+            if($user->cannot('deletePermission', $hardware)) {
+                Log::warning('User denied delete permission by policy', [
+                    'username' => $user->username,
+                    'hardware_ip' => $hardware->ip,
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this hardware.'], 403);
             }
 
             // Không cho phép xóa quyền của chủ phần cứng

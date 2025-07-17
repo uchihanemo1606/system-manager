@@ -14,6 +14,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Http\Controllers\LogController;
 use App\Models\softwareModel;
 use App\Models\UserModel;
+use Illuminate\Support\Facades\Log;
 
 class SoftwarePermissionController extends Controller
 {
@@ -30,6 +31,23 @@ class SoftwarePermissionController extends Controller
             'user_name' => 'required|string|exists:users,username',
             'permissions_name' => 'required|string|exists:permissions,permissions_name',
         ]);
+
+        // Kiểm tra xem người dùng có quyền tạo phần mềm không
+        $software = softwareModel::find($validated['software_id']);
+        if (!$software) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Software not found.'
+            ], 404);
+        }
+
+        if($user->cannot('createPermission', $software)) {
+            Log::warning('User denied create permission by policy', [
+                'username' => $user->username,
+                'software_id' => $software->id,
+            ]);
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to create this software.'], 403);
+        }
 
         // Kiểm tra type của permission
         $permission = permissionModel::where('permissions_name', $validated['permissions_name'])->first();
@@ -186,6 +204,14 @@ class SoftwarePermissionController extends Controller
                     'message' => 'Software not found.'
                 ], 404);
             }
+            
+            if($user->cannot('deletePermission', $software)) {
+                Log::warning('User denied delete permission by policy', [
+                    'username' => $user->username,
+                    'software_id' => $software->id,
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this software.'], 403);
+            }
 
             // Không cho phép xóa quyền của chủ phần mềm
             if ($username === $software->user_createby) {
@@ -264,6 +290,14 @@ class SoftwarePermissionController extends Controller
                     'status' => 'not_found',
                     'message' => 'Software not found.'
                 ], 404);
+            }
+
+            if($user->cannot('deletePermission', $software)) {
+                Log::warning('User denied delete permission by policy', [
+                    'username' => $user->username,
+                    'software_id' => $software->id,
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this software.'], 403);
             }
 
             $results = [];
@@ -431,7 +465,22 @@ class SoftwarePermissionController extends Controller
                 'user_name' => 'required|string|exists:users,username',
                 'permissions_name' => 'required|string|exists:permissions,permissions_name',
             ]);
+            $software = softwareModel::find($validated['software_id']);
+            if (!$software) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Software not found.'
+                ], 404);
+            }
 
+            if($user->cannot('updatePermission', $software)) {
+                Log::warning('User denied update permission by policy', [
+                    'username' => $user->username,
+                    'software_id' => $software->id,
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this software.'], 403);
+            }
+            
             // Kiểm tra type của permission
             $permission = DB::table('permissions')->where('permissions_name', $validated['permissions_name'])->first();
             if (!$permission || $permission->type !== 'software') {

@@ -111,7 +111,54 @@ public function delete(UserModel $user, softwareModel $software): bool
     return $result;
 }
 
-// ...existing code...
+// =====================================================================PERMISSION==================================================================================================
+
+    public function createPermission(UserModel $user, softwareModel $software): bool
+    {
+        Log::info('SoftwarePolicy@createPermission: Checking create permission', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+        ]);
+        $result = $this->checkSoftwarePermission($user, $software, 'softwarepermission.create');
+        Log::info('SoftwarePolicy@createPermission: Result', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+            'result' => $result,
+        ]);
+        return $result;
+    }
+
+    public function editPermission(UserModel $user, softwareModel $software): bool
+    {
+        Log::info('SoftwarePolicy@editPermission: Checking edit permission', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+        ]);
+        $result = $this->checkSoftwarePermission($user, $software, 'softwarepermission.edit');
+        Log::info('SoftwarePolicy@editPermission: Result', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+            'result' => $result,
+        ]);
+        return $result;
+    }
+
+    public function deletePermission(UserModel $user, softwareModel $software): bool
+    {
+        Log::info('SoftwarePolicy@deletePermission: Checking delete permission', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+        ]);
+        $result = $this->checkSoftwarePermission($user, $software, 'softwarepermission.delete');
+        Log::info('SoftwarePolicy@deletePermission: Result', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+            'result' => $result,
+        ]);
+        return $result;
+    }
+
+// =====================================================================CHECK PERMISSION==================================================================================================
 
     protected function checkSoftwarePermission(UserModel $user, softwareModel $software, string $routeName): bool
     {

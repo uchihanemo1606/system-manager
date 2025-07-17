@@ -109,7 +109,53 @@ public function delete(UserModel $user, hardwareModel $hardware): bool
     return $result;
 }
 
-// ...existing code...
+// =================================================PERMISSION==================================================
+    public function createPermission(UserModel $user, hardwareModel $hardware): bool
+{
+    Log::info('HardwarePolicy@createPermission: Checking create permission', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+    ]);
+    $result = $this->checkHardwarePermission($user, $hardware, 'hardwarepermission.create');
+    Log::info('HardwarePolicy@createPermission: Result', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+        'result' => $result,
+    ]);
+    return $result;
+}
+
+public function editPermission(UserModel $user, hardwareModel $hardware): bool
+{
+    Log::info('HardwarePolicy@editPermission: Checking edit permission', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+    ]);
+    $result = $this->checkHardwarePermission($user, $hardware, 'hardwarepermission.edit');
+    Log::info('HardwarePolicy@editPermission: Result', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+        'result' => $result,
+    ]);
+    return $result;
+}
+
+public function deletePermission(UserModel $user, hardwareModel $hardware): bool
+{
+    Log::info('HardwarePolicy@deletePermission: Checking delete permission', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+    ]);
+    $result = $this->checkHardwarePermission($user, $hardware, 'hardwarepermission.delete');
+    Log::info('HardwarePolicy@deletePermission: Result', [
+        'username' => $user->username,
+        'hardware_ip' => $hardware->ip,
+        'result' => $result,
+    ]);
+    return $result;
+}
+
+// =========================================================CHECK PERMISSION==================================================
 
     protected function checkHardwarePermission(UserModel $user, hardwareModel $hardware, string $routeName): bool
     {
