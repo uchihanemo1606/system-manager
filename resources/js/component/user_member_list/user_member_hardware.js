@@ -7,7 +7,7 @@ async function getHardwarePermissions() {
         return;
     }
 
-    const res = await get_all_user_permission_hardware(ip); 
+    const res = await get_all_user_permission_hardware(ip);
     const userListTbody = document.getElementById("user-list-hardware");
 
     if (!userListTbody) {
@@ -42,7 +42,7 @@ async function getHardwarePermissions() {
                           data-toggle="tooltip"
                           title="${hiddenPermissions.join(", ")}"
                           style="font-size: 0.85rem; cursor: pointer;">
-                        +${remainingCount}
+                        +${remainingCount > 2 ? 2 : remainingCount}
                     </span>`;
             }
 

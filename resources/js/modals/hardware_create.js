@@ -99,8 +99,7 @@ window.initHardwareCreateModal = async function () {
         try {
             const res = await create_hardware(data);
             showToast({ message: res.message || "Tạo phần cứng thành công!", type: "success" });
-
-            // ✅ Chuyển hướng sau khi tạo thành công
+ 
             setTimeout(() => {
                 window.location.href = `/hardware_detail?id=${encodeURIComponent(data.ip)}`;
             }, 1000); // chờ 1s cho người dùng thấy thông báo

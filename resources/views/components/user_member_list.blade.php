@@ -8,7 +8,7 @@
     
     @if ($id)
         <div class="user-member-list-add mb-2">
-            <button class="btn btn-success btn-sm" onclick="loadModal('type_permission_create', { type: '{{ $type }}', id: '{{ $id }}' })">
+            <button class="btn btn-success btn-sm" onclick="loadModal('type_permission_create', { type: '{{ $type }}', id: '{{ $id }}' },'xl')">
                 <i class="mdi mdi-plus"></i> Thêm người dùng
             </button>
         </div>

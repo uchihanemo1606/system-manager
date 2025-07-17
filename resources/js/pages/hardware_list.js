@@ -147,7 +147,7 @@ async function initHardwareFilterSelects() {
     const dbSelect = document.getElementById("filter-dbname");
     const dbverSelect = document.getElementById("filter-dbversion");
     const osSelect = document.getElementById("filter-os");
-    const osverSelect = document.getElementById("filter-osver"); 
+    const osverSelect = document.getElementById("filter-osver");
 
     // Tắt version ban đầu
     dbverSelect.disabled = true;
@@ -174,12 +174,14 @@ async function initHardwareFilterSelects() {
         });
     });
 
-    // Khi chọn dbname → load dbversion
+    // Khi chọn dbname → load dbversion     
     $(dbSelect).on("change", async function () {
         const val = this.value;
         dbverSelect.innerHTML = `<option></option>`;
         $(dbverSelect).val(null).trigger("change");
         dbverSelect.disabled = true;
+        applyFilter(); // <== Thêm dòng này để lọc sau khi chọn dbname
+
         if (!val) return;
 
         try {
@@ -197,6 +199,8 @@ async function initHardwareFilterSelects() {
         osverSelect.innerHTML = `<option></option>`;
         $(osverSelect).val(null).trigger("change");
         osverSelect.disabled = true;
+        applyFilter(); // <== Thêm dòng này để lọc sau khi chọn OS
+
         if (!val) return;
 
         try {
@@ -207,43 +211,37 @@ async function initHardwareFilterSelects() {
             console.error("Lỗi khi lấy OS version:", err);
         }
     });
+
 }
 
 function applyFilter() {
-    const ip = document.getElementById("filter-ip").value.toLowerCase();
-    const dbname = document.getElementById("filter-dbname").value.toLowerCase();
-    const dbversion = document
-        .getElementById("filter-dbversion")
-        .value.toLowerCase();
+    const ip = document.getElementById("filter-ip").value?.toLowerCase() || "";
+    const dbname = document.getElementById("filter-dbname").value || "";
+    const dbversion = document.getElementById("filter-dbversion").value || "";
     const virtual = document.getElementById("filter-virtual").value;
-    const os = document.getElementById("filter-os").value.toLowerCase();
-    const osver = document.getElementById("filter-osver").value.toLowerCase();
-    const hdd = document.getElementById("filter-hdd").value.toLowerCase();
-    const ram = document.getElementById("filter-ram").value.toLowerCase();
+    const os = document.getElementById("filter-os").value || "";
+    const osver = document.getElementById("filter-osver").value || "";
+    const hdd = document.getElementById("filter-hdd").value?.toLowerCase() || "";
+    const ram = document.getElementById("filter-ram").value?.toLowerCase() || "";
     const is_delete = document.getElementById("filter-delete").value;
-    const services = document
-        .getElementById("filter-services")
-        .value.toLowerCase();
-    const created_by = document
-        .getElementById("filter-createdby")
-        .value.toLowerCase();
+    const services = document.getElementById("filter-services").value?.toLowerCase() || "";
+    const created_by = document.getElementById("filter-createdby").value?.toLowerCase() || "";
     const created_at = document.getElementById("filter-createdat").value;
     const updated_at = document.getElementById("filter-updatedat").value;
 
     const filtered = allHardwareCache.filter((hw) => {
         return (
             (!ip || hw.ip?.toLowerCase().includes(ip)) &&
-            (!dbname || hw.dbname?.toLowerCase().includes(dbname)) &&
-            (!dbversion || hw.dbversion?.toLowerCase().includes(dbversion)) &&
+            (!dbname || hw.dbname === dbname) &&
+            (!dbversion || hw.dbversion === dbversion) &&
             (!virtual || String(hw.isVirtualServer) === virtual) &&
-            (!os || hw.OS?.toLowerCase().includes(os)) &&
-            (!osver || hw.OSver?.toLowerCase().includes(osver)) &&
+            (!os || hw.OS === os) &&
+            (!osver || hw.OSver === osver) &&
             (!hdd || hw.hdd?.toLowerCase().includes(hdd)) &&
             (!ram || hw.ram?.toLowerCase().includes(ram)) &&
             (!is_delete || String(hw.is_delete) === is_delete) &&
             (!services || hw.services?.toLowerCase().includes(services)) &&
-            (!created_by ||
-                hw.created_by?.toLowerCase().includes(created_by)) &&
+            (!created_by || hw.created_by?.toLowerCase().includes(created_by)) &&
             (!created_at || hw.created_at?.startsWith(created_at)) &&
             (!updated_at || hw.updated_at?.startsWith(updated_at))
         );

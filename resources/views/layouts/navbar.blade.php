@@ -68,13 +68,13 @@
                             <span>Danh Sách Phần Mềm</span>
                         </a>
                     </li>
-                    @endhasPermission 
+                    @endhasPermission
                     <li class="item">
                         <a data-key="log" class="link flex">
                             <i class="bx bxs-magic-wand"></i>
                             <span>Bản ghi hệ thống</span>
                         </a>
-                    </li>  
+                    </li>
                     {{-- <li class="item">
                         <a data-key="rule" class="link flex">
                             <i class="bx bxs-magic-wand"></i>
@@ -128,13 +128,15 @@
             <div class="dropdown-menu dropdown-menu-right">
                 <a class="dropdown-item" href="#" onclick="loadModal('profile')"><i
                         class="bx bx-user font-size-16 align-middle mr-1"></i> Hồ Sơ</a>
+                <a class="dropdown-item" href="#" onclick="loadModal('chane_password')"><i
+                        class="mdi mdi-shield-account text-info font-size-16 align-middle mr-1"></i> Bảo mật</a>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item text-danger coru" id="logout"><i
                         class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i>Đăng Xuất</button>
             </div>
         </div>
     </nav>
-  
+
 </body>
 <script src="{{ asset('js/style/bar.js') }}"></script>
 <script src="{{ asset('js/bar.js') }}"></script>

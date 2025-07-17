@@ -35,7 +35,7 @@ async function getSoftwarePermissions() {
         <span class="badge badge-light border mr-1 mb-1 px-2 py-1 text-primary" 
               data-toggle="tooltip" 
               title="${remaining}" 
-              style="font-size: 0.85rem; cursor: pointer;">+${remainingCount}</span>`;
+              style="font-size: 0.85rem; cursor: pointer;">+${remainingCount > 2 ? 2 : remainingCount}</span>`;
             }
 
             permissionsHTML += `</div>`;
