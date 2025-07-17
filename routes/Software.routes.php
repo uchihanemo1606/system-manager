@@ -33,8 +33,6 @@ Route::get('/getsoftwaredelte', [SoftwareController::class, 'getAllSoftwareIsDel
     ->middleware('check.permission')
     ->name('software.list');
 
-
- 
 // =======================================================================================SOFTWARE FILE ROUTE============================================================================================================================
 
 Route::post('/createsoftwarefile', [softwarefileController::class, 'createSoftwarefile'])

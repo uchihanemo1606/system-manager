@@ -18,6 +18,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->foreign('department')->references('name')->on('departments')->onUpdate('cascade');
         });
+
+        
     }
 
     /**
@@ -25,14 +27,17 @@ return new class extends Migration
      */
     public function down(): void
     {
+        
         Schema::table('departments', function (Blueprint $table) {
         // Nếu lỗi vẫn xảy ra, dùng tên key tường minh:
         // $table->dropForeign('departments_created_by_foreign');
         $table->dropForeign(['created_by']);
     });
+
     Schema::table('users', function (Blueprint $table) {
         // $table->dropForeign('users_department_foreign');
         $table->dropForeign(['department']);
     });
+
     }
 };
