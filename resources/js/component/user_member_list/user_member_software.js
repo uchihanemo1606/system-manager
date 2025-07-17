@@ -32,28 +32,28 @@ async function getSoftwarePermissions() {
             if (remainingCount > 0) {
                 const remaining = permissions.slice(2).join(", ");
                 permissionsHTML += `
-        <span class="badge badge-light border mr-1 mb-1 px-2 py-1 text-primary" 
-              data-toggle="tooltip" 
-              title="${remaining}" 
-              style="font-size: 0.85rem; cursor: pointer;">+${remainingCount > 2 ? 2 : remainingCount}</span>`;
-            }
+                <span class="badge badge-light border mr-1 mb-1 px-2 py-1 text-primary" 
+                    data-toggle="tooltip" 
+                    title="${remaining}" 
+                    style="font-size: 0.85rem; cursor: pointer;">+${remainingCount}</span>`;
+                    }
 
             permissionsHTML += `</div>`;
 
 
             tr.innerHTML = `
-    <td>${index + 1}</td>
-    <td>
-        <div class="fw-bold">${item.user_info.fullName}</div>   
-        <small class="text-muted">(${item.user_info.username})</small>
-    </td>
-    <td>${permissionsHTML}</td>
-    <td>
-        <button class="btn btn-primary btn-sm" onclick="loadModal('user_software_permission_edit', { username: '${item.user_info.username}', targetId: '${id}' })">
-            <i class="mdi mdi-pencil"></i> Sửa  
-        </button>
-    </td>
-`;
+                <td>${index + 1}</td>
+                <td>
+                    <div class="fw-bold">${item.user_info.fullName}</div>   
+                    <small class="text-muted">(${item.user_info.username})</small>
+                </td>
+                <td>${permissionsHTML}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="loadModal('user_software_permission_edit', { username: '${item.user_info.username}', targetId: '${id}' })">
+                        <i class="mdi mdi-pencil"></i> Sửa  
+                    </button>
+                </td>
+            `;
 
 
             userListTbody.appendChild(tr);

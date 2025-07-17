@@ -176,7 +176,7 @@
                             <div class="media">
                                 <div class="media-body">
                                     <p class="text-muted font-weight-medium">
-                                        Phát hành
+                                        Ngày tạo
                                     </p>
                                     <h5 class="mb-0" id="hardware-created">2/4/2025</h5>
                                 </div>

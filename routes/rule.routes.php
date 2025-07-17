@@ -8,9 +8,9 @@ use app\Http\Middleware\CheckPermission;
 
 // CATEGORY RULES ROUTES
 //tạo 1 lọi rule 
-Route::post('/createcateogryrule', [RuleController::class, 'createCategoryRule'])
-    ->middleware('check.permission')
-    ->name('legal.create');
+Route::post('/createcategoryrule', [RuleController::class, 'createCategoryRule']);
+    // ->middleware('check.permission')
+    // ->name('legal.create');
 //só 1 lội rule
 Route::delete('/deletecategoryrule', [RuleController::class, 'deleteCategoryRule'])
     ->middleware('check.permission')
@@ -77,7 +77,7 @@ Route::get('/getrulebyname', [RuleController::class, 'getRuleByName'])
 // SOFTWARE RULES ROUTES
 
 //thim 1 rule dào phằng mìm
-Route::post('/createsoftware', [RuleController::class, 'createSoftwareRule'])
+Route::post('/createsoftwarerule', [RuleController::class, 'createSoftwareRule'])
     ->middleware('check.permission')
     ->name('software.create');
 
@@ -91,3 +91,6 @@ Route::patch('/updatesoftwarerule', [RuleController::class, 'updateSoftwareRule'
     ->middleware('check.permission')
     ->name('software.edit');
 
+Route::get('/get_software_rules', [RuleController::class,'getRulesBySoftware'])
+    ->middleware('check.permission')
+    ->name('legal.create');

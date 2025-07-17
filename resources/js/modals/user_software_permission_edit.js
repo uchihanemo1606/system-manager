@@ -4,14 +4,10 @@ import { showToast } from "../component/toast";
 const defaultPermissions = [
     "xem phần mềm",
     "sửa phần mềm",
-    "xóa phần mềm"
-];
-
-const groupPermissionLabel = "Cấp quyền cho người dùng";
-const groupPermissionValues = [
+    "xóa phần mềm",
     "sửa người dùng quản lý phần mềm",
-    "thêm người dùng quản lý phần mềm",
-    "xoá người dùng quản lý phần mềm"
+    "thêm người dùng quản lý phần mềm", 
+    "xóa người dùng quản lý phần mềm",
 ];
 
 let currentEditing = {
@@ -37,13 +33,6 @@ window.initUserSoftwarePermissionEditModal = function (data) {
             let selected = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"))
                 .filter(input => input.id !== "perm-group")
                 .map(input => input.value);
-
-            const groupChecked = document.getElementById("perm-group").checked;
-            if (groupChecked) {
-                groupPermissionValues.forEach(p => {
-                    if (!selected.includes(p)) selected.push(p);
-                });
-            }
 
             await remove_user_permission_in_software({
                 username: currentEditing.username,
@@ -98,12 +87,5 @@ function renderPermissionCheckboxList() {
         `;
     });
 
-    const hasGroupPermissions = groupPermissionValues.every(p => currentEditing.permissions.includes(p));
-    container.innerHTML += `
-        <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="perm-group" ${hasGroupPermissions ? "checked" : ""}>
-            <label class="form-check-label" for="perm-group">${groupPermissionLabel}</label>
-        </div>
-    `;
 }
 

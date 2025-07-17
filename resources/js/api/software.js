@@ -1,4 +1,3 @@
-import { data } from "autoprefixer";
 import { defaultHeaders } from "../config/api_config";
 export async function create_software(data) {
     const res = await fetch("/api/createsoftware", {
@@ -40,7 +39,7 @@ export const update_software_file_by_id = async (id, data) => {
         throw err;
     }
 };
-export async function delete_software_file_by_id(id ) {
+export async function delete_software_file_by_id(id) {
     const res = await fetch(`/api/deletesoftwarefile/${id}`, {
         method: "DELETE",
         headers: defaultHeaders(), // đảm bảo có Authorization + Content-Type: application/json
@@ -50,6 +49,7 @@ export async function delete_software_file_by_id(id ) {
     if (!res.ok) throw new Error(result.message || "Lỗi xóa tài liệu thành công");
     return result;
 }
+
 export const get_all_software_file_by_id = async (id) => {
     const res = await fetch(
         `/api/getallsoftwarefilebysoftwareid/${encodeURIComponent(id)}`,
@@ -167,16 +167,19 @@ export async function get_all_permission_software_by_user({ username, softwareId
     if (!res.ok) throw new Error(result.message || "Lỗi khi lấy quyền.");
     return result.data || [];
 }
-export async function create_software_file({ software_id, file_name, file_path, description }) {
+export async function create_software_file({ software_id, file_name, file, description }) {
+    const formData = new FormData();
+    formData.append("software_id", software_id);
+    formData.append("file_name", file_name);
+    formData.append("file", file); // Truyền file thực
+    if (description) formData.append("description", description);
+
     const res = await fetch("/api/createsoftwarefile", {
         method: "POST",
-        headers: defaultHeaders(),
-        body: JSON.stringify({
-            software_id,
-            file_name,
-            file_path,
-            description, // thêm nếu cần
-        }),
+        headers: {
+            Authorization: defaultHeaders().Authorization, 
+        },
+        body: formData,
     });
 
     const result = await res.json();

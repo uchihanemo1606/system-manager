@@ -15,24 +15,32 @@
     <div class="card mb-3">
         <div class="card-body">
             <h5 class="mb-3">Bộ lọc tìm kiếm</h5>
-
+ 
             <div class="row">
                 <div class="col-md-3 mb-2">
                     <label class="fw-semibold ">Địa chỉ IP</label>
                     <input type="text" id="filter-ip" class="form-control" placeholder="Tìm theo IP">
-                </div>
+                </div> 
                 <div class="col-md-3 mb-2">
-                    <label class="fw-semibold">Database</label>
-                    <select id="filter-dbname" class="form-control select2">
-                        <option></option>
-                    </select>
+                    <label class="fw-semibold d-flex justify-content-between align-items-center">
+                        Ổ cứng (HDD)
+                        <medium class="text-muted ms-2">
+                            Hỗ trợ: <code>&gt;=500GB</code>, <code>&lt;1TB</code>, <code>=1024MB</code>
+                        </medium>
+                    </label>
+                    <input type="text" id="filter-hdd" class="form-control" placeholder="VD: >=500GB">
                 </div>
+
                 <div class="col-md-3 mb-2">
-                    <label class="fw-semibold">Phiên bản DB</label>
-                    <select id="filter-dbversion" class="form-control select2" disabled>
-                        <option></option>
-                    </select>
+                    <label class="fw-semibold d-flex justify-content-between align-items-center">
+                        RAM
+                        <medium class="text-muted ms-2">
+                            Hỗ trợ: <code>&gt;=8GB</code>, <code>&lt;=16GB</code>, <code>=1024MB</code>
+                        </medium>
+                    </label>
+                    <input type="text" id="filter-ram" class="form-control" placeholder="VD: >=8GB">
                 </div>
+
                 <div class="col-md-3 mb-2">
                     <label class="fw-semibold">Loại máy</label>
                     <select id="filter-virtual" class="form-control">
@@ -58,13 +66,18 @@
                         </select>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label class="fw-semibold">Ổ cứng (HDD)</label>
-                        <input type="text" id="filter-hdd" class="form-control" placeholder="VD: 500GB">
+                        <label class="fw-semibold">Database</label>
+                        <select id="filter-dbname" class="form-control select2">
+                            <option></option>
+                        </select>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label class="fw-semibold">RAM</label>
-                        <input type="text" id="filter-ram" class="form-control" placeholder="VD: 8GB">
+                        <label class="fw-semibold">Phiên bản DB</label>
+                        <select id="filter-dbversion" class="form-control select2" disabled>
+                            <option></option>
+                        </select>
                     </div>
+
                 </div>
 
                 <div class="row">
@@ -85,16 +98,24 @@
                         <input type="text" id="filter-createdby" class="form-control" placeholder="Tên người tạo">
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label class="fw-semibold">Ngày tạo</label>
-                        <input type="date" id="filter-createdat" class="form-control">
+                        <label class="fw-semibold">Ngày tạo (Từ - Đến)</label>
+                        <div class="d-flex gap-2">
+                            <input type="date" id="filter-createdat-from" class="form-control">
+                            <input type="date" id="filter-createdat-to" class="form-control">
+                        </div>
                     </div>
+
                 </div>
 
                 <div class="row">
                     <div class="col-md-3 mb-2">
-                        <label class="fw-semibold">Ngày cập nhật</label>
-                        <input type="date" id="filter-updatedat" class="form-control">
+                        <label class="fw-semibold">Ngày cập nhật (Từ - Đến)</label>
+                        <div class="d-flex gap-2">
+                            <input type="date" id="filter-updatedat-from" class="form-control">
+                            <input type="date" id="filter-updatedat-to" class="form-control">
+                        </div>
                     </div>
+
                 </div>
             </div>
 
@@ -102,7 +123,7 @@
                 <button class="btn btn-link text-primary p-0" type="button" onclick="toggleAdvancedFilters()">
                     <span id="toggle-text">Hiện thêm bộ lọc nâng cao</span>
                 </button>
-                <button class="btn btn-primary" onclick="applyFilter()">Tìm</button>
+                <button class="btn btn-primary" onclick="applyFilter()">Tìm kiếm</button>
             </div>
 
         </div>

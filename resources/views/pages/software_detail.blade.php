@@ -2,11 +2,11 @@
 @section('content')
 @hasPermission('software.detail')
 <div id="software-detail" style="display: none;">
-    <h4 class="mb-0 font-size-18 pb-2">Chi tiết phần mềm</h4> 
+    <h4 class="mb-0 font-size-18 pb-2">Chi tiết phần mềm</h4>
     <div class="row">
         <div class="col-lg-7">
             <div class="card position-relative">
-                <div class="position-absolute bottom-2 right-2" style="bottom: 0.5rem; right: 0.5rem;"> 
+                <div class="position-absolute bottom-2 right-2" style="bottom: 0.5rem; right: 0.5rem;">
                     @hasPermission('software.update')
                     <button id="toggle-edit-btn" class="btn btn-primary">
                         <i class="mdi mdi-pencil"></i> Sửa
@@ -63,12 +63,9 @@
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title mb-4">Quy chế</h4>
+            @include('components.software_rule')
+            @vite('resources/js/component/rule/software_rule.js')
 
-                </div>
-            </div>
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Thành viên quản lý phần mềm</h4>

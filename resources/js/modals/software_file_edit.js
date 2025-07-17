@@ -21,7 +21,7 @@ async function initSoftwareFileEditModal(data) {
         e.preventDefault();
 
         const updatedData = {
-            software_id: String(file.software_id),
+            software_id: file.software_id, 
             file_name: fileNameInput.value.trim(),
             file_path: filePathInput.value.trim(),
             description: descriptionInput.value.trim(),

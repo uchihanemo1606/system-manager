@@ -31,7 +31,7 @@ function renderHardware(list) {
         const deleted = hw.is_delete;
         const card = `
         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-            <div class="shadow-sm h-100 position-relative ${!active ? "bg-light text-muted border" : "border"}">
+            <div class="bg-white shadow-sm h-100 position-relative ${!active ? "bg-light text-muted border" : "border"}">
                 ${deleted ? `<div style="position:absolute;top:0;right:0;background:red;color:white;font-size:11px;padding:2px 6px;font-weight:600;border-bottom-left-radius:5px;z-index:10">ĐÃ XÓA</div>` : ""}
                 <div class="position-absolute" style="top:4px;left:4px;font-size:13px;z-index:2">
                     <span class="badge ${active ? "badge-primary" : "badge-secondary"} badge-custom">IP: ${hw.ip}</span>
@@ -90,7 +90,7 @@ async function initHardwareFilterSelects() {
         dbverSelect.innerHTML = `<option></option>`;
         $(dbverSelect).val(null).trigger("change");
         dbverSelect.disabled = true;
-        applyFilter();
+        // applyFilter();
 
         if (!this.value) return;
         const res = await get_versions_by_dbname(this.value);
@@ -102,7 +102,7 @@ async function initHardwareFilterSelects() {
         osverSelect.innerHTML = `<option></option>`;
         $(osverSelect).val(null).trigger("change");
         osverSelect.disabled = true;
-        applyFilter();
+        // applyFilter();
 
         if (!this.value) return;
         const res = await get_versions_by_os(this.value);
@@ -112,7 +112,8 @@ async function initHardwareFilterSelects() {
 }
 function parseCompareValue(str) {
     if (!str) return null;
-    const match = str.match(/^([<>]=?|=)?\s*(\d+)(gb|mb|tb)?$/i);
+    const match = str.match(/^([<>]=?|=)?\s*(\d+)\s*(gb|mb|tb)?$/i);
+
     if (!match) return null;
     const [, operator = "=", valueStr, unit = "GB"] = match;
     const multiplier = { mb: 1, gb: 1024, tb: 1024 * 1024 };
@@ -121,7 +122,8 @@ function parseCompareValue(str) {
 }
 
 function compareValue(hwValueStr, compare) {
-    const match = hwValueStr?.match(/^(\d+)(gb|mb|tb)?$/i);
+    const match = hwValueStr?.match(/^(\d+)\s*(gb|mb|tb)?$/i);
+
     if (!match) return false;
     const [, valueStr, unit = "GB"] = match;
     const multiplier = { mb: 1, gb: 1024, tb: 1024 * 1024 };
@@ -147,14 +149,19 @@ function applyFilter() {
         os: getRaw("filter-os"),
         osver: getRaw("filter-osver"),
         virtual: getRaw("filter-virtual"),
-        hdd: getVal("filter-hdd"),
-        ram: getVal("filter-ram"),
+        hdd: getRaw("filter-hdd"),
+        ram: getRaw("filter-ram"),
         is_delete: getRaw("filter-delete"),
         services: getVal("filter-services"),
         created_by: getVal("filter-createdby"),
-        created_at: getRaw("filter-createdat"),
-        updated_at: getRaw("filter-updatedat")
+        created_at_from: getRaw("filter-createdat-from"),
+        created_at_to: getRaw("filter-createdat-to"),
+        updated_at_from: getRaw("filter-updatedat-from"),
+        updated_at_to: getRaw("filter-updatedat-to")
     };
+
+    const ramCompare = parseCompareValue(f.ram);
+    const hddCompare = parseCompareValue(f.hdd);
 
     const filtered = allHardwareCache.filter(hw => {
         return (!f.ip || hw.ip?.toLowerCase().includes(f.ip)) &&
@@ -168,8 +175,10 @@ function applyFilter() {
             (!f.is_delete || String(hw.is_delete) === f.is_delete) &&
             (!f.services || hw.services?.toLowerCase().includes(f.services)) &&
             (!f.created_by || hw.created_by?.toLowerCase().includes(f.created_by)) &&
-            (!f.created_at || hw.created_at?.startsWith(f.created_at)) &&
-            (!f.updated_at || hw.updated_at?.startsWith(f.updated_at));
+            (!f.created_at_from || hw.created_at >= f.created_at_from) &&
+            (!f.created_at_to || hw.created_at <= f.created_at_to) &&
+            (!f.updated_at_from || hw.updated_at >= f.updated_at_from) &&
+            (!f.updated_at_to || hw.updated_at <= f.updated_at_to);
     });
 
     renderHardware(filtered);
