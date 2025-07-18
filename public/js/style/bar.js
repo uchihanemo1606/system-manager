@@ -2,10 +2,10 @@
 
 const routes = {
     login: "/login",
-    overview: "#",
+    overview: "/dashboard",
     users: "/user_list",
-    hardware: "/hardware_manager",
-    software: "/software_manager",
+    hardware: "/hardware_list",
+    software: "/software_list",
     software_file: "/software_detail",
     rule: "/rules",
     roles: "/roles",

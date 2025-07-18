@@ -76,6 +76,7 @@ class CheckPermission
                 Log::warning("User '{$user->username}' lacks permission '{$requiredPermission}' for route '{$routeName}'.", ['user_permissions' => $userPermissions]);
                 return response()->json([
                     'status' => 'error',
+                    'mypermission' => $userPermissions,
                     'message' => "Access Denied: You do not have the required permission ('{$requiredPermission}') to perform this action."
                 ], 403);
             }
