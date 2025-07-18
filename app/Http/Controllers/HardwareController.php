@@ -98,6 +98,10 @@ class HardwareController extends Controller
                 Log::warning('User not authenticated in getAllHardware');
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
+            
+            // if ($user->cannot('list', hardwareModel::class)) {
+            // return response()->json(['status' => 'error', 'message' => 'You do not have permission to view hardware'], 403);
+            // }
 
             // Sử dụng policy để kiểm tra người dùng có phải là quản lý phần cứng không
             $isManager = $user->can('viewAny', hardwareModel::class);
@@ -211,6 +215,7 @@ class HardwareController extends Controller
             $newData = $hardware->only([
                 'ip', 'dbname', 'dbversion', 'isVirtualServer', 'OS', 'OSver', 'hdd', 'ram', 'services',
             ]);
+
 
             // So sánh và tạo chuỗi thay đổi
             $changes = [];

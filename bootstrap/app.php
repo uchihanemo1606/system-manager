@@ -18,9 +18,22 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'json.exception' => JsonExceptionHandler::class,
-            'check.permission' => CheckPermission::class, 
+            'check.permission' => CheckPermission::class, // <<<<<< THÊM ALIAS MỚI Ở ĐÂY
+            'check.login' => CheckLogin::class,
+            // 'jwt.cookie' => JwtFromCookieMiddleware::class,
+            // Hoặc bạn có thể dùng Full Qualified Class Name (FQCN) nếu không muốn import:
+            // 'check.permission' => \App\Http\Middleware\CheckPermission::class,
         ]);
-
+        // Nếu bạn muốn CheckPermission cũng được áp dụng cho tất cả các route trong group 'api'
+        // giống như 'json.exception', bạn có thể thêm nó vào đây:
+        // $middleware->appendToGroup('api', [
+        //     'json.exception',
+        //     'check.permission' // <<<<<< THÊM VÀO GROUP 'api' NẾU CẦN
+        // ]);
+        // Tuy nhiên, từ file route bạn gửi trước, bạn đang áp dụng 'check.permission'
+        // cho từng route cụ thể, nên việc thêm vào group 'api' ở đây có thể không cần thiết
+        // trừ khi bạn muốn nó chạy cho MỌI route API.
+        // Giữ lại cấu hình hiện tại của bạn cho 'json.exception' 
         $middleware->appendToGroup('api', ['json.exception']);
     })
     ->withExceptions(function (Exceptions $exceptions) {
