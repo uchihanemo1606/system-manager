@@ -175,7 +175,32 @@ class AuthController extends Controller
             'token' => $token,
         ])->withCookie(cookie('auth_token', $token, 60, '/', null, false, false));
     }
+    public function refresh(Request $request)
+    {
+        try {
+            $token = JWTAuth::getToken();
 
+            if (!$token) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Token không tồn tại',
+                ], 401);
+            }
+
+            $newToken = JWTAuth::refresh($token);
+            $user = JWTAuth::setToken($newToken)->authenticate();
+
+            return response()->json([
+                'status' => 'success',
+                'token' => $newToken,
+            ])->withCookie(cookie('auth_token', $newToken, 60, '/', null, false, false));
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token không hợp lệ hoặc đã hết hạn',
+            ], 401);
+        }
+    }
     /**
      * Log out the authenticated user.
      *

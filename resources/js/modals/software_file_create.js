@@ -13,19 +13,23 @@ async function initSoftwareFileCreateModal(data) {
 
     const form = document.getElementById("create-software-file-form");
     if (!form) return;
-
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const file_name = document.getElementById("file-name").value.trim();
-        const file_path = document.getElementById("file-path").value.trim();
-        const description = document.getElementById("description").value.trim(); // nếu bạn cần
+        const fileInput = document.getElementById("file-path");
+        const file = fileInput.files[0]; // Lấy file thực
+        const description = document.getElementById("description").value.trim();
+
+        if (!file) {
+            showToast({ message: "Vui lòng chọn tập tin.", type: "error" });
+            return;
+        }
 
         try {
             const result = await create_software_file({
                 software_id: data.id,
                 file_name,
-                file_path,
-                // nếu cần gửi thêm description, thêm dòng này:
+                file,
                 description,
             });
             window.dispatchEvent(new Event("softwareFileCreated"));
@@ -34,7 +38,6 @@ async function initSoftwareFileCreateModal(data) {
                 type: "success",
                 timeout: 2000,
             });
-
         } catch (err) {
             console.error(err);
             showToast({
@@ -43,7 +46,8 @@ async function initSoftwareFileCreateModal(data) {
                 timeout: 3000,
             });
         }
-    }); // chỉ gắn 1 lần để tránh bị trùng sự kiện nhiều lần
+    });
+
 }
 
 window.initSoftwareFileCreateModal = initSoftwareFileCreateModal;

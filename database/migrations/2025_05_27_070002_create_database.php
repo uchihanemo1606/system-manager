@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('dbname',100)->unique();
             $table->string('created_by',100);
             $table->string('decription')->nullable();
-            $table->boolean('is_delete')->default(true);
+            $table->boolean('is_delete')->default(false);
 
             $table->foreign('created_by')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();

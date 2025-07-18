@@ -12,6 +12,8 @@ use App\Http\Middleware\CheckPermission;
 Route::post('/createUser', [AuthController::class, 'CreateUser'])
     ->middleware('check.permission')
     ->name('user.create');
+Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/getuser', [AuthController::class, 'getAuthenticatedUser']);

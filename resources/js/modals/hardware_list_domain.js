@@ -9,7 +9,7 @@ export async function initHardwareListDomainModal(ip) {
     try {
         const res = await get_domain_by_hardware(ip);
         if (res.data.domains) {
-            renderDomainList(res.data.domains, true);
+            renderDomainList(res.data.domains, true,false);
         } else {
             renderDomainList([]);
         }

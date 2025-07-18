@@ -2,6 +2,8 @@
     <title>Đăng Nhập</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <link href="assets\css\bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 <div class="login-container">
     <div class="login-title">Đăng Nhập</div>
@@ -25,7 +27,7 @@
                     <input type="checkbox" name="remember" class="mr-2">
                     <span>Nhớ tài khoản</span>
                 </label> --}}
-                <a  href="/forgot_password"  class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
+                <a href="/forgot_password" class="text-sm text-blue-500 hover:text-blue-700">Quên mật khẩu?</a>
             </div>
         </div>
         <button type="submit" class="login-btn">Đăng Nhập</button>

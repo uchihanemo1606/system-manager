@@ -343,6 +343,52 @@ class OSController extends Controller
             ], 500);
         }
     }
+
+    public function getOSById($id)
+    {
+        try{
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+            $os = OSModel::findOrFail($id);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Operating System retrieved successfully.',
+                'data' => $os
+            ], 200);
+        }
+        catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Operating System not found.'
+            ], 404);
+        }
+        catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        }
+        catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        }
+        catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not retrieve Operating System. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 // ============================================================================================OS VERSION============================================================================================
 
     public function createOSVersion(Request $request)

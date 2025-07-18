@@ -1,5 +1,5 @@
 
-export function renderDomainList(domains, is_Delete_Hardware_Domain = false) {
+export function renderDomainList(domains, is_Delete_Hardware_Domain = false, is_connect = true) {
     const tbody = document.querySelector("#domain_list tbody");
     if (!tbody) return;
 
@@ -10,13 +10,11 @@ export function renderDomainList(domains, is_Delete_Hardware_Domain = false) {
         return;
     }
 
-    const canCreate = window.permissions?.canCreateHardwareDomain;
-
     domains.forEach((domain) => {
         const tr = document.createElement("tr");
 
         let connectButton = "";
-        if (canCreate) {
+        if (is_connect) {
             connectButton = `
                 <button class="btn btn-sm btn-outline-primary me-2"
                     data-name="${domain.name}"
@@ -57,16 +55,7 @@ export function renderDomainList(domains, is_Delete_Hardware_Domain = false) {
                     onclick="loadModal('domain_detail', JSON.parse(this.dataset.domain))">
                     Chi tiết
                 </button>
-                <button
-                    class="btn btn-link p-0 dropdown-toggle mr-2"
-                    type="button"
-                    data-name="${JSON.stringify(domain.name)}"
-                    data-link="${JSON.stringify(domain.link)}"
-                    data-id="${JSON.stringify(domain.id)}"
-                     onclick="loadModal('hardware_domain_create', { name: this.dataset.name, link: this.dataset.link ,id: this.dataset.id})"
-                >
-                    Kết nối
-                </button>
+                ${connectButton}
                 ${deleteButton} 
             </td>
         `;

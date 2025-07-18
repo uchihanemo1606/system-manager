@@ -10,7 +10,6 @@ class databaseVersionModel extends Model
     protected $fillable = [
         'dbname',
         'version',
-        'version_description',
         'created_by',
         'decription',
         'is_delete'

@@ -7,7 +7,7 @@ async function getHardwarePermissions() {
         return;
     }
 
-    const res = await get_all_user_permission_hardware(ip); 
+    const res = await get_all_user_permission_hardware(ip);
     const userListTbody = document.getElementById("user-list-hardware");
 
     if (!userListTbody) {
@@ -23,9 +23,8 @@ async function getHardwarePermissions() {
 
             const permissions = item.permissions || [];
             const visiblePermissions = permissions.slice(0, 2);
-            const hiddenPermissions = permissions.slice(2);
-            const remainingCount = hiddenPermissions.length;
-
+            // const hiddenPermissions = permissions.slice(2); 
+            const remainingCount = permissions.length - visiblePermissions.length;
             // Tạo HTML badge
             let permissionsHTML = `<div class="d-flex flex-wrap align-items-start">`;
 
@@ -37,14 +36,13 @@ async function getHardwarePermissions() {
             });
 
             if (remainingCount > 0) {
+                const remaining = permissions.slice(2).join(", ");
                 permissionsHTML += `
-                    <span class="badge badge-light border mr-1 mb-1 px-2 py-1 text-primary"
-                          data-toggle="tooltip"
-                          title="${hiddenPermissions.join(", ")}"
-                          style="font-size: 0.85rem; cursor: pointer;">
-                        +${remainingCount}
-                    </span>`;
-            }
+                <span class="badge badge-light border mr-1 mb-1 px-2 py-1 text-primary" 
+                    data-toggle="tooltip" 
+                    title="${remaining}" 
+                    style="font-size: 0.85rem; cursor: pointer;">+${remainingCount}</span>`;
+                    }
 
             permissionsHTML += `</div>`;
 
@@ -66,10 +64,10 @@ async function getHardwarePermissions() {
             userListTbody.appendChild(tr);
         });
 
-        // Kích hoạt tooltip Bootstrap
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
+        // // Kích hoạt tooltip Bootstrap
+        // $(function () {
+        //     $('[data-toggle="tooltip"]').tooltip();
+        // });
 
     } else {
         userListTbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Không có dữ liệu</td></tr>`;

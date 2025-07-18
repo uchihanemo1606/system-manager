@@ -28,7 +28,7 @@ function initProfileModal() {
     }
 
     function setReadOnly(isReadOnly) {
-        ["fullName", "email", "phone_number"].forEach((id) => {
+        ["fullName",  "phone_number"].forEach((id) => {
             document.getElementById(id).readOnly = isReadOnly;
         });
         editBtn.classList.toggle("d-none", !isReadOnly);

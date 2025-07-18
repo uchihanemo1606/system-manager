@@ -2,7 +2,7 @@
 
 @section('content')
 @hasPermission('system.get')
-<div class="container-fluid">
+<div >
     <div class="page-title-box d-flex align-items-center justify-content-between">
         <h4 class="mb-0 font-size-18">
             <i class="bx bx-history"></i> Nhật ký hoạt động hệ thống

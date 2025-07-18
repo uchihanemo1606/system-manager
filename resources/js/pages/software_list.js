@@ -79,8 +79,8 @@ function applyFilter() {
 
 function renderSoftwareCard(software) {
     return `
-    <div class="col-12 col-sm-6 col-lg-4 mb-4">
-        <div class="card position-relative ${software.is_delete ? 'border-danger' : ''}">
+    <div class="col-12 col-sm-6 col-lg-3 mb-2">
+        <div class="card position-relative m-0 ${software.is_delete ? 'border-danger' : ''}">
     ${software.is_delete ? `
         <div style="
             position: absolute;
@@ -98,11 +98,7 @@ function renderSoftwareCard(software) {
 
             <div class="card-body">
                 <div class="media">
-                    <div class="avatar-md mr-4">
-                        <span class="avatar-title rounded-circle bg-light text-primary font-size-16">
-                            <img src="images/img-1.jpg" alt="" height="30">
-                        </span>
-                    </div>
+
                     <div class="media-body overflow-hidden">
                         <h5 class="font-size-15 mb-2 text-truncate">
                             <span class="font-weight-normal text-muted">Tên:</span>

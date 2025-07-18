@@ -11,7 +11,7 @@
     </div>
 
     @hasPermission('hardware.delete')
-    <div class="w-full d-flex justify-content-end mb-3">
+    <div class="w-full d-flex justify-content-end">
         <button id="delete-hardware-btn" class="btn btn-danger">
             <i class="mdi mdi-delete"></i> Xóa
         </button>
@@ -176,7 +176,7 @@
                             <div class="media">
                                 <div class="media-body">
                                     <p class="text-muted font-weight-medium">
-                                        Phát hành
+                                        Ngày tạo
                                     </p>
                                     <h5 class="mb-0" id="hardware-created">2/4/2025</h5>
                                 </div>

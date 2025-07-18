@@ -1,17 +1,17 @@
-import { get_all_permission_hardware_by_user, create_hardware_permission, remove_user_permission_in_hardware } from "../api/hardware";
+import {
+    get_all_permission_hardware_by_user,
+    create_hardware_permission,
+    remove_user_permission_in_hardware
+} from "../api/hardware";
 import { showToast } from "../component/toast";
 
 const defaultPermissions = [
     "xem phần cứng",
     "sửa phần cứng",
-    "xóa phần cứng"
-];
-
-const groupPermissionLabel = "Cấp quyền cho người dùng";
-const groupPermissionValues = [
+    "xóa phần cứng",
     "sửa người dùng quản lý phần cứng",
-    "thêm người dùng quản lý phần cứng",
-    "xoá người dùng quản lý phần cứng"
+    "thêm người dùng quản lý phần cứng", 
+    "xóa người dùng quản lý phần cứng"
 ];
 
 let currentEditing = {
@@ -28,11 +28,13 @@ window.initUserHardwarePermissionEditModal = function (data) {
     }
 
     currentEditing = { username, hardwareIp: ip, permissions: [] };
+
     document.getElementById("savePermissionBtn").onclick = async () => {
         try {
             // Thu thập quyền được chọn
             const selected = Array.from(document.querySelectorAll("#permissionCheckboxList input:checked")).map(input => input.value);
             console.log("Selected permissions:", selected);
+
             await remove_user_permission_in_hardware({
                 username: currentEditing.username,
                 hardwareIp: currentEditing.hardwareIp
@@ -55,6 +57,7 @@ window.initUserHardwarePermissionEditModal = function (data) {
             showToast({ message: "Lỗi: " + e.message, type: "error" });
         }
     };
+
     fetchPermissions();
 };
 
@@ -76,11 +79,11 @@ function renderPermissionCheckboxList() {
     const container = document.getElementById("permissionCheckboxList");
     container.innerHTML = "";
 
-    // Render các quyền cơ bản
     defaultPermissions.forEach(perm => {
         const isChecked = currentEditing.permissions.includes(perm);
         const div = document.createElement("div");
         div.className = "form-check mb-2";
+
         const safeId = perm.replace(/\s+/g, "-").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
         div.innerHTML = `
@@ -90,16 +93,4 @@ function renderPermissionCheckboxList() {
 
         container.appendChild(div);
     });
-
-    // Kiểm tra nếu có đủ cả 3 quyền quản lý người dùng thì tick sẵn checkbox gom nhóm
-    const hasGroupPermissions = groupPermissionValues.every(p => currentEditing.permissions.includes(p));
-    const groupDiv = document.createElement("div");
-    groupDiv.className = "form-check mb-2";
-    groupDiv.innerHTML = `
-        <input class="form-check-input" type="checkbox" id="perm-group" ${hasGroupPermissions ? "checked" : ""}>
-        <label class="form-check-label" for="perm-group">${groupPermissionLabel}</label>
-    `;
-    container.appendChild(groupDiv);
 }
-
-

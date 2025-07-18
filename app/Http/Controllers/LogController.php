@@ -30,6 +30,8 @@ class LogController extends Controller
             'hw_permission_user',
             'permission_name',
             'department',
+            'database_name',
+            'os_name',
 
         ];
         $logData = array_intersect_key($data, array_flip($fields));
@@ -51,18 +53,20 @@ class LogController extends Controller
                 return response()->json(['please login to use the function'], 404);
             }
 
-            $validator = Validator::make($request->all(), [
-                'username' => 'nullable|string|max:255',
-                'software_id' => 'nullable|integer',
-                'hardware_ip' => 'nullable|string|max:255',
-                'rule_id' => 'nullable|integer',
-                'message' => 'nullable|string|max:1000',
-                'software_file_id' => 'nullable|integer',
-                'link_domain' => 'nullable|string|max:255',
-                'sw_permission_user' => 'nullable|string|max:255',
-                'hw_permission_user' => 'nullable|string|max:255',
-                'permissions_name' => 'nullable|string|max:255',
-                'department' => 'nullable|string|max:255',
+        $validator = Validator::make($request->all(), [
+            'username' => 'nullable|string|max:255',
+            'software_id' => 'nullable|integer',
+            'hardware_ip' => 'nullable|string|max:255',
+            'rule_id' => 'nullable|integer',
+            'message' => 'nullable|string|max:1000',
+            'software_file_id' => 'nullable|integer',
+            'link_domain' => 'nullable|string|max:255',
+            'sw_permission_user' => 'nullable|string|max:255',
+            'hw_permission_user' => 'nullable|string|max:255',
+            'permissions_name' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
+            'database_name' => 'nullable|string|max:255',
+            'os_name' => 'nullable|string|max:255',
 
             ]);
 
@@ -96,17 +100,15 @@ class LogController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 404);
             }
 
-            $query = logModel::query();
+            $query = logModel::query()->where('is_delete', false);
 
             // Lọc theo từ khoá nếu có
             $keyword = $request->query('keyword');
             $exact = $request->query('exact');
             if ($keyword) {
-                // Mặc định là tìm đúng thứ tự
                 if (!isset($exact) || $exact == 1) {
                     $query->where('message', 'like', '%' . $keyword . '%');
                 } else {
-                    // exact = 0 thì tìm từng từ (không cần đúng thứ tự)
                     $keywords = array_filter(explode(' ', trim($keyword)));
                     foreach ($keywords as $kw) {
                         $query->where('message', 'like', '%' . $kw . '%');
@@ -114,8 +116,25 @@ class LogController extends Controller
                 }
             }
 
-            $logs = $query->get();
-            return response()->json($logs);
+            // Lấy logs và load các quan hệ
+            $logs = $query->with([
+                'software:id,softwareName',
+                'user:username,fullName',
+                'software_file_id:id,file_name',
+
+            ])->get();
+
+            // Biến đổi dữ liệu: thay id bằng name
+            $logsTransformed = $logs->map(function ($log) {
+                return [
+                    'username' => $log->user ? $log->user->fullName : $log->username,
+                    'software' => $log->software ? $log->software->softwareName : null,
+                    'software_file' => $log->software_file_id ? $log->software_file_id->file_name : null,
+                    'message' => $log->message,
+                ];
+            });
+
+            return response()->json($logsTransformed);
 
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);

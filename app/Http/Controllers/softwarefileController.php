@@ -14,6 +14,8 @@ use App\Models\softwareFileModel;
 
 class softwarefileController extends Controller
 {
+
+
     public function createSoftwarefile(Request $request)
     {
         try {
@@ -21,36 +23,43 @@ class softwarefileController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-           $validated = $request->validate([
-            'software_id' => 'required|string|max:25', //exists:hardware,ip|
-            'file_name' => 'required|string|max:255',
-            'file_path' => 'required|string|max:10000',
-            'description' => 'nullable|string|max:10000',
-        ]);
+            $validated = $request->validate([
+                'software_id' => 'required|string|exists:software,id|max:25',
+                'file_name' => 'required|string|max:255',
+                'file' => 'required|file|max:10240', // 10MB
+                'description' => 'nullable|string|max:10000',
+            ]);
 
-        $exists = softwareFileModel::where([
-            'software_id' => $validated['software_id'],
-            'file_name' => $validated['file_name'],
-            'file_path' => $validated['file_path'],
-        ])->exists();
+            $file = $request->file('file');
+            $filePath = $file->store('software_files', 'public');
 
-        if ($exists) {
+            // Kiểm tra trùng lặp theo tên file và phần mềm
+            $exists = softwareFileModel::where([
+                'software_id' => $validated['software_id'],
+                'file_name' => $validated['file_name'],
+                'file_path' => $filePath,
+            ])->exists();
+
+            if ($exists) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'File already exists for this software.'
+                ], 409);
+            }
+
+            $softwareFile = softwareFileModel::create([
+                'software_id' => $validated['software_id'],
+                'username' => $user->username,
+                'file_name' => $validated['file_name'],
+                'file_path' => $filePath,
+                'description' => $validated['description'] ?? null,
+            ]);
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'file already exists for this software.'
-            ], 409);
-        }
-       $softwareFile = softwareFileModel::create([
-            'software_id' => $validated['software_id'],
-            'username' => $user->username,
-            'file_name' => $validated['file_name'],
-            'file_path' => $validated['file_path'],
-            'description' => $validated['description'] ?? null,
-        ]);
-        return response()->json([
-            'message' => 'Software file created successfully.',
-            'data' => $softwareFile,
-        ], 201);
+                'message' => 'Software file uploaded and created successfully.',
+                'data' => $softwareFile,
+            ], 201);
+
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
@@ -69,15 +78,77 @@ class softwarefileController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Could not create hardware permission. ' . $e->getMessage()
+                'message' => 'Could not upload software file. ' . $e->getMessage()
             ], 500);
         }
-
     }
+
+
+
+    // public function createSoftwarefile(Request $request)
+    // {
+    //     try {
+    //         if (!$user = JWTAuth::parseToken()->authenticate()) {
+    //             return response()->json(['message' => 'Please login to use this function'], 401);
+    //         }
+
+    //        $validated = $request->validate([
+    //         'software_id' => 'required|string|exists:hardware,ip|max:25',
+    //         'file_name' => 'required|string|max:255',
+    //         'file_path' => 'required|string|max:10000',
+    //         'description' => 'nullable|string|max:10000',
+    //     ]);
+
+    //     $exists = softwareFileModel::where([
+    //         'software_id' => $validated['software_id'],
+    //         'file_name' => $validated['file_name'],
+    //         'file_path' => $validated['file_path'],
+    //     ])->exists();
+
+    //     if ($exists) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'file already exists for this software.'
+    //         ], 409);
+    //     }
+    //    $softwareFile = softwareFileModel::create([
+    //         'software_id' => $validated['software_id'],
+    //         'username' => $user->username,
+    //         'file_name' => $validated['file_name'],
+    //         'file_path' => $validated['file_path'],
+    //         'description' => $validated['description'] ?? null,
+    //     ]);
+    //     return response()->json([
+    //         'message' => 'Software file created successfully.',
+    //         'data' => $softwareFile,
+    //     ], 201);
+    //     } catch (TokenExpiredException $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Token has expired.'
+    //         ], 401);
+    //     } catch (TokenInvalidException $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Token is invalid.'
+    //         ], 401);
+    //     } catch (JWTException $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Token is absent or could not be parsed.'
+    //         ], 401);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Could not create hardware permission. ' . $e->getMessage()
+    //         ], 500);
+    //     }
+
+    // }
 
     public function updateSoftwareFile(Request $request, $softwareFileid)
     {
-         try {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
@@ -97,7 +168,7 @@ class softwarefileController extends Controller
             ]);
             $softwareFile = softwareFileModel::findOrFail($softwareFileid);
 
-            if(!$softwareFile) {
+            if (!$softwareFile) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Software file not found.'
@@ -109,7 +180,7 @@ class softwarefileController extends Controller
                 'message' => 'Software file updated successfully.',
                 'data' => $softwareFile,
             ], 200);
-        }catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'
@@ -149,7 +220,7 @@ class softwarefileController extends Controller
 
             $softwareFile = softwareFileModel::findOrFail($softwareFileid);
 
-            if(!$softwareFile) {
+            if (!$softwareFile) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Software file not found.'
@@ -224,7 +295,7 @@ class softwarefileController extends Controller
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            
+
             if (!$softwareId) {
                 return response()->json([
                     'status' => 'error',

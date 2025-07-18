@@ -8,8 +8,8 @@
     <div class="row">
         <!-- Thông tin Domain -->
         <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
+            <div class=" p-4 shadow-sm h-100">
+                <div class=" ">
                     <h5 class="card-title d-flex justify-content-between align-items-center mb-4">
                         <span class="text-primary">Tên miền</span>
                         <div>
@@ -55,8 +55,8 @@
 
         <!-- Danh sách Phần cứng -->
         <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
+            <div class="p-4  shadow-sm h-100">
+                <div class=" ">
                     <h5 class="card-title mb-0">
                         <i class="bx bx-server"></i> Phần cứng liên kết
                     </h5>
