@@ -1,8 +1,6 @@
 <?php
 
 use App\Http\Controllers\domainController;
-;
-
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use app\Http\Middleware\CheckPermission;
@@ -17,7 +15,7 @@ Route::get('/getalldomain', [domainController::class, 'getAllDomains'])
     ->middleware('check.permission')
     ->name('domain.list');
 
-Route::patch('/updatedomain', [domainController::class, 'updateDomain'])
+Route::patch('/updatedomain', [domainController::class,'updateDomain'])
     ->middleware('check.permission')
     ->name('domain.edit');
 
@@ -47,3 +45,4 @@ Route::get('/getdomainsbyhardware', [domainController::class, 'getdomainsbyhardw
 Route::delete('/removehardwareindomain/{hardwareIp}/{domainId}', [domainController::class, 'removeHardwareInDomain'])
     ->middleware('check.permission')
     ->name('hardwaredomain.delete');
+    

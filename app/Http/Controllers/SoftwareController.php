@@ -12,15 +12,14 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
 class SoftwareController extends Controller
 {
     public function createSoftware(Request $request)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['message' => 'Please login to use this function'], 401);
-            }
+            return response()->json(['message' => 'Please login to use this function'], 401);
+        }
 
             // Validate the request data
             $request->validate([
@@ -97,6 +96,12 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
+            
+            $id = $request->query('id');
+            if (!$id) {
+                return response()->json(['message' => 'Software id is required'], 400);
+            }
+
             $software = SoftwareModel::findOrFail($id);
 
             $request->validate([
@@ -130,11 +135,11 @@ class SoftwareController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Software not found'], 404);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not update software. ' . $e->getMessage()], 500);
         }
@@ -147,9 +152,9 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            // if ($user->cannot('viewAny', softwareModel::class)) {
-            // return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
-            // }
+            if ($user->cannot('viewAny', softwareModel::class)) {
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
+            }
 
             $software = SoftwareModel::all();
             return response()->json([
@@ -157,11 +162,11 @@ class SoftwareController extends Controller
                 'data' => $software
             ], 200);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve software. ' . $e->getMessage()], 500);
         }
@@ -244,9 +249,9 @@ class SoftwareController extends Controller
                 'data' => $software
             ], 200);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
@@ -310,13 +315,14 @@ class SoftwareController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Software not found'], 404);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not delete software. ' . $e->getMessage()], 500);
         }
     }
+
 }

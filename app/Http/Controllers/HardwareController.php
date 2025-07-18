@@ -213,6 +213,7 @@ class HardwareController extends Controller
                 'ip', 'dbname', 'dbversion', 'isVirtualServer', 'OS', 'OSver', 'hdd', 'ram', 'services',
             ]);
 
+
             // So sánh và tạo chuỗi thay đổi
             $changes = [];
             foreach ($oldData as $key => $oldValue) {

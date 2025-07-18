@@ -29,7 +29,6 @@ route::get('/sendmail', [MailController::class, 'sendEmail']);
 Route::get('/getmypermissions', [PermissionController::class, 'getMyPermissions']);
 
 
-
 Route::get('/sendotpresetpassword', [AuthController::class, 'sendOtpResetPassword']);
 Route::post('/verifyotpresetpassword', [AuthController::class, 'verifyOTP']);
 Route::patch('/resetpassword', [AuthController::class, 'resetPassword']);
