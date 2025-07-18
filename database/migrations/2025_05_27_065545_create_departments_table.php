@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('category_rule', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->string('name',300)->unique();
-            $table->string('description', 200)->nullable();
+            $table->string('name', 100)->unique();
+            $table->string('description')->nullable();
+            $table->string('created_by',100);
+            $table->boolean('is_delete')->default(false);
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('category_rule');
+        Schema::dropIfExists('departments');
     }
 };

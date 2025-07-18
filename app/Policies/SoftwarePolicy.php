@@ -11,86 +11,196 @@ use Illuminate\Support\Facades\Log;
 class SoftwarePolicy
 {
     /**
-     * Kiểm tra quyền trên phần cứng dựa trên route_name trong bảng route_permission.
+     * Hằng số cho tên role quản lý để tránh lỗi gõ sai và giúp code dễ bảo trì hơn.
      */
-    protected function checkSoftwarePermission(UserModel $user, softwareModel $software, string $permissionName): bool
-    {
-        // 1. Tìm route_name tương ứng với permissions_name từ bảng route_permission
-        // Sử dụng cache để tối ưu hóa truy vấn
-        $cacheKey = "route_permission_{$permissionName}";
-        $routeName = Cache::remember($cacheKey, now()->addHours(1), function () use ($permissionName) {
-            return DB::table('route_permission')
-                ->where('permissions_name', $permissionName)
-                ->value('route_name');
-        });
-
-        // 2. Nếu không tìm thấy route_name, ghi log và fallback
-        if (!$routeName) {
-            Log::warning("No route_name found for permission: {$permissionName} in route_permission table.", [
-                'user' => $user->username,
-                'software_id' => $software->ip,
-            ]);
-            return $user->hasPermissionTo($permissionName); // Fallback về quyền chung
-        }
-
-        // 3. Kiểm tra xem có quy tắc cụ thể trong bảng software_permissions
-        // với route_name thay vì permissions_name
-        $hasSpecificRules = DB::table('software_permissions')
-            ->where('user_name', $user->username)
-            ->where('software_id', $software->ip)
-            ->where('permissions_name', $routeName) // Kiểm tra route_name
-            ->exists();
-
-        // 4. Nếu có quy tắc cụ thể, trả về true
-        if ($hasSpecificRules) {
-            return true;
-        }
-
-        return false;
-    }
+    private const SOFTWARE_MANAGER_ROLE = 'quản lý phần mềm';
 
     /**
-     * Determine whether the user can view any models.
+     * Xác định xem người dùng có thể xem danh sách tất cả phần cứng không.
+     *
+     * @param  \App\Models\UserModel  $user
+     * @return bool
      */
     public function viewAny(UserModel $user): bool
     {
-        $hasPermission = DB::table('software_permissions')
-            ->where('user_name', $user->username)
-            ->where('permissions_name', 'software.list')
-            ->exists();
+        // === BẮT ĐẦU PHẦN GỠ LỖI QUAN TRỌNG ===
+        // Lấy danh sách roles từ DB
+        $rolesFromDb = DB::table('user_role')
+            ->where('username', $user->username)
+            ->pluck('role_name');
 
-        // níu trú là quản lý phầng kứng thì no one can't stop you
-        $roles = DB::table('user_role')->where('username', $user->username)->pluck('role_name')->map(function($r) {
-            return mb_strtolower($r, 'UTF-8');
+        // Chuẩn hóa roles: xóa khoảng trắng thừa và chuyển thành chữ thường
+        $normalizedRoles = $rolesFromDb->map(function ($roleName) {
+            // Quan trọng: Xử lý chuỗi để đảm bảo so sánh chính xác
+            return trim(mb_strtolower($roleName, 'UTF-8'));
         });
-        if ($roles->contains('quản lý phần mềm' | 'software manager')) {
-            return true;
-        }
 
-        return $hasPermission;
+        // Ghi log chi tiết để gỡ lỗi
+        Log::info('softwarePolicy@viewAny: Checking roles', [
+            'username' => $user->username,
+            'original_roles' => $rolesFromDb->toArray(),      // Vai trò gốc từ DB
+            'normalized_roles' => $normalizedRoles->toArray(),  // Vai trò đã được chuẩn hóa
+            'role_to_check' => self::SOFTWARE_MANAGER_ROLE, // Vai trò cần kiểm tra
+        ]);
+
+        // Kiểm tra xem người dùng có role quản lý không
+        $result = $normalizedRoles->contains(self::SOFTWARE_MANAGER_ROLE);
+
+        Log::info('softwarePolicy@viewAny: Result', [
+            'username' => $user->username,
+            'has_manager_role' => $result,
+        ]);
+        // === KẾT THÚC PHẦN GỠ LỖI QUAN TRỌNG ===
+
+        return $result;
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Xác định xem người dùng có thể xem một phần cứng cụ thể không.
+     *
+     * @param  \App\Models\UserModel  $user
+     * @param  \App\Models\softwareModel  $software
+     * @return bool
      */
     public function view(UserModel $user, softwareModel $software): bool
     {
-        return $this->checkSoftwarePermission($user, $software, 'software.view');
+        // Người dùng có vai trò quản lý thì luôn có quyền xem
+        if ($this->viewAny($user)) {
+             Log::info('User is manager, allowed to view.', ['username' => $user->username, 'software id' => $software->id]);
+             return true;
+        }
+
+        // Kiểm tra quyền cụ thể nếu không phải quản lý
+        return $this->checkSoftwarePermission($user, $software, 'software.list');
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Xác định xem người dùng có thể cập nhật phần cứng không.
+     *
+     * @param  \App\Models\UserModel  $user
+     * @param  \App\Models\softwareModel  $software
+     * @return bool
      */
-    public function update(UserModel $userModel, softwareModel $software): bool
+    public function update(UserModel $user, softwareModel $software): bool
+{
+    Log::info('softwarePolicy@update: Checking update permission', [
+        'username' => $user->username,
+        'software_id' => $software->id,
+    ]);
+    $result = $this->checkSoftwarePermission($user, $software, 'software.edit');
+    Log::info('SoftwarePolicy@update: Result', [
+        'username' => $user->username,
+        'software_id' => $software->id,
+        'result' => $result,
+    ]);
+    return $result;
+}
+
+public function delete(UserModel $user, softwareModel $software): bool
+{
+    Log::info('SoftwarePolicy@delete: Checking delete permission', [
+        'username' => $user->username,
+        'software_id' => $software->id,
+    ]);
+    $result = $this->checkSoftwarePermission($user, $software, 'software.delete');
+    Log::info('SoftwarePolicy@delete: Result', [
+        'username' => $user->username,
+        'software_id' => $software->id,
+        'result' => $result,
+    ]);
+    return $result;
+}
+
+// =====================================================================PERMISSION==================================================================================================
+
+    public function createPermission(UserModel $user, softwareModel $software): bool
     {
-        return $this->checkSoftwarePermission($userModel, $software, 'software.edit');
+        Log::info('SoftwarePolicy@createPermission: Checking create permission', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+        ]);
+        $result = $this->checkSoftwarePermission($user, $software, 'softwarepermission.create');
+        Log::info('SoftwarePolicy@createPermission: Result', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+            'result' => $result,
+        ]);
+        return $result;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(UserModel $userModel, softwareModel $software): bool
+    public function editPermission(UserModel $user, softwareModel $software): bool
     {
-        return $this->checkSoftwarePermission($userModel, $software, 'software.delete');
+        Log::info('SoftwarePolicy@editPermission: Checking edit permission', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+        ]);
+        $result = $this->checkSoftwarePermission($user, $software, 'softwarepermission.edit');
+        Log::info('SoftwarePolicy@editPermission: Result', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+            'result' => $result,
+        ]);
+        return $result;
+    }
+
+    public function deletePermission(UserModel $user, softwareModel $software): bool
+    {
+        Log::info('SoftwarePolicy@deletePermission: Checking delete permission', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+        ]);
+        $result = $this->checkSoftwarePermission($user, $software, 'softwarepermission.delete');
+        Log::info('SoftwarePolicy@deletePermission: Result', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+            'result' => $result,
+        ]);
+        return $result;
+    }
+
+// =====================================================================CHECK PERMISSION==================================================================================================
+
+    protected function checkSoftwarePermission(UserModel $user, softwareModel $software, string $routeName): bool
+    {
+        Log::info('SoftwarePolicy@checkSoftwarePermission: Start', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+            'route_name' => $routeName,
+        ]);
+
+        // Lấy permissions_name (tên quyền tiếng Việt) từ bảng route_permission
+        $permissionName = Cache::remember("permission_name_for_{$routeName}", now()->addHours(1), function () use ($routeName) {
+            return DB::table('route_permission')
+                ->where('route_name', $routeName)
+                ->value('permissions_name');
+        });
+
+        Log::info('SoftwarePolicy@checkSoftwarePermission: permissionName', [
+            'route_name' => $routeName,
+            'permission_name' => $permissionName,
+        ]);
+
+        if (!$permissionName) {
+            Log::warning("SoftwarePolicy@checkSoftwarePermission: No permission_name found for route", [
+                'user' => $user->username,
+                'route_name' => $routeName,
+            ]);
+            return false;
+        }
+
+        $hasPermission = DB::table('software_permissions')
+            ->where('user_name', $user->username)
+            ->where('software_id', $software->id)
+            ->where('permissions_name', $permissionName)
+            ->exists();
+
+        Log::info('SoftwarePolicy@checkSoftwarePermission: Result', [
+            'username' => $user->username,
+            'software_id' => $software->id,
+            'permission_name' => $permissionName,
+            'result' => $hasPermission,
+        ]);
+
+        return $hasPermission;
     }
 }

@@ -29,15 +29,14 @@ class LogController extends Controller
             'sw_permission_user',
             'hw_permission_user',
             'permission_name',
+            'department',
+            'database_name',
+            'os_name',
 
         ];
          $logData = array_intersect_key($data, array_flip($fields));
 
     // Thiết lập mặc định cho is_delete nếu chưa có
-    if (!isset($logData['is_delete'])) {
-        $logData['is_delete'] = false;
-    }
-
     try {
         logModel::create($logData);
     } catch (\Exception $e) {
@@ -65,7 +64,10 @@ class LogController extends Controller
             'sw_permission_user' => 'nullable|string|max:255',
             'hw_permission_user' => 'nullable|string|max:255',
             'permissions_name' => 'nullable|string|max:255',
-            'is_delete' => 'boolean'
+            'department' => 'nullable|string|max:255',
+            'database_name' => 'nullable|string|max:255',
+            'os_name' => 'nullable|string|max:255',
+
         ]);
 
         if ($validator->fails()) {
@@ -94,14 +96,47 @@ class LogController extends Controller
     }
 
     public function getAllLogs(Request $request)
-    {   try
-        {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 404);
-        }
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 404);
+            }
 
-        $logs = logModel::where('is_delete', false)->get();
-        return response()->json($logs);
+            $query = logModel::query()->where('is_delete', false);
+
+            // Lọc theo từ khoá nếu có
+            $keyword = $request->query('keyword');
+            $exact = $request->query('exact');
+            if ($keyword) {
+                if (!isset($exact) || $exact == 1) {
+                    $query->where('message', 'like', '%' . $keyword . '%');
+                } else {
+                    $keywords = array_filter(explode(' ', trim($keyword)));
+                    foreach ($keywords as $kw) {
+                        $query->where('message', 'like', '%' . $kw . '%');
+                    }
+                }
+            }
+
+            // Lấy logs và load các quan hệ
+            $logs = $query->with([
+                'software:id,softwareName',
+                'user:username,fullName',
+                'software_file_id:id,file_name',
+
+            ])->get();
+
+            // Biến đổi dữ liệu: thay id bằng name
+            $logsTransformed = $logs->map(function ($log) {
+                return [
+                    'username' => $log->user ? $log->user->fullName : $log->username,
+                    'software' => $log->software ? $log->software->softwareName : null,
+                    'software_file' => $log->software_file_id ? $log->software_file_id->file_name : null,
+                    'message' => $log->message,
+                ];
+            });
+
+            return response()->json($logsTransformed);
 
         } catch (TokenExpiredException $e) {
             return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
@@ -241,14 +276,13 @@ class LogController extends Controller
         }
     }
 
-    public function getLogCreateByUser(Request $request)
+    public function getLogCreateByUser(Request $request, $username)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 404);
             }
 
-            $username = $request->query('username');
             if (!$username) {
                 return response()->json(['message' => 'Username is required'], 400);
             }
@@ -259,6 +293,61 @@ class LogController extends Controller
 
             if ($logs->isEmpty()) {
                 return response()->json(['message' => 'No logs found for this user'], 404);
+            }
+
+            return response()->json($logs);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getLogByHardwarer(Request $request, $hardwareIP)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 404);
+            }
+
+            $logs = logModel::where('hardware_ip', $hardwareIP)
+                ->where('is_delete', false)
+                ->get();
+
+            if ($logs->isEmpty()) {
+                return response()->json(['message' => 'No logs found for this hardware IP'], 404);
+            }
+
+            return response()->json($logs);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getLogBySoftware(Request $request, $softwareId)
+    {
+        try
+        {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 404);
+            }
+
+            $logs = logModel::where('software_id', $softwareId)
+                ->where('is_delete', false)
+                ->get();
+
+            if ($logs->isEmpty()) {
+                return response()->json(['message' => 'No logs found for this software ID'], 404);
             }
 
             return response()->json($logs);

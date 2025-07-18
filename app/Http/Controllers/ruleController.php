@@ -39,6 +39,14 @@ class ruleController extends Controller
             'updated_at' => now(),
         ]);
 
+        logController::createLogAuto([
+            'username' => $user->username,
+            'category_rule_id' => $categoryRule,
+            'message' => 'Created category rule with ID: ' . $categoryRule,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         return response()->json([
             'message' => 'Category rule created successfully.',
             'id' => $categoryRule,
@@ -262,12 +270,17 @@ class ruleController extends Controller
                 'name' => 'required|string|max:100',
                 'description' => 'nullable|string|max:200',
                 'category_rule_id' => 'required|integer|exists:category_rules,id',
-                'file_url' => 'string|nullable|max:255',
-                'descripton' => 'string|nullable|max:600',
+                'file' => 'required|file|max:10240', 
             ];
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            // Xử lý upload file nếu có
+            $fileUrl = null;
+            if ($request->hasFile('file')) {
+                $fileUrl = $request->file('file')->store('rules_files', 'public');
             }
 
             $ruleId = DB::table('rules')->insertGetId([
@@ -275,9 +288,8 @@ class ruleController extends Controller
                 'description' => $request->input('description'),
                 'category_rule_id' => $request->input('category_rule_id'),
                 'username' => $user->username,
-                'file_url' => $request->input('file_url', null),
+                'file_url' => $fileUrl,
                 'date_release' => now(),
-                'descripton' => $request->input('description', null),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -285,6 +297,7 @@ class ruleController extends Controller
             return response()->json([
                 'message' => 'Rule created successfully.',
                 'id' => $ruleId,
+                'file_url' => $fileUrl,
             ], 201);
 
         } catch (TokenExpiredException $e) {

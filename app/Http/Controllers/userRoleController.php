@@ -49,7 +49,7 @@ class userRoleController extends Controller
 
             LogController::createLogAuto([
                 'username' => $user->username,
-                'message' => "User {$user->username} created a new user role: {$request->input('role_name')}.",
+                'message' => "User {$user->fullName} created a new user role: {$request->input('role_name')}.",
                 'is_delete' => false
             ]);
 
@@ -152,7 +152,7 @@ class userRoleController extends Controller
 
         LogController::createLogAuto([
             'username' => $user->username,
-            'message' => "User {$user->username} updated user role.",
+            'message' => "User {$user->fullName} updated user role.",
             'is_delete' => false
         ]);
 
@@ -221,7 +221,7 @@ class userRoleController extends Controller
 
             LogController::createLogAuto([
                 'username' => $user->username,
-                'message' => "User {$user->username} removed user role: {$request->input('role_name')}.",
+                'message' => "User {$user->fullName} removed user role: {$request->input('role_name')}.",
                 'is_delete' => true
             ]);
 

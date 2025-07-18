@@ -14,17 +14,36 @@ Route::get('/getallhardware', [HardwareController::class, 'getAllHardware'])
     ->middleware('check.permission')
     ->name('hardware.list');
 
-Route::patch('/updatehardware', [HardwareController::class, 'updateHardware'])
+Route::patch('/updatehardware/{ip}', [HardwareController::class, 'updateHardware'])
     ->middleware('check.permission')
     ->name('hardware.edit');
 
 Route::delete('/deletehardware', [HardwareController::class, 'deleteHardware']);
 Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareByIP'])
     ->middleware('check.permission')
-    ->name('hardware.list'); 
-// harware perrmision controller
+    ->name('hardware.list');
+
+
+// ======================================================================================================================================================================================================================================================
+// HARDWARE PERMISSION CONTROLLER
+
 
 Route::post('/createharwarepermission', [HardwarePermissionController::class, 'createHardwarePermission'])
     ->middleware('check.permission')
     ->name('hardwarepermission.create');
 
+Route::delete('/removeuserpermissioninhardware', [HardwarePermissionController::class, 'removeUserPermisionInHardware'])
+    ->middleware('check.permission')
+    ->name('hardwarepermission.delete');
+
+Route::get('/getdetailuserpermissioninhardware', [HardwarePermissionController::class, 'getDetailUserPermissionInHardware'])
+    ->middleware('check.permission')
+    ->name('hardwarepermission.list');
+
+Route::get('/getalluserpermissioninhardware/{hardwareIP}', [HardwarePermissionController::class, 'getUserInHardwarePermission'])
+    ->middleware('check.permission')
+    ->name('hardwarepermission.list');
+
+Route::delete('/removepermissionforuserinhardware/{hardware_ip}', [HardwarePermissionController::class, 'removePermissionsForUsersInHardware'])
+    ->middleware('check.permission')
+    ->name('hardwarepermission.delete');

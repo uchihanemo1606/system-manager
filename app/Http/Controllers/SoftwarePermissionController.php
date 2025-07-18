@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\permissionModel;
 use Illuminate\Http\Request;
 use App\Models\softwarePermissionModel;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,10 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use App\Http\Controllers\LogController;
+use App\Models\softwareModel;
+use App\Models\UserModel;
+use Illuminate\Support\Facades\Log;
 
 class SoftwarePermissionController extends Controller
 {
@@ -27,8 +32,25 @@ class SoftwarePermissionController extends Controller
             'permissions_name' => 'required|string|exists:permissions,permissions_name',
         ]);
 
+        // Kiểm tra xem người dùng có quyền tạo phần mềm không
+        $software = softwareModel::find($validated['software_id']);
+        if (!$software) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Software not found.'
+            ], 404);
+        }
+
+        if($user->cannot('createPermission', $software)) {
+            Log::warning('User denied create permission by policy', [
+                'username' => $user->username,
+                'software_id' => $software->id,
+            ]);
+            return response()->json(['status' => 'error', 'message' => 'You do not have permission to create this software.'], 403);
+        }
+
         // Kiểm tra type của permission
-        $permission = DB::table('permissions')->where('permissions_name', $validated['permissions_name'])->first();
+        $permission = permissionModel::where('permissions_name', $validated['permissions_name'])->first();
         if (!$permission || $permission->type !== 'software') {
             return response()->json([
                 'status' => 'error',
@@ -58,7 +80,11 @@ class SoftwarePermissionController extends Controller
             'user_createdby' => $user->username,
             'assigned_at' => now(),
         ]);
-
+        logController::createLogAuto([
+            'username' => $user->username,
+            'software_id' => $validated['software_id'],
+            'message' => "{$user->fullName} đã thêm quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
+        ]);
         return response()->json([
             'message' => 'Software permission created successfully.',
             'data' => $permission,
@@ -171,12 +197,35 @@ class SoftwarePermissionController extends Controller
                 ], 400);
             }
 
-            $userExists = DB::table('users')->where('username', $username)->exists();
-            $softwareExists = DB::table('software')->where('id', $softwareId)->exists();
-            if (!$userExists || !$softwareExists) {
+            $software = softwareModel::find($softwareId);
+            if (!$software) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User or software not found.'
+                    'message' => 'Software not found.'
+                ], 404);
+            }
+            
+            if($user->cannot('deletePermission', $software)) {
+                Log::warning('User denied delete permission by policy', [
+                    'username' => $user->username,
+                    'software_id' => $software->id,
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this software.'], 403);
+            }
+
+            // Không cho phép xóa quyền của chủ phần mềm
+            if ($username === $software->user_createby) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không thể xóa quyền của chủ phần mềm!'
+                ], 403);
+            }
+
+            $userExists = UserModel::where('username', $username)->exists();
+            if (!$userExists) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.'
                 ], 404);
             }
 
@@ -191,6 +240,12 @@ class SoftwarePermissionController extends Controller
                     'message' => 'No permissions found to delete for this user on this software.'
                 ], 404);
             }
+
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $softwareId,
+                'message' => "{$user->fullName} đã xóa quyền của người dùng {$username} trong phần mềm.",
+            ]);
 
             return response()->json([
                 'message' => 'User permissions removed successfully.',
@@ -207,39 +262,184 @@ class SoftwarePermissionController extends Controller
         }
     }
 
-    public function getAllUserPermissionInSoftware(Request $request)
+    public function removePermissionsForUsersInSoftware(Request $request, $softwareId)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            $username = $request->query('username') ?? $request->input('username');
-            if (!$username) {
+
+            if (!$softwareId) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'please input username'
+                    'message' => 'software_id is required.'
                 ], 400);
             }
-            $userExists = DB::table('users')->where('username', $username)->exists();
-            if (!$userExists) {
+
+            $users = $request->input('users'); // array: [{user_name, permissions: []}, ...]
+            if (!is_array($users) || empty($users)) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User not found.'
+                    'message' => 'users is required and must be an array.'
+                ], 400);
+            }
+
+            $software = softwareModel::find($softwareId);
+            if (!$software) {
+                return response()->json([
+                    'status' => 'not_found',
+                    'message' => 'Software not found.'
                 ], 404);
             }
-            $permissions = softwarePermissionModel::where('user_name', $username)
-                ->with(['user', 'software'])
-                ->get();
+
+            if($user->cannot('deletePermission', $software)) {
+                Log::warning('User denied delete permission by policy', [
+                    'username' => $user->username,
+                    'software_id' => $software->id,
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this software.'], 403);
+            }
+
+            $results = [];
+            // Lấy danh sách user hiện đang giữ quyền sửa và xóa
+            $currentEditUsers = softwarePermissionModel::where('software_id', $softwareId)
+                ->where('permissions_name', 'sửa phần mềm')
+                ->pluck('user_name')
+                ->toArray();
+
+            $currentDeleteUsers = softwarePermissionModel::where('software_id', $softwareId)
+                ->where('permissions_name', 'xóa phần mềm')
+                ->pluck('user_name')
+                ->toArray();
+
+            foreach ($users as $userData) {
+                $username = $userData['user_name'] ?? null;
+                $permissions = $userData['permissions'] ?? [];
+
+                if (!$username || !is_array($permissions) || empty($permissions)) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'error',
+                        'message' => 'user_name and permissions are required.'
+                    ];
+                    continue;
+                }
+
+                // Không cho phép xóa quyền của chủ phần mềm
+                if ($username === $software->user_createby) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Không thể xóa quyền của chủ phần mềm!'
+                    ];
+                    continue;
+                }
+
+                // Kiểm tra logic giữ lại ít nhất 1 quyền sửa và 1 quyền xóa
+                $editWillRemove = in_array('sửa phần mềm', $permissions) && in_array($username, $currentEditUsers);
+                $deleteWillRemove = in_array('xóa phần mềm', $permissions) && in_array($username, $currentDeleteUsers);
+
+                if ($editWillRemove && count($currentEditUsers) == 1) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Phần mềm này cần ít nhất 1 người giữ quyền sửa phần mềm!'
+                    ];
+                    continue;
+                }
+                if ($deleteWillRemove && count($currentDeleteUsers) == 1) {
+                    $results[] = [
+                        'user_name' => $username,
+                        'status' => 'forbidden',
+                        'message' => 'Phần mềm này cần ít nhất 1 người giữ quyền xóa phần mềm!'
+                    ];
+                    continue;
+                }
+
+                // Thực hiện xóa các quyền chỉ định
+                $deletedRows = softwarePermissionModel::where([
+                        'software_id' => $softwareId,
+                        'user_name' => $username,
+                    ])
+                    ->whereIn('permissions_name', $permissions)
+                    ->delete();
+
+                // Nếu xóa thành công thì cập nhật lại danh sách người giữ quyền sửa/xóa
+                if ($deletedRows > 0) {
+                    if ($editWillRemove) {
+                        $currentEditUsers = array_diff($currentEditUsers, [$username]);
+                    }
+                    if ($deleteWillRemove) {
+                        $currentDeleteUsers = array_diff($currentDeleteUsers, [$username]);
+                    }
+                }
+
+                $results[] = [
+                    'user_name' => $username,
+                    'deleted_rows' => $deletedRows,
+                    'status' => $deletedRows > 0 ? 'success' : 'error',
+                    'message' => $deletedRows > 0 ? 'Permissions removed.' : 'No permissions found to delete.'
+                ];
+            }
+
+            return response()->json([
+                'message' => 'Bulk permission removal completed.',
+                'results' => $results,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not remove permissions. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getAllUserPermissionInSoftware(Request $request, $softwareId)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            if (!$softwareId) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Vui lòng nhập software_id'
+                ], 400);
+            }
+
+            $softwareExists = softwareModel::where('id', $softwareId)->exists();
+            if (!$softwareExists) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Software not found.'
+                ], 404);
+            }
+
+            // Lấy tất cả user và quyền của họ trong phần mềm này
+            $permissions = softwarePermissionModel::where('software_id', $softwareId)
+                ->with(['user'])
+                ->get()
+                ->groupBy('user_name')
+                ->map(function ($items, $userName) {
+                    return [
+                        'user_name' => $userName,
+                        'permissions' => $items->pluck('permissions_name'),
+                        'user_info' => $items->first()->user ?? null,
+                    ];
+                })
+                ->values();
 
             if ($permissions->isEmpty()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'No software permissions found for this user.'
+                    'message' => 'No users found for this software.'
                 ], 404);
             }
 
             return response()->json([
-                'message' => 'User software permissions retrieved successfully.',
+                'message' => 'All users and their permissions in software retrieved successfully.',
                 'data' => $permissions,
             ], 200);
         } catch (TokenExpiredException $e) {
@@ -249,7 +449,7 @@ class SoftwarePermissionController extends Controller
         } catch (JWTException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Could not retrieve user software permissions. ' . $e->getMessage()], 500);
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve users and permissions. ' . $e->getMessage()], 500);
         }
     }
 
@@ -265,7 +465,22 @@ class SoftwarePermissionController extends Controller
                 'user_name' => 'required|string|exists:users,username',
                 'permissions_name' => 'required|string|exists:permissions,permissions_name',
             ]);
+            $software = softwareModel::find($validated['software_id']);
+            if (!$software) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Software not found.'
+                ], 404);
+            }
 
+            if($user->cannot('updatePermission', $software)) {
+                Log::warning('User denied update permission by policy', [
+                    'username' => $user->username,
+                    'software_id' => $software->id,
+                ]);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this software.'], 403);
+            }
+            
             // Kiểm tra type của permission
             $permission = DB::table('permissions')->where('permissions_name', $validated['permissions_name'])->first();
             if (!$permission || $permission->type !== 'software') {
@@ -290,6 +505,12 @@ class SoftwarePermissionController extends Controller
 
             $softwarePermission->permissions_name = $validated['permissions_name'];
             $softwarePermission->save();
+
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $validated['software_id'],
+                'message' => "{$user->fullName} đã cập nhật quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
+            ]);
 
             return response()->json([
                 'message' => 'Software permission updated successfully.',
@@ -349,6 +570,12 @@ class SoftwarePermissionController extends Controller
                 'permissions_name' => $validated['permissions_name'],
                 'user_createdby' => $user->username,
                 'assigned_at' => now(),
+            ]);
+
+            logController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $validated['software_id'],
+                'message' => "{$user->fullName} đã thêm quyền {$validated['permissions_name']} cho người dùng {$validated['user_name']} trong phần mềm.",
             ]);
 
             return response()->json([
