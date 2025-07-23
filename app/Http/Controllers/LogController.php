@@ -100,7 +100,7 @@ class LogController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 404);
             }
 
-            $query = logModel::query()->where('is_delete', false);
+            $query = logModel::query();
 
             // Lọc theo từ khoá nếu có
             $keyword = $request->query('keyword');
@@ -120,16 +120,37 @@ class LogController extends Controller
                 'software',
                 'user',
                 'softwareFile',
+                'hardware',
+                'department',
+                'permission',
+                'rule',
+                'role',
+                'domain',
+                'softwarePermission',
+                'hardwarePermission',
             ])->get();
 
-            // Biến đổi dữ liệu: thay id bằng name
             $logsTransformed = $logs->map(function ($log) {
-                return [
-                    'username' => $log->user ? $log->user->fullName : $log->username,
-                    'software' => $log->software ? $log->software->softwareName : null,
-                    'software_file' => $log->softwareFile ? $log->softwareFile->file_name : null,
-                    'message' => $log->message,
-                ];
+                $data = $log->toArray();
+
+                // Ghi đè các trường id bằng thông tin chi tiết
+                $data['username']       = $log->user ? $log->user->fullName : $log->username;
+                $data['software']       = $log->software ? $log->software->softwareName : $log->software_id;
+                $data['software_file']  = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
+                $data['hardware']       = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
+                $data['department']     = $log->department ? $log->department->name : $log->department ?? null;
+                $data['permission']     = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
+
+                // Nếu muốn show thêm các trường khác, thêm vào đây
+
+                unset($data['software_id']);
+                unset($data['hardware_ip']);
+                unset($data['software_file_id']);
+                unset($data['rule_id']);
+                unset($data['role_id']);
+                unset($data['permission_name']);
+
+                return $data;
             });
 
             return response()->json($logsTransformed);
