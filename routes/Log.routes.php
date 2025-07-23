@@ -14,3 +14,4 @@ Route::get('/getlogintime', [LogController::class,'getLogsInTime']);
 Route::get('/getlogcreatebyuser/{username}', [LogController::class,'getLogCreateByUser']);
 Route::get('/getloginhardware/{hardwareIP}', [LogController::class,'getLogByHardwarer']);
 route::get('/getloginsoftware/{softwareId}', [LogController::class,'getLogBySoftware']);
+Route::get('/getlogbyid/{id}', [LogController::class,'getLogById']);
