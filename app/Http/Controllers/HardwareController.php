@@ -32,11 +32,11 @@ class HardwareController extends Controller
         // Validate the request data
         $request->validate([
             'ip' => 'required|string|max:255',
-            'dbname' => 'required|string|max:100',
-            'dbversion' => 'required|string|max:100',
+            'dbname' => 'required|string|max:100|exists:database,dbname',
+            'dbversion' => 'required|string|max:100|exists:database_version,version',
             'isVirtualServer' => 'required|boolean',
-            'OS' => 'required|string|max:100',
-            'OSver' => 'required|string|max:100',
+            'OS' => 'required|string|max:100|exists:os,name',
+            'OSver' => 'required|string|max:100|exists:os_version,version',
             'hdd' => 'required|string|max:100',
             'ram'=> 'required|string|max:100',
             'services' => 'nullable|string|max:1000',
@@ -215,6 +215,7 @@ class HardwareController extends Controller
             $newData = $hardware->only([
                 'ip', 'dbname', 'dbversion', 'isVirtualServer', 'OS', 'OSver', 'hdd', 'ram', 'services',
             ]);
+
 
             // So sánh và tạo chuỗi thay đổi
             $changes = [];
