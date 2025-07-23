@@ -44,9 +44,6 @@ function renderCategoryRules(filterName = "", filterDescription = "") {
                     </div>
                 </div>
                 <div class="text-nowrap">
-                    <button class="btn btn-outline-primary btn-sm me-2"  onclick="loadModal('category_rules_list', { rule_id: '${rule.id}' })" title="Xem thêm">
-                        <i class="mdi ">rules</i>
-                    </button>
                     <button class="btn btn-outline-primary btn-sm me-2"  onclick="loadModal('category_rule_detail', { rule_id: '${rule.id}' })" title="Xem thêm">
                         <i class="mdi mdi-pencil"></i>
                     </button>

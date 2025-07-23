@@ -19,17 +19,17 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label>IP Phần cứng/ tên phần cứng</label>
+                    <label>IP Phần cứng</label>
                     <input type="text" id="filter-hardware-ip" class="form-control" placeholder="Nhập IP...">
                 </div>
 
                 <div class="col-md-3">
-                    <label>Phần mềm</label>
-                    <input type="text" id="filter-software-id" class="form-control" placeholder="ID phần mềm...">
+                    <label>Id Phần mềm/ tên phần mềm</label>
+                    <input type="text" id="filter-software-id" class="form-control" placeholder="ID hoặc tên phần mềm...">
                 </div>
 
                 <div class="col-md-3">
-                    <label>Quyền</label>
+                    <label>Tên role</label>
                     <input type="text" id="filter-permission-name" class="form-control" placeholder="Tên quyền...">
                 </div>
 
@@ -39,25 +39,9 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label>Domain</label>
+                    <label>đường dẫn domain</label>
                     <input type="text" id="filter-domain" class="form-control" placeholder="Link domain...">
-                </div>
-
-                <div class="col-md-3">
-                    <label>Phòng ban</label>
-                    <input type="text" id="filter-department" class="form-control" placeholder="Tên phòng ban...">
-                </div>
-
-                <div class="col-md-3">
-                    <label>Quyền phần mềm</label>
-                    <input type="text" id="filter-sw-permission" class="form-control" placeholder="Quyền phần mềm...">
-                </div>
-
-                <div class="col-md-3">
-                    <label>Quyền phần cứng</label>
-                    <input type="text" id="filter-hw-permission" class="form-control" placeholder="Quyền phần cứng...">
-                </div>
-
+                </div>   
                 <div class="col-md-3">
                     <label>Từ ngày</label>
                     <input type="date" id="filter-from-date" class="form-control">
@@ -97,12 +81,9 @@
                 <thead class="thead-light">
                     <tr>
                         <!-- <th>ID</th> -->
-                        <th>Người thực hiện</th>
-                        <th>Tên phần cứng</th>
-                        <th>Tên phần mềm</th>
-                        <th>Tên quyền</th>
+                        <th>Người thực hiện</th> 
                         <th>Log</th>
-                        <th>Thời gian tạo</th>
+                        <th>Thời gian thực thi</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
@@ -119,92 +100,7 @@
                 </nav>
             </div>
         </div>
-    </div>
-
-    <!-- Modal chi tiết -->
-    <div class="modal fade" id="logDetailModal" tabindex="-1" aria-labelledby="logDetailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Chi tiết nhật ký</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                </div>
-                <div class="modal-body">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <!-- <tr>
-                                <th>ID</th>
-                                <td id="detail-id"></td>
-                            </tr> -->
-                            <tr>
-                                <th>Người thực hiện</th>
-                                <td id="detail-username"></td>
-                            </tr>
-                            <tr>
-                                <th>IP Phần cứng</th>
-                                <td id="detail-hardware"></td>
-                            </tr>
-                            <tr>
-                                <th>tên phần mềm</th>
-                                <td id="detail-software"></td>
-                            </tr>
-                            <tr>
-                                <th>Tên quyền</th>
-                                <td id="detail-permission"></td>
-                            </tr>
-                            <tr>
-                                <th>Log</th>
-                                <td id="detail-message"></td>
-                            </tr>
-                            <tr>
-                                <th>Domain</th>
-                                <td id="detail-domain"></td>
-                            </tr>
-                            <tr>
-                                <th>Phòng ban</th>
-                                <td id="detail-department"></td>
-                            </tr>
-                            <tr>
-                                <th>Role ID</th>
-                                <td id="detail-role-id"></td>
-                            </tr>
-                            <tr>
-                                <th>Category Rule</th>
-                                <td id="detail-category-rule"></td>
-                            </tr>
-                            <tr>
-                                <th>Rule ID</th>
-                                <td id="detail-rule-id"></td>
-                            </tr>
-                            <tr>
-                                <th>Quyền phần mềm</th>
-                                <td id="detail-sw-permission"></td>
-                            </tr>
-                            <tr>
-                                <th>Quyền phần cứng</th>
-                                <td id="detail-hw-permission"></td>
-                            </tr>
-                            <tr>
-                                <th>File phần mềm</th>
-                                <td id="detail-software-file-id"></td>
-                            </tr>
-
-                            <tr>
-                                <th>Thời gian tạo</th>
-                                <td id="detail-created"></td>
-                            </tr>
-                            <tr>
-                                <th>Thời gian cập nhật</th>
-                                <td id="detail-updated"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
+    </div> 
 </div>
 @vite('resources/js/pages/log_list.js')
 @endhasPermission

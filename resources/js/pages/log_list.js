@@ -158,19 +158,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         pageLogs.forEach(log => {
             const tr = document.createElement("tr");
-           const safeLogJson = escapeHtml(JSON.stringify(log));
+            const safeLogJson = escapeHtml(JSON.stringify(log));
             tr.innerHTML = `
-                <td>${log.id}</td>
                 <td>${log.username || ""}</td>
-                <td>${log.hardware_ip || ""}</td>
-                <td>${log.software_id || ""}</td>
-                <td>${log.permission_name || ""}</td>
                 <td>${log.message || ""}</td>
                 <td>${formatDatetime(log.created_at)}</td>
                 <td>
-                    <button class="btn btn-sm btn-info btn-detail" data-log='${safeLogJson}'>Xem</button>
+                    <button class="btn btn-sm btn-info btn-detail"
+                    onclick="loadModal('log_detail', { id: '${log.id}' })"
+                    >Xem</button>
                 </td>
-            `;
+            `; 
             tbody.appendChild(tr);
         });
 
@@ -195,8 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "detail-permission": log.permission_name,
             "detail-message": log.message,
             "detail-domain": log.link_domain,
-            "detail-created": formatDatetime(log.created_at),
-            "detail-updated": formatDatetime(log.updated_at),
             "detail-department": log.department,
             "detail-role-id": log.role_id,
             "detail-category-rule": log.category_rule,

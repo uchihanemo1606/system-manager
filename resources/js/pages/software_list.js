@@ -81,29 +81,44 @@ function renderSoftwareCard(software) {
     return `
     <div class="col-12 col-sm-6 col-lg-3 mb-2">
         <div class="card position-relative m-0 ${software.is_delete ? 'border-danger' : ''}">
-    ${software.is_delete ? `
-        <div style="
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: red;
-            color: white;
-            padding: 2px 6px;
-            font-size: 12px;
-            font-weight: bold;
-            border-bottom-left-radius: 4px;
-        ">
-            ĐÃ XÓA
-        </div>` : ""}
+            ${software.is_delete ? `
+                <div style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    background: red;
+                    color: white;
+                    padding: 2px 6px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    border-bottom-right-radius: 4px;
+                    z-index: 1;
+                ">
+                    ĐÃ XÓA
+                </div>` : ""
+            }
+
+            <div style="
+                position: absolute;
+                top: 0;
+                right: 0;
+                background: #007bff;
+                color: white;
+                padding: 2px 6px;
+                font-size: 12px;
+                font-weight: bold;
+                border-bottom-left-radius: 4px;
+                z-index: 1;
+            ">
+                ${software.version || "N/A"}
+            </div>
 
             <div class="card-body">
                 <div class="media">
-
                     <div class="media-body overflow-hidden">
                         <h5 class="font-size-15 mb-2 text-truncate">
                             <span class="font-weight-normal text-muted">Tên:</span>
-                            <a href="software_detail?id=${software.id
-        }" class="text-dark font-weight-bold">
+                            <a href="software_detail?id=${software.id}" class="text-dark font-weight-bold">
                                 ${software.softwareName}
                             </a>
                         </h5> 
@@ -114,40 +129,29 @@ function renderSoftwareCard(software) {
                             </div>
                             <div class="mb-1">
                                 <span class="text-muted">Tạo bởi:</span>
-                                <span class="text-success font-weight-bold">${software.user_createby
-        }</span>
+                                <span class="text-success font-weight-bold">${software.user_createby}</span>
                             </div>
                         </div>
-
                         <p class="text-muted limit-3-lines mb-0">
                             ${software.description || "Không có mô tả"}
                         </p>
                     </div>
-
                 </div>
             </div>
             <div class="px-4 py-3 border-top d-flex justify-content-between">
                 <ul class="list-inline mb-0">
-                    <li class="list-inline-item mr-3">
-                        <span class="badge badge-primary">${software.version || "N/A"
-        }</span>
-                    </li>
-                    <li class="list-inline-item mr-3" data-toggle="tooltip" title="Ngày tạo">
-                        <i class="bx bx-calendar mr-1"></i> ${formatDate(
-            software.created_at
-        )}
+                    <li class="list-inline-item" data-toggle="tooltip" title="Ngày tạo">
+                        <i class="bx bx-calendar mr-1"></i> ${formatDate(software.created_at)}
                     </li>
                 </ul>
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item mr-3">
-                        <a href="/software_detail?id=${software.id
-        }&edit=true" title="Sửa" class="text-primary d-inline-flex align-items-center">
+                        <a href="/software_detail?id=${software.id}&edit=true" title="Sửa" class="text-primary d-inline-flex align-items-center">
                             <i class="bx bx-wrench mr-1"></i> Sửa
                         </a>
                     </li>
                     <li class="list-inline-item">
-                        <a href="/software_detail?id=${software.id
-        }" title="Chi tiết" class="text-muted d-inline-flex align-items-center">
+                        <a href="/software_detail?id=${software.id}" title="Chi tiết" class="text-muted d-inline-flex align-items-center">
                             <i class="bx bx-link-external mr-1"></i> Chi tiết
                         </a>
                     </li>
