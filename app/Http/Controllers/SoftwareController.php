@@ -152,11 +152,17 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            // if ($user->cannot('viewAny', softwareModel::class)) {
-            // return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
-            // }
+            // Nếu là quản lý phần mềm, trả về tất cả
+            if ($user->can('viewAny', SoftwareModel::class)) {
+                $software = SoftwareModel::all();
+            } else {
+                // Lấy danh sách id phần mềm user có quyền xem
+                $allowedIds = softwarePermissionModel::where('user_name', $user->username)
+                    ->where('permissions_name', 'xem phần mềm')
+                    ->pluck('software_id');
+                $software = SoftwareModel::whereIn('id', $allowedIds)->get();
+            }
 
-            $software = SoftwareModel::all();
             return response()->json([
                 'status' => 'success',
                 'data' => $software
