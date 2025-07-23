@@ -118,12 +118,10 @@ class LogController extends Controller
                 }
             }
 
-            // Lấy logs và load các quan hệ
             $logs = $query->with([
-                'software:id,softwareName',
-                'user:username,fullName',
-                'software_file_id:id,file_name',
-
+                'software',
+                'user',
+                'softwareFile',
             ])->get();
 
             // Biến đổi dữ liệu: thay id bằng name
@@ -131,7 +129,7 @@ class LogController extends Controller
                 return [
                     'username' => $log->user ? $log->user->fullName : $log->username,
                     'software' => $log->software ? $log->software->softwareName : null,
-                    'software_file' => $log->software_file_id ? $log->software_file_id->file_name : null,
+                    'software_file' => $log->softwareFile ? $log->softwareFile->file_name : null,
                     'message' => $log->message,
                 ];
             });
