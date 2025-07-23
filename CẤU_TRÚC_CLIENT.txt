@@ -1,0 +1,18 @@
+
+
+
+/public 
+/resources
+        là nơi chứa css, js, php
+        js call api xử lý dữ liệu sau đó render vào html5
+        90% tên file php tương ứng với tên js file 
+        modal/...php + modal/...js sẽ luôn tự gọi js khi php được render 
+        page/....php  sẽ tự render thông qua url /tên file
+    /js/component  /view/component
+        là nơi chứa các hàm js, trang php dùng lại nhiều trang 
+        tên js/component/...js trong component được đặt tương ứng với view/component/...php file 
+    /config
+        chứa config của hệ thống bao gồm config http call api
+    /api 
+        chứa các hàm gọi api 
+giao diện 90% là boostrap nên hầu như không có css tổng ngoại trừ public/css là nơi chưa css tổng wwebsite

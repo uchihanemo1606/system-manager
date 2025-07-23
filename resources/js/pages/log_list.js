@@ -170,46 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
             `; 
             tbody.appendChild(tr);
-        });
-
-        // 🛠 Di chuyển đoạn này VÀO renderPage để kích hoạt nút sau khi render
-        document.querySelectorAll(".btn-detail").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const log = JSON.parse(btn.dataset.log);
-                showDetail(log);
-            });
-        });
-
+        }); 
         renderPagination(totalPages);
         paginationInfo.textContent = `Trang ${currentPage} / ${totalPages}, Tổng ${allLogs.length} bản ghi`;
     }
-
-    function showDetail(log) {
-        const map = {
-            "detail-id": log.id,
-            "detail-username": log.username,
-            "detail-hardware": log.hardware_ip,
-            "detail-software": log.software_id,
-            "detail-permission": log.permission_name,
-            "detail-message": log.message,
-            "detail-domain": log.link_domain,
-            "detail-department": log.department,
-            "detail-role-id": log.role_id,
-            "detail-category-rule": log.category_rule,
-            "detail-rule-id": log.rule_id,
-            "detail-sw-permission": log.sw_permission_user,
-            "detail-hw-permission": log.hw_permission_user,
-            "detail-software-file-id": log.software_file_id
-        };
-
-        Object.entries(map).forEach(([id, value]) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = value ?? "(trống)";
-        });
-
-        const modal = new bootstrap.Modal(document.getElementById("logDetailModal"));
-        modal.show();
-    }
+ 
 
     function renderPagination(totalPages) {
         pagination.innerHTML = "";
