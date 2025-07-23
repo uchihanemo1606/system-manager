@@ -96,6 +96,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         : "<span class='text-muted'>Không có</span>"
                     }</p>
                                                 </div>
+                                                
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                                                 </div>

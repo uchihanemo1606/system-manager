@@ -19,7 +19,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label>IP Phần cứng</label>
+                    <label>IP Phần cứng/ tên phần cứng</label>
                     <input type="text" id="filter-hardware-ip" class="form-control" placeholder="Nhập IP...">
                 </div>
 
@@ -96,10 +96,10 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-light">
                     <tr>
-                        <th>ID</th>
+                        <!-- <th>ID</th> -->
                         <th>Người thực hiện</th>
-                        <th>IP Phần cứng</th>
-                        <th>ID Phần mềm</th>
+                        <th>Tên phần cứng</th>
+                        <th>Tên phần mềm</th>
                         <th>Tên quyền</th>
                         <th>Log</th>
                         <th>Thời gian tạo</th>
@@ -132,10 +132,10 @@
                 <div class="modal-body">
                     <table class="table table-bordered">
                         <tbody>
-                            <tr>
+                            <!-- <tr>
                                 <th>ID</th>
                                 <td id="detail-id"></td>
-                            </tr>
+                            </tr> -->
                             <tr>
                                 <th>Người thực hiện</th>
                                 <td id="detail-username"></td>
@@ -145,7 +145,7 @@
                                 <td id="detail-hardware"></td>
                             </tr>
                             <tr>
-                                <th>ID Phần mềm</th>
+                                <th>tên phần mềm</th>
                                 <td id="detail-software"></td>
                             </tr>
                             <tr>

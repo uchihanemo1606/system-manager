@@ -111,7 +111,7 @@
 
         </div>
     </nav>
-    <nav class="navbar flex flex-row" id="main_navbar">
+    <nav class="navbar flex flex-row " id="main_navbar">
         <i class="bx bx-menu" id="sidebar-open"></i>
         <form class="app-search d-none d-lg-block  " style="padding: 0;">
             <div class="position-relative">

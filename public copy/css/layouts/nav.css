@@ -220,7 +220,6 @@ label.required::after {
     left: 270px;
     padding: 10px 20px;
     background: #fff;
-    border-bottom: rgb(199, 199, 199) solid 0.001px ;
     transition: all 0.4s ease;
     z-index: 998;
 }

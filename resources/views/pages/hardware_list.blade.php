@@ -15,12 +15,12 @@
     <div class="card mb-3">
         <div class="card-body">
             <h5 class="mb-3">Bộ lọc tìm kiếm</h5>
- 
+
             <div class="row">
                 <div class="col-md-3 mb-2">
                     <label class="fw-semibold ">Địa chỉ IP</label>
                     <input type="text" id="filter-ip" class="form-control" placeholder="Tìm theo IP">
-                </div> 
+                </div>
                 <div class="col-md-3 mb-2">
                     <label class="fw-semibold d-flex justify-content-between align-items-center">
                         Ổ cứng (HDD)
@@ -132,8 +132,18 @@
     <div class="row" id="hardware-container">
         <!-- Danh sách phần cứng sẽ được JS đẩy vào đây -->
     </div>
-
-    <div class="row">
+    <ul class="pagination pagination-sm justify-content-center">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" data-page="0">Trang trước</a>
+        </li>
+        <li class="page-item active">
+            <a class="page-link" href="#" data-page="1">1</a>
+        </li>
+        <li class="page-item ">
+            <a class="page-link" href="#" data-page="2">Trang sau</a>
+        </li>
+    </ul>
+    <!-- <div class="row">
         <div class="col-12">
             <div class="text-center my-3">
                 <a href="javascript:void(0);" class="text-success" onclick="loadHardware()">
@@ -141,7 +151,7 @@
                 </a>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 @endsection
 
