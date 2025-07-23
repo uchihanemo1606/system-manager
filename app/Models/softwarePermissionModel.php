@@ -13,6 +13,7 @@ class softwarePermissionModel extends Model
         'user_name',
         'create_by',
         'permissions_name',
+        'assigned_at',
     ];
     public function software()
     {
@@ -29,6 +30,7 @@ class softwarePermissionModel extends Model
     {
         return [
             'created_at' => 'datetime',
+            'assigned_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
     }

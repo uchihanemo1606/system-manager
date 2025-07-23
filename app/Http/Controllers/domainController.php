@@ -270,7 +270,6 @@ class domainController extends Controller
         }
     }
 
-    
     public function getHardwareAndSoftwareInDomain(Request $request)
     {
         try {
@@ -378,58 +377,6 @@ class domainController extends Controller
         }
     }
 
-            $ip = $request->query('ip');
-            if (!$ip) {
-                return response()->json(['status' => 'error', 'message' => 'IP is required'], 400);
-            }
-
-            // Lấy tất cả bản ghi hardware-domain theo hardware_ip (có thể nhiều domain)
-            $hardwareAccessDomains = hardwareAccessDomainModel::where('hardware_ip', 'like', '%' . $ip . '%')->get();
-
-            if ($hardwareAccessDomains->isEmpty()) {
-                return response()->json(['status' => 'error', 'message' => 'No hardware found'], 404);
-            }
-
-            // Gom nhóm theo hardware_ip
-            $result = null;
-            $grouped = $hardwareAccessDomains->groupBy('hardware_ip');
-
-            foreach ($grouped as $hardware_ip => $items) {
-                $domains = [];
-
-                foreach ($items as $item) {
-                    $domain = DomainModel::find($item->domain_id);
-                    if ($domain) {
-                        $domains[] = $domain;
-                    }
-                }
-
-                if (!empty($domains)) {
-                    $result[] = [
-                        'hardware_ip' => $hardware_ip,
-                        'domains' => $domains
-                    ];
-                }
-            }
-
-            if (empty($result)) {
-                return response()->json(['status' => 'error', 'message' => 'No domain found for these hardware IPs'], 404);
-            }
-
-            return response()->json([
-                'message' => 'Domains by hardware IP retrieved successfully',
-                'data' => $result[0]
-            ]);
-        } catch (TokenExpiredException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
-        } catch (TokenInvalidException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
-        } catch (JWTException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Could not retrieve domains. ' . $e->getMessage()], 500);
-        }
-    }
     public function removeHardwareInDomain(Request $request, $hardwareIp, $domainId)
     {
         try {

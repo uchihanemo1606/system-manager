@@ -50,3 +50,6 @@ Route::get('/getallsoftwarefilebysoftwareid/{getAllSoftwareFileBySoftwareId}', [
 Route::get('/getallsoftwarefile', [softwarefileController::class, 'getAllSoftwareFile'])
     ->middleware('check.permission')
     ->name('software.list');
+Route::get('/getsoftwarebyid', [SoftwareController::class, 'getSoftwareById'])
+    ->middleware('check.permission')
+    ->name('software.detail');

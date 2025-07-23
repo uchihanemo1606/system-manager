@@ -116,7 +116,7 @@ class ruleController extends Controller
             $query = DB::table('software_rule')
                 ->join('rules', 'software_rule.rule_id', '=', 'rules.id')
                 ->join('software', 'software_rule.software_id', '=', 'software.id')
-                ->leftJoin('category_rule', 'rules.category_rule_id', '=', 'category_rule.id') // JOIN thêm bảng loại quy chế
+                ->leftJoin('category_rule', 'rules.category_id', '=', 'category_rule.id') // JOIN thêm bảng loại quy chế
                 ->select(
                     'software_rule.id as software_rule_id',
                     'software_rule.software_id',
@@ -328,7 +328,7 @@ class ruleController extends Controller
             $ruleId = DB::table('rules')->insertGetId([
                 'name' => $request->input('name'),
                 'description' => $request->input('description'),
-                'category_rule_id' => $request->input('category_rule_id'),
+                'category_id' => $request->input('category_rule_id'),
                 'username' => $user->username,
                 'file_url' => $fileUrl,
                 'date_release' => now(),

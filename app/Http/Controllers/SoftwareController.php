@@ -43,19 +43,18 @@ class SoftwareController extends Controller
             // Save the software record
             if ($software->save()) {
 
-                $fullPermissions = ['xem phần mềm', 'sửa phần mềm', 'xóa phần mềm','thêm người dùng quản lý phần mềm','sửa người dùng quản lý phần mềm','xóa người dùng quản lý phần mềm'];
-                $userName = $user->username;
+                $fullPermissions = ['xem phần mềm', 'sửa phần mềm', 'xóa phần mềm'];
                 foreach ($fullPermissions as $permission) {
                     softwarePermissionModel::create([
                         'software_id' => $software->id,
-                        'create_by' => $userName,
-                        'user_name' => $userName,
+                        'user_name' => $user->username,
                         'permissions_name' => $permission,
+                        'create_by' => $user->username,
                         'assigned_at' => now(),
-                    ]);
+                    ]); 
                 }
                 LogController::createLogAuto([
-                    'username' => $userName,
+                    'username' => $user->username,
                     'software_id' => $software->id,
                     'message' => " user {$user->fullName} created software '{$software->softwareName}'.",
                     'is_delete' => false
@@ -96,7 +95,6 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            
             $id = $request->query('id');
             if (!$id) {
                 return response()->json(['message' => 'Software id is required'], 400);
@@ -152,9 +150,9 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            if ($user->cannot('viewAny', softwareModel::class)) {
-            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
-            }
+            // if ($user->cannot('viewAny', softwareModel::class)) {
+            // return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
+            // }
 
             $software = SoftwareModel::all();
             return response()->json([
