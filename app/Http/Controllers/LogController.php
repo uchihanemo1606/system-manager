@@ -36,13 +36,13 @@ class LogController extends Controller
         ];
         $logData = array_intersect_key($data, array_flip($fields));
 
-    // Thiết lập mặc định cho is_delete nếu chưa có
-    try {
-        logModel::create($logData);
-    } catch (\Exception $e) {
-        // Ghi log lỗi vào laravel.log để dễ debug
-        Log::error('Log ghi không thành công: ' . $e->getMessage(), $logData);
-    }
+        // Thiết lập mặc định cho is_delete nếu chưa có
+        try {
+            logModel::create($logData);
+        } catch (\Exception $e) {
+            // Ghi log lỗi vào laravel.log để dễ debug
+            Log::error('Log ghi không thành công: ' . $e->getMessage(), $logData);
+        }
     }
 
     public function createLogManual(Request $request)
@@ -53,20 +53,20 @@ class LogController extends Controller
                 return response()->json(['please login to use the function'], 404);
             }
 
-        $validator = Validator::make($request->all(), [
-            'username' => 'nullable|string|max:255',
-            'software_id' => 'nullable|integer',
-            'hardware_ip' => 'nullable|string|max:255',
-            'rule_id' => 'nullable|integer',
-            'message' => 'nullable|string|max:1000',
-            'software_file_id' => 'nullable|integer',
-            'link_domain' => 'nullable|string|max:255',
-            'sw_permission_user' => 'nullable|string|max:255',
-            'hw_permission_user' => 'nullable|string|max:255',
-            'permissions_name' => 'nullable|string|max:255',
-            'department' => 'nullable|string|max:255',
-            'database_name' => 'nullable|string|max:255',
-            'os_name' => 'nullable|string|max:255',
+            $validator = Validator::make($request->all(), [
+                'username' => 'nullable|string|max:255',
+                'software_id' => 'nullable|integer',
+                'hardware_ip' => 'nullable|string|max:255',
+                'rule_id' => 'nullable|integer',
+                'message' => 'nullable|string|max:1000',
+                'software_file_id' => 'nullable|integer',
+                'link_domain' => 'nullable|string|max:255',
+                'sw_permission_user' => 'nullable|string|max:255',
+                'hw_permission_user' => 'nullable|string|max:255',
+                'permissions_name' => 'nullable|string|max:255',
+                'department' => 'nullable|string|max:255',
+                'database_name' => 'nullable|string|max:255',
+                'os_name' => 'nullable|string|max:255',
 
             ]);
 
@@ -134,12 +134,12 @@ class LogController extends Controller
                 $data = $log->toArray();
 
                 // Ghi đè các trường id bằng thông tin chi tiết
-                $data['username']       = $log->user ? $log->user->fullName : $log->username;
-                $data['software']       = $log->software ? $log->software->softwareName : $log->software_id;
-                $data['software_file']  = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
-                $data['hardware']       = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
-                $data['department']     = $log->department ? $log->department->name : $log->department ?? null;
-                $data['permission']     = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
+                $data['username'] = $log->user ? $log->user->fullName : $log->username;
+                $data['software'] = $log->software ? $log->software->softwareName : $log->software_id;
+                $data['software_file'] = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
+                $data['hardware'] = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
+                $data['department'] = $log->department ? $log->department->name : $log->department ?? null;
+                $data['permission'] = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
 
                 // Nếu muốn show thêm các trường khác, thêm vào đây
 
@@ -241,12 +241,12 @@ class LogController extends Controller
             $data = $log->toArray();
 
             // Ghi đè các trường id bằng thông tin chi tiết
-            $data['username']       = $log->user ? $log->user->fullName : $log->username;
-            $data['software']       = $log->software ? $log->software->softwareName : $log->software_id;
-            $data['software_file']  = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
-            $data['hardware']       = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
-            $data['department']     = $log->department ? $log->department->name : $log->department ?? null;
-            $data['permission']     = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
+            $data['username'] = $log->user ? $log->user->fullName : $log->username;
+            $data['software'] = $log->software ? $log->software->softwareName : $log->software_id;
+            $data['software_file'] = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
+            $data['hardware'] = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
+            $data['department'] = $log->department ? $log->department->name : $log->department ?? null;
+            $data['permission'] = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
 
             // Nếu muốn show thêm các trường khác, thêm vào đây
 
@@ -260,11 +260,11 @@ class LogController extends Controller
             return response()->json($data);
 
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve log. ' . $e->getMessage()], 500);
         }
@@ -279,9 +279,9 @@ class LogController extends Controller
             }
 
             // Nhận và chuyển đổi định dạng ngày từ d/m/Y sang Y-m-d
-            $date = $request->query('date'); 
-            $from = $request->query('from'); 
-            $to = $request->query('to');     
+            $date = $request->query('date');
+            $from = $request->query('from');
+            $to = $request->query('to');
 
             // Hàm chuyển đổi d/m/Y sang Y-m-d
             $convertDate = function ($str) {
@@ -295,8 +295,8 @@ class LogController extends Controller
             $from = $convertDate($from);
             $to = $convertDate($to);
 
-            $query = logModel::where('is_delete', false);
-
+            // $query = logModel::where('is_delete', false);
+            $query = logModel::query(); // ✅ Đây là chỗ sửa
             if ($date) {
                 $query->whereDate('created_at', $date);
             } elseif ($from && $to) {

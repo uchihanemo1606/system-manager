@@ -25,8 +25,7 @@
                     <input type="text" id="filter-version" class="form-control" placeholder="Phiên bản">
                 </div>
                 <div class="col-md-3 mb-2">
-                    <select id="filter-delete" class="form-control">
-                        <option value="">-- Trạng thái xóa --</option>
+                    <select id="filter-delete" class="form-control"> 
                         <option value="false">Chưa xóa</option>
                         <option value="true">Đã xóa</option>
                     </select>

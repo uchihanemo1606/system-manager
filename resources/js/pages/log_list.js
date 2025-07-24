@@ -5,16 +5,12 @@ import {
 import { showToast } from "../component/toast";
 
 document.addEventListener("DOMContentLoaded", () => {
-
     const usernameInput = document.getElementById("filter-username");
     const hardwareIpInput = document.getElementById("filter-hardware-ip");
     const softwareIdInput = document.getElementById("filter-software-id");
     const permissionNameInput = document.getElementById("filter-permission-name");
     const messageInput = document.getElementById("filter-message");
     const domainInput = document.getElementById("filter-domain");
-    const departmentInput = document.getElementById("filter-department");
-    const swPermissionInput = document.getElementById("filter-sw-permission");
-    const hwPermissionInput = document.getElementById("filter-hw-permission");
     const fromDateInput = document.getElementById("filter-from-date");
     const toDateInput = document.getElementById("filter-to-date");
 
@@ -55,9 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
             permission_name: permissionNameInput.value.trim(),
             message: messageInput.value.trim(),
             link_domain: domainInput.value.trim(),
-            department: departmentInput.value.trim(),
-            sw_permission_user: swPermissionInput.value.trim(),
-            hw_permission_user: hwPermissionInput.value.trim(),
             from_date: fromDateInput.value,
             to_date: toDateInput.value
         };
@@ -89,10 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!test(log.permission_name, "permission_name")) return false;
             if (!test(log.message, "message")) return false;
             if (!test(log.link_domain, "link_domain")) return false;
-            if (!test(log.department, "department")) return false;
-            if (!test(log.sw_permission_user, "sw_permission_user")) return false;
-            if (!test(log.hw_permission_user, "hw_permission_user")) return false;
-            if (filters.software_id && String(log.software_id || "") !== filters.software_id) return false;
+            if (filters.software_id && String(log.software_id || "") !== filters.software_id && !fuzzyIncludes(log.software, [filters.software_id])) return false;
 
             if (from || to) {
                 const logDate = new Date(log.created_at);
@@ -113,9 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
         permissionNameInput.value = "";
         messageInput.value = "";
         domainInput.value = "";
-        departmentInput.value = "";
-        swPermissionInput.value = "";
-        hwPermissionInput.value = "";
         fromDateInput.value = "";
         toDateInput.value = "";
     }
@@ -134,13 +121,15 @@ document.addEventListener("DOMContentLoaded", () => {
         currentPage = 1;
         renderPage();
     }
+
     function escapeHtml(str) {
-        return str.replace(/&/g, "&amp;")
+        return (str || "").replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+
     function renderPage() {
         tbody.innerHTML = "";
 
@@ -158,23 +147,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         pageLogs.forEach(log => {
             const tr = document.createElement("tr");
-            const safeLogJson = escapeHtml(JSON.stringify(log));
             tr.innerHTML = `
-                <td>${log.username || ""}</td>
-                <td>${log.message || ""}</td>
+                <td>${escapeHtml(log.username || "")}</td>
+                <td>${escapeHtml(log.message || "")}</td>
                 <td>${formatDatetime(log.created_at)}</td>
-                <td>
+                <td class="text-center">
                     <button class="btn btn-sm btn-info btn-detail"
-                    onclick="loadModal('log_detail', { id: '${log.id}' })"
+                        onclick="loadModal('log_detail', { id: '${log.id}' })"
                     >Xem</button>
                 </td>
-            `; 
+            `;
             tbody.appendChild(tr);
-        }); 
+        });
+
         renderPagination(totalPages);
-        paginationInfo.textContent = `Trang ${currentPage} / ${totalPages}, Tổng ${allLogs.length} bản ghi`;
+        paginationInfo.innerHTML = `Trang ${currentPage} / ${totalPages}<br>Tổng ${allLogs.length} bản ghi`;
+
     }
- 
 
     function renderPagination(totalPages) {
         pagination.innerHTML = "";
@@ -208,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatDatetime(datetimeStr) {
         if (!datetimeStr) return "";
         const date = new Date(datetimeStr);
-        return date.toLocaleString();
+        return date.toLocaleString("vi-VN");
     }
 
     function formatDate(dateStr) {

@@ -43,7 +43,7 @@ class SoftwareController extends Controller
             // Save the software record
             if ($software->save()) {
 
-                $fullPermissions = ['xem phần mềm', 'sửa phần mềm', 'xóa phần mềm'];
+                $fullPermissions = ['xem phần mềm', 'sửa phần mềm', 'xóa phần mềm','thêm người dùng quản lý phần mềm','sửa người dùng quản lý phần mềm','xóa người dùng quản lý phần mềm'];
                 foreach ($fullPermissions as $permission) {
                     softwarePermissionModel::create([
                         'software_id' => $software->id,

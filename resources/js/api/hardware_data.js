@@ -10,7 +10,7 @@ export async function get_all_hardware_os() {
 }
 
 export async function get_versions_by_os(osName) {
-    const res = await fetch(`/api/hardwareOsData/versions?name=${encodeURIComponent(osName)}`, {
+    const res = await fetch(`/api/getallversionofos/${osName}`, {
         headers: defaultHeaders(),
     });
     const result = await res.json();
