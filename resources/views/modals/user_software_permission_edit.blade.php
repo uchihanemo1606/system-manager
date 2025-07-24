@@ -1,7 +1,6 @@
 <div id="softwarePermissionModal">
     <div class="modal-header">
-        <h5 class="modal-title">Phân quyền người dùng</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title">Phân quyền người dùng</h5> 
     </div>
     <div class="modal-body">
         <div id="permissionCheckboxList" class="mb-3">

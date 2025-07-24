@@ -1,6 +1,3 @@
-
-
-
 /public 
 /resources
         là nơi chứa css, js, php

@@ -20,6 +20,7 @@ Route::delete('/deletedatabase/{id}', [databaseController::class, 'deleteDatabas
 Route::get('/getalldatabases', [databaseController::class, 'getAllDatabases'])
     ->middleware('check.permission')
     ->name('hardware.list');
+    
 
 Route::get('/getdatabaseactive', [databaseController::class, 'getDatabaseActive'])
     ->middleware('check.permission')

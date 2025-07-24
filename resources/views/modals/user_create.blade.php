@@ -1,12 +1,9 @@
 <div id="createUserModal" tabindex="-1" role="dialog">
     <form id="create-user-form" class="modal-content p-4" novalidate>
-        <div class="modal-header pb-4">
+        <div class="modal-header pb-2">
             <h5 class="modal-title w-100 text-center text-success" id="createUserModalLabel">
                 Tạo người dùng mới
-            </h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            </h5> 
         </div>
 
         <div class="modal-body pt-2">

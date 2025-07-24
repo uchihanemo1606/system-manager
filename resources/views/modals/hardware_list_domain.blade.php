@@ -1,4 +1,4 @@
- <div class="modal-body">
+ <div class="">
      <div class="table-responsive">
          <table class="table table-centered mb-0" id="domain_list">
              <thead>

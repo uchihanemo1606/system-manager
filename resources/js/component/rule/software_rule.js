@@ -80,10 +80,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                                                 <div class="modal-header bg-light">
                                                     <h5 class="modal-title fw-bold" id="ruleModalLabel${index}">
                                                         <i class="mdi mdi-file-document-outline text-primary me-1"></i> ${item.rule_name}
-                                                    </h5>
-                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    </h5> 
                                                 </div>
                                                 <div class="modal-body">
                                                     <p><strong>Mô tả:</strong><br>${item.rule_description || "<span class='text-muted'>Không có</span>"}</p>

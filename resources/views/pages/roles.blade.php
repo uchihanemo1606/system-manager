@@ -49,11 +49,9 @@
                     <table class="table project-list-table table-nowrap table-centered table-borderless">
                         <thead>
                             <tr>
-                                <th scope="col">Tên Quyền Hạng</th>
-                                <th scope="col">Permission</th>
-                                <th scope="col">Ngày tạo</th>
-                                <th scope="col">Người dùng liên quan</th>
-                                <th scope="col">Action</th>
+                                <th scope="col">Tên Quyền Hạng</th> 
+                                <th scope="col">Ngày tạo</th> 
+                                <th scope="col" class="text-right">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="role-table-body"></tbody>

@@ -89,7 +89,7 @@ export async function delete_software({ id }) {
 }
 
 export async function update_software({ id, ...data }) {
-    const res = await fetch(`/api/updatesoftware/${id}`, {
+    const res = await fetch(`/api/updatesoftware/${id}?id=${id}`, {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),

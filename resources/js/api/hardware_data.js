@@ -3,7 +3,7 @@ import { defaultHeaders } from "../config/api_config";
 // ----------- OS Data -----------
 
 export async function get_all_hardware_os() {
-    const res = await fetch("/api/hardwareOsData", { headers: defaultHeaders() });
+    const res = await fetch("/api/getallos", { headers: defaultHeaders() });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Không thể lấy danh sách OS.");
     return result;
@@ -18,8 +18,8 @@ export async function get_versions_by_os(osName) {
     return result;
 }
 
-export async function create_hardware_os_data(data) {
-    const res = await fetch("/api/hardwareOsData", {
+export async function create_hardware_os(data) {
+    const res = await fetch("/api/createos", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -28,6 +28,17 @@ export async function create_hardware_os_data(data) {
     if (!res.ok) throw new Error(result.message || "Lỗi khi thêm OS.");
     return result;
 }
+export async function create_hardware_os_version(data) {
+    const res = await fetch("/api/createosversion", {
+        method: "POST",
+        headers: defaultHeaders(),
+        body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi khi thêm OS version.");
+    return result;
+}
+
 
 export async function update_hardware_os_data(id, data) {
     const res = await fetch(`/api/hardwareOsData/${id}`, {
@@ -53,9 +64,15 @@ export async function delete_hardware_os_data(id) {
 // ----------- Database Data -----------
 
 export async function get_all_hardware_database() {
-    const res = await fetch("/api/hardwareDatabase", { headers: defaultHeaders() });
+    const res = await fetch("/api/getalldatabases", { headers: defaultHeaders() });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Không thể lấy danh sách Database.");
+    return result;
+}
+export async function get_all_hardware_database_version() {
+    const res = await fetch("/api/getalldatabaseversions", { headers: defaultHeaders() });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Không thể lấy danh sách Database version.");
     return result;
 }
 
@@ -69,13 +86,23 @@ export async function get_versions_by_dbname(dbname) {
 }
 
 export async function create_hardware_database(data) {
-    const res = await fetch("/api/hardwareDatabase", {
+    const res = await fetch("/api/createdatabase", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
     });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Lỗi khi thêm database.");
+    return result;
+}
+export async function create_hardware_database_version(data) {
+    const res = await fetch("/api/createdatabaseversion", {
+        method: "POST",
+        headers: defaultHeaders(),
+        body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi khi thêm database version.");
     return result;
 }
 

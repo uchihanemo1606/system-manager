@@ -9,8 +9,7 @@
             <a style="scale: 2" href="/login" class="nav_image">
                 <img src="images/logo.png" alt="logo_img" />
             </a>
-            <span class="logo_name">System Manager</span>
-
+            <span class="logo_name ">Hệ thống</span> 
             <i class="bx bx-lock-alt" id="lock-icon" title="Unlock Sidebar"></i>
             <i class="bx bx-x" id="sidebar-close"></i>
         </div>
@@ -23,7 +22,7 @@
                     </div>
                     <li class="item">
                         <a data-key="overview" class="link flex">
-                            <i class="bx bx-home-alt"></i>
+                            <i class="mdi 	mdi-counter"></i>
                             <span>Thống Kê</span>
                         </a>
                     </li>
@@ -38,7 +37,7 @@
                     @hasPermission('role.list')
                     <li class="item">
                         <a data-key="roles" class="link flex">
-                            <i class="bx bx-shield"></i>
+                            <i class="mdi mdi-account-key"></i>
                             <span>Quản Lý Vai Trò</span>
                         </a>
                     </li>
@@ -52,11 +51,7 @@
                     @hasPermission('hardware.list')
                     <li class="item">
                         <a data-key="hardware" class="link flex">
-                            <i class="bx"><svg style="width: 22px;height: 22px;" xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
-                                </svg></i>
+                            <i class="mdi mdi-chip"></i>
                             <span>Danh Sách Phần Cứng</span>
                         </a>
                     </li>
@@ -64,21 +59,21 @@
                     @hasPermission('software.list')
                     <li class="item">
                         <a data-key="software" class="link flex">
-                            <i class="bx bx-cloud-upload"></i>
+                            <i class="mdi mdi-application"></i>
                             <span>Danh Sách Phần Mềm</span>
                         </a>
                     </li>
                     @endhasPermission
-                    
+
                     <li class="item">
                         <a data-key="log" class="link flex">
-                            <i class="bx bxs-magic-wand"></i>
+                            <i class="mdi mdi-history"></i>
                             <span>Bản ghi hệ thống</span>
                         </a>
                     </li>
                     <li class="item">
                         <a data-key="rule" class="link flex">
-                            <i class="bx bxs-magic-wand"></i>
+                            <i class="mdi mdi-gavel"></i>
                             <span>Loại pháp lý</span>
                         </a>
                     </li>
@@ -87,19 +82,7 @@
                     <div class="menu_title flex">
                         <span class="title">Khác</span>
                         <span class="line"></span>
-                    </div>
-                    {{-- <li class="item">
-                        <a href="hardware_detail" class="link flex">
-                            <i class="bx bx-flag"></i>
-                            <span>Notice Board</span>
-                        </a>
-                    </li> --}}
-                    {{-- <li class="item">
-                        <a href="#" class="link flex">
-                            <i class="bx bx-award"></i>
-                            <span>Award</span>
-                        </a>
-                    </li> --}}
+                    </div> 
                     <li class="item">
                         <a href="#" class="link flex">
                             <i class="bx bx-cog"></i>
@@ -128,9 +111,9 @@
             </div>
             <div class="dropdown-menu dropdown-menu-right">
                 <a class="dropdown-item" href="#" onclick="loadModal('profile')"><i
-                        class="bx bx-user font-size-16 align-middle mr-1"></i> Hồ Sơ</a>
+                        class="mdi mdi-account font-size-16 align-middle mr-1"></i> Hồ Sơ</a>
                 <a class="dropdown-item" href="#" onclick="loadModal('chane_password')"><i
-                        class="mdi mdi-shield-account text-info font-size-16 align-middle mr-1"></i>Đổi mật khẩu</a>
+                        class="mdi mdi-lock text-info font-size-16 align-middle mr-1"></i>Đổi mật khẩu</a>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item text-danger coru" id="logout"><i
                         class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i>Đăng Xuất</button>

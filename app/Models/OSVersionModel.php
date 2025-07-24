@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OSVersionModel extends Model
 {
-    protected $table = "os_version";
+    protected $table = "_o_s_version";
 
     protected $fillable = [
         'os_name',

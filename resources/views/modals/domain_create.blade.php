@@ -5,11 +5,10 @@
          </div>
          <div class="modal-body">
 
-             <div class="mb-3">
+             <div class="mb-3 d-none">
                  <label for="domain-name" class="form-label required">Tên miền</label>
-                 <input type="text" class="form-control" id="domain-name" name="name" required>
-             </div>
-
+                 <input type="text" class="form-control" value="no_name" id="domain-name" name="name" required>
+             </div> 
              <div class="mb-3">
                  <label for="domain-link" class="form-label required">Liên kết</label>
                  <input type="text" class="form-control" id="domain-link" name="link" required>

@@ -1,7 +1,6 @@
 <div id="typePermissionCreateModal">
     <div class="modal-header">
-        <h5 class="modal-title">Thêm người dùng vào <span id="modalTypeLabel"></span></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title">Thêm người dùng vào <span id="modalTypeLabel"></span></h5> 
     </div>
 
     <div class="modal-body row">

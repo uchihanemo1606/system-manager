@@ -144,12 +144,7 @@ function renderSoftwareCard(software) {
                         <i class="bx bx-calendar mr-1"></i> ${formatDate(software.created_at)}
                     </li>
                 </ul>
-                <ul class="list-inline mb-0">
-                    <li class="list-inline-item mr-3">
-                        <a href="/software_detail?id=${software.id}&edit=true" title="Sửa" class="text-primary d-inline-flex align-items-center">
-                            <i class="bx bx-wrench mr-1"></i> Sửa
-                        </a>
-                    </li>
+                <ul class="list-inline mb-0"> 
                     <li class="list-inline-item">
                         <a href="/software_detail?id=${software.id}" title="Chi tiết" class="text-muted d-inline-flex align-items-center">
                             <i class="bx bx-link-external mr-1"></i> Chi tiết

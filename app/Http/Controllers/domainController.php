@@ -98,7 +98,6 @@ class domainController extends Controller
             $request->validate([
                 'id' => 'required|integer|exists:domain,id',
                 'name' => 'required|string|max:255',
-                'description' => 'nullable|string|max:1000',
                 'link' => 'required|string|max:255',
             ]);
 
@@ -109,18 +108,17 @@ class domainController extends Controller
             }
 
             // Lưu thông tin cũ
-            $oldData = $domain->only(['name', 'link', 'description']);
+            $oldData = $domain->only(['name', 'link']);
 
             // Update the domain record
             $domain->name = $request->input('name');
             $domain->link = $request->input('link', '');
-            $domain->description = $request->input('description');
             $domain->updated_at = now();
 
             // Save the updated domain record
             if ($domain->save()) {
                 // Lấy thông tin mới
-                $newData = $domain->only(['name', 'link', 'description']);
+                $newData = $domain->only(['name', 'link']);
 
                 // So sánh và tạo chuỗi thay đổi
                 $changes = [];
