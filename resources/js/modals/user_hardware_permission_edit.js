@@ -4,15 +4,7 @@ import {
     remove_user_permission_in_hardware
 } from "../api/hardware";
 import { showToast } from "../component/toast";
-
-const defaultPermissions = [
-    "xem phần cứng",
-    "sửa phần cứng",
-    "xóa phần cứng",
-    "sửa người dùng quản lý phần cứng",
-    "thêm người dùng quản lý phần cứng", 
-    "xóa người dùng quản lý phần cứng"
-];
+import { permissionSets } from "./type_permission_create"; // thêm dòng này ở đầu file nếu chưa có
 
 let currentEditing = {
     username: "",
@@ -32,9 +24,8 @@ window.initUserHardwarePermissionEditModal = function (data) {
     document.getElementById("savePermissionBtn").onclick = async () => {
         try {
             // Thu thập quyền được chọn
-            const selected = Array.from(document.querySelectorAll("#permissionCheckboxList input:checked")).map(input => input.value);
-            console.log("Selected permissions:", selected);
-
+            const selected = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"))
+                .map(input => input.value);
             await remove_user_permission_in_hardware({
                 username: currentEditing.username,
                 hardwareIp: currentEditing.hardwareIp
@@ -79,18 +70,72 @@ function renderPermissionCheckboxList() {
     const container = document.getElementById("permissionCheckboxList");
     container.innerHTML = "";
 
-    defaultPermissions.forEach(perm => {
+    // 1. Render default permissions
+    permissionSets.hardware.default.forEach(perm => {
         const isChecked = currentEditing.permissions.includes(perm);
-        const div = document.createElement("div");
-        div.className = "form-check mb-2";
-
         const safeId = perm.replace(/\s+/g, "-").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-        div.innerHTML = `
-            <input class="form-check-input" type="checkbox" id="perm-${safeId}" value="${perm}" ${isChecked ? "checked" : ""}>
-            <label class="form-check-label" for="perm-${safeId}">${perm}</label>
+        container.innerHTML += `
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="perm-${safeId}" value="${perm}" ${isChecked ? "checked" : ""}>
+                <label class="form-check-label" for="perm-${safeId}">${perm}</label>
+            </div>
         `;
+    });
 
-        container.appendChild(div);
+    // 2. Render group permissions
+    permissionSets.hardware.group.forEach(groupObj => {
+        for (const groupName in groupObj) {
+            const groupPerms = groupObj[groupName];
+
+            const normalize = str => str.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const currentPermsNormalized = currentEditing.permissions.map(normalize);
+
+            const hasAll = groupPerms.every(p => currentPermsNormalized.includes(normalize(p)));
+            const hasSome = groupPerms.some(p => currentPermsNormalized.includes(normalize(p)));
+
+            const showWarning = hasSome && !hasAll;
+
+            const safeId = groupName.replace(/\s+/g, "-").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const tooltipTitle = groupPerms.map(p => `• ${p}`).join("\n");
+
+            container.innerHTML += `
+                <div class="form-check mb-2 position-relative" title="${tooltipTitle}">
+                    <input class="form-check-input group-permission" type="checkbox"
+                        id="perm-${safeId}"
+                        value="${groupName}"
+                        data-children='${JSON.stringify(groupPerms)}'
+                        ${hasAll ? "checked" : ""}
+                    >
+                    <label class="form-check-label fw-bold text-primary" for="perm-${safeId}">
+                        ${groupName}
+                        ${showWarning ? '<span class="text-danger ms-1" title="Thiếu quyền con">❗</span>' : ""}
+                    </label>
+                </div>
+            `;
+        }
+    });
+
+    // 3. Bắt sự kiện click nhóm
+    container.querySelectorAll(".group-permission").forEach(input => {
+        input.addEventListener("change", () => {
+            const children = JSON.parse(input.dataset.children || "[]");
+            children.forEach(p => {
+                const childId = "perm-" + p.replace(/\s+/g, "-").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                let el = document.getElementById(childId);
+                if (!el) {
+                    const hiddenInput = document.createElement("input");
+                    hiddenInput.type = "checkbox";
+                    hiddenInput.id = childId;
+                    hiddenInput.value = p;
+                    hiddenInput.checked = input.checked;
+                    hiddenInput.classList.add("hidden-child", "form-check-input");
+                    hiddenInput.style.display = "none";
+                    container.appendChild(hiddenInput);
+                } else {
+                    el.checked = input.checked;
+                }
+            });
+        });
     });
 }

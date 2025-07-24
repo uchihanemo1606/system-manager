@@ -59,7 +59,7 @@ class HardwareController extends Controller
             // Save the hardware record
             if ($hardware->save()) {
 
-                $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xóa phần cứng', 'danh sách người dùng quản lý phần cứng', 'thêm người dùng quản lý phần cứng', 'sửa người dùng quản lý phần cứng', 'xóa người dùng quản lý phần cứng'];
+                $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xoá phần cứng', 'xem danh sách người dùng quản lý phần cứng', 'thêm người dùng quản lý phần cứng', 'sửa người dùng quản lý phần cứng', 'xoá người dùng quản lý phần cứng'];
                 foreach ($fullPermissions as $permission) {
                     hardwarePemisssionModel::create([
                         'hardware_ip' => $hardware->ip,

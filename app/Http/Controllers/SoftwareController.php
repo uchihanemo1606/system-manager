@@ -46,8 +46,8 @@ class SoftwareController extends Controller
                 $fullPermissions = [
                     'xem phần mềm',
                     'sửa phần mềm',
-                    'xóa phần mềm',
-                    'danh sách người dùng quản lý phần mềm',
+                    'xoá phần mềm',
+                    'xem danh sách người dùng quản lý phần mềm',
                     'sửa người dùng quản lý phần mềm',
                     'thêm người dùng quản lý phần mềm',
                     'xoá người dùng quản lý phần mềm',
