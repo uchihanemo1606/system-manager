@@ -43,7 +43,15 @@ class SoftwareController extends Controller
             // Save the software record
             if ($software->save()) {
 
-                $fullPermissions = ['xem phần mềm', 'sửa phần mềm', 'xóa phần mềm','thêm người dùng quản lý phần mềm','sửa người dùng quản lý phần mềm','xóa người dùng quản lý phần mềm'];
+                $fullPermissions = [
+                    'xem phần mềm',
+                    'sửa phần mềm',
+                    'xóa phần mềm',
+                    'danh sách người dùng quản lý phần mềm',
+                    'sửa người dùng quản lý phần mềm',
+                    'thêm người dùng quản lý phần mềm',
+                    'xoá người dùng quản lý phần mềm',
+                ];
                 foreach ($fullPermissions as $permission) {
                     softwarePermissionModel::create([
                         'software_id' => $software->id,
@@ -152,21 +160,36 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            // Nếu là quản lý phần mềm, trả về tất cả
-            if ($user->can('viewAny', SoftwareModel::class)) {
-                $software = SoftwareModel::all();
-            } else {
-                // Lấy danh sách id phần mềm user có quyền xem
+            $isManager = $user->can('viewAny', SoftwareModel::class);
+
+            $softwareQuery = SoftwareModel::query();
+
+            // Nếu không phải quản lý, chỉ lấy những phần mềm user được phép xem
+            if (!$isManager) {
                 $allowedIds = softwarePermissionModel::where('user_name', $user->username)
                     ->where('permissions_name', 'xem phần mềm')
                     ->pluck('software_id');
-                $software = SoftwareModel::whereIn('id', $allowedIds)->get();
+                $softwareQuery->whereIn('id', $allowedIds);
+            }
+
+            $software = $softwareQuery->get();
+            $total = $software->count();
+
+            if ($software->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No software found for your account',
+                    'total' => 0,
+                    'data' => []
+                ], 200);
             }
 
             return response()->json([
                 'status' => 'success',
+                'total' => $total,
                 'data' => $software
             ], 200);
+
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
@@ -321,7 +344,7 @@ class SoftwareController extends Controller
                 'data' => $software[0]
             ], 200);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status' => 'error', 'message' => 'ERRRR'], 401); 
-        } 
+            return response()->json(['status' => 'error', 'message' => 'ERRRR'], 401);
+        }
     }
 }

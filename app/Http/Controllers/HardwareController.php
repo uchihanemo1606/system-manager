@@ -103,7 +103,6 @@ class HardwareController extends Controller
             // return response()->json(['status' => 'error', 'message' => 'You do not have permission to view hardware'], 403);
             // }
 
-            // Sử dụng policy để kiểm tra người dùng có phải là quản lý phần cứng không
             $isManager = $user->can('viewAny', hardwareModel::class);
             Log::info('Policy check result for viewAny', [
                 'username' => $user->username,
@@ -123,8 +122,6 @@ class HardwareController extends Controller
 
                 Log::info('Found allowed IPs for user', ['username' => $user->username, 'allowedIps' => $allowedIps->toArray()]);
 
-                // Query sẽ chỉ lấy các hardware có IP nằm trong danh sách được phép.
-                // Nếu $allowedIps rỗng, query sẽ không trả về kết quả nào (đây là hành vi đúng).
                 $hardwareQuery->whereIn('ip', $allowedIps);
             } else {
                 Log::info('User is a manager, will fetch all hardware.', ['username' => $user->username]);

@@ -540,4 +540,40 @@ class databaseController extends Controller
         }
     }
 
+    public function getAllDatabaseVersionsByDatabaseName($dbname)
+    {
+        try
+        {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+            
+            $databaseVersions = databaseVersionModel::where('dbname', $dbname)->get();
+            return response()->json([
+                'status' => 'success',
+                'data' => $databaseVersions
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not retrieve database versions by name. ' . $e->getMessage()
+            ], 500);
+        }   
+    }
+
 }

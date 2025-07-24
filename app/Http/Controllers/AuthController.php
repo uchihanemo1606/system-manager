@@ -472,38 +472,37 @@ class AuthController extends Controller
 
             $request->validate(['email' => 'required|email']);
             $email = $request->input('email');
-            //check email có bé nào đang sử dụng hông
             $user = UserModel::where('email', $email)->first();
             if (!$user) {
                 return response()->json(['success' => false, 'message' => 'Email không tồn tại!'], 404);
             }
 
-            // check sem chú có smap otp hông
             $lastOtp = passwordResetModel::where('email', $email)->first();
-            if ($lastOtp && $lastOtp->created_at && now()->diffInSeconds($lastOtp->created_at) < 60) {
-                $wait = 60 - now()->diffInSeconds($lastOtp->created_at);
-                return response()->json([
-                    'success' => false,
-                    'message' => "Bạn vừa yêu cầu OTP, vui lòng đợi {$wait} giây nữa để gửi lại."
-                ], 429);
+            if ($lastOtp && $lastOtp->created_at) {
+                $createdAtAdjusted = $lastOtp->created_at->setTimezone('Asia/Ho_Chi_Minh');
+                $timeDiff = now()->diffInSeconds($createdAtAdjusted);
+                Log::info('Time difference check', [
+                    'now' => now()->toDateTimeString(),
+                    'created_at_original' => $lastOtp->created_at->toDateTimeString(),
+                    'created_at_adjusted' => $createdAtAdjusted->toDateTimeString(),
+                    'timeDiff' => $timeDiff
+                ]);
+                if ($timeDiff < 0) {
+                    $timeDiff = 0;
+                }
+                if ($timeDiff < 60) {
+                    $wait = 60 - $timeDiff;
+                    Log::info('Wait time applied', ['wait' => $wait]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Bạn vừa yêu cầu OTP, vui lòng đợi {$wait} giây nữa để gửi lại."
+                    ], 429);
+                }
             }
 
-            // create otp random
             $otp = random_int(100000, 999999);
-
-            // hash otp
             $hashedOtp = bcrypt($otp);
 
-            passwordResetModel::updateOrInsert(
-                ['email' => $email],
-                [
-                    'otp' => $hashedOtp,
-                    'created_at' => now(),
-                    'otp_expiration' => now()->addMinutes(2),
-                    'otp_attempts' => 0,
-                    'isVerified' => false
-                ]
-            );
             $subject = 'OTP đặt lại mật khẩu';
             $message = "
                 <div style='max-width:400px;margin:0 auto;padding:24px 18px 18px 18px;border:1px solid #eee;border-radius:8px;font-family:sans-serif;'>
@@ -519,9 +518,28 @@ class AuthController extends Controller
             $result = $mailController->sendEmailTo($email, $subject, $message);
 
             if ($result === true) {
+                if ($lastOtp) {
+                    $lastOtp->update([
+                        'otp' => $hashedOtp,
+                        'otp_expiration' => now()->addMinutes(2),
+                        'otp_attempts' => 0,
+                        'isVerified' => false,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                } else {
+                    passwordResetModel::create([
+                        'email' => $email,
+                        'otp' => $hashedOtp,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                        'otp_expiration' => now()->addMinutes(2),
+                        'otp_attempts' => 0,
+                        'isVerified' => false
+                    ]);
+                }
                 return response()->json(['success' => true, 'message' => 'OTP đã được gửi về email!']);
             } else {
-                // Log lỗi chi tiết
                 Log::error('Gửi email thất bại: ' . $result);
                 return response()->json(['success' => false, 'message' => 'Gửi email thất bại! Lý do: ' . $result], 500);
             }
