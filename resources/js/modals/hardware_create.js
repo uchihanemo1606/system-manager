@@ -1,8 +1,7 @@
 // Gộp tất cả mã thành một file hoàn chỉnh
 
 import {
-    get_all_hardware_database,
-    get_all_hardware_database_version,
+    get_all_hardware_database, 
     get_versions_by_dbname,
     get_all_hardware_os,
     get_versions_by_os,
@@ -48,8 +47,9 @@ async function populateDropdowns() {
         if (!name) return;
 
         try {
-            const res = await get_all_hardware_database_version(name);
-            dbVersionSelect.innerHTML = `<option></option>` + res.data.map(ver => `<option value="${ver}">${ver}</option>`).join('');
+            const res = await get_versions_by_dbname(name);
+            console.log(res)
+            dbVersionSelect.innerHTML = `<option></option>` + res.data.map(ver => `<option value="${ver.version}">${ver.version}</option>`).join('');
             dbVersionSelect.disabled = false;
         } catch (err) {
             console.error("Lỗi lấy phiên bản DB:", err);

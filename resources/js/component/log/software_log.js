@@ -59,7 +59,7 @@ function renderLog(log) {
     const updatedStr = formatDateTimeVN(log.updated_at);
 
     return `
-        <li class="event-list">
+        <li class="event-list" onclick="loadModal('log_detail', { id: '${log.id}' })" >
             <div class="event-timeline-dot">
                 <i class="bx bx-right-arrow-circle"></i>
             </div>
@@ -73,6 +73,8 @@ function renderLog(log) {
                     </h5>
                     <div class="small text-muted">Ngày tạo: <b>${createdStr}</b></div>
                     <div class="small text-muted">Ngày cập nhật: <b>${updatedStr}</b></div>
+                                    <td class="text-center"> 
+                </td>
                 </div>
             </div>
         </li>`;

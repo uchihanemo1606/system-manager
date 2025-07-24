@@ -1,5 +1,13 @@
 import { chane_password } from "../api/user";
-import { showToast } from "../component/toast"; // nếu bạn dùng showToast
+import { showToast } from "../component/toast";
+
+function isStrongPassword(password) {
+    const lengthOK = password.length >= 8;
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+    return lengthOK && hasLetter && hasNumber && hasSpecial;
+}
 
 async function initChanePasswordModal() {
     const form = document.getElementById("changePasswordForm");
@@ -17,6 +25,14 @@ async function initChanePasswordModal() {
             return;
         }
 
+        if (!isStrongPassword(newPassword)) {
+            showToast({
+                message: "Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ, số và ký tự đặc biệt!",
+                type: "error"
+            });
+            return;
+        }
+
         try {
             const res = await chane_password({
                 current_password: currentPassword,
@@ -26,8 +42,10 @@ async function initChanePasswordModal() {
             if (res.success) {
                 showToast({ message: "Đổi mật khẩu thành công!", type: "success" });
             } else {
-                showToast({ message: res.message || "Đổi mật khẩu thất bại!", type: "success" });
+                showToast({ message: res.message || "Đổi mật khẩu thất bại!", type: "error" });
             }
+
+            // Đăng xuất sau khi đổi mật khẩu thành công
             fetch("/api/logout", {
                 method: "POST",
                 headers: {

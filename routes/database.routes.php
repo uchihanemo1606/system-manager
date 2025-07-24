@@ -57,6 +57,6 @@ Route::get('/getdatabaseversionbyid/{id}', [databaseController::class, 'getDatab
     ->middleware('check.permission')
     ->name('hardware.detail');
 
-Route::get('/getdatabaseversionbyname/{name}', [databaseController::class, 'getDatabaseVersionByName'])
+Route::get('/getdatabaseversionbyname/{name}', [databaseController::class, 'getAllDatabaseVersionsByDatabaseName'])
     ->middleware('check.permission')
     ->name('hardware.list');

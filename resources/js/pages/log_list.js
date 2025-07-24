@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const domainInput = document.getElementById("filter-domain");
     const fromDateInput = document.getElementById("filter-from-date");
     const toDateInput = document.getElementById("filter-to-date");
+    const fromTimeInput = document.getElementById("filter-from-time");
+    const toTimeInput = document.getElementById("filter-to-time");
 
     const btnFilter = document.getElementById("btn-filter");
     const btnReset = document.getElementById("btn-reset");
@@ -52,7 +54,9 @@ document.addEventListener("DOMContentLoaded", () => {
             message: messageInput.value.trim(),
             link_domain: domainInput.value.trim(),
             from_date: fromDateInput.value,
-            to_date: toDateInput.value
+            to_date: toDateInput.value,
+            from_time: fromTimeInput.value,
+            to_time: toTimeInput.value
         };
 
         showLoading(true);
@@ -83,6 +87,22 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!test(log.message, "message")) return false;
             if (!test(log.link_domain, "link_domain")) return false;
             if (filters.software_id && String(log.software_id || "") !== filters.software_id && !fuzzyIncludes(log.software, [filters.software_id])) return false;
+            if (filters.from_time || filters.to_time) {
+                const logDate = new Date(log.created_at);
+                const logMinutes = logDate.getHours() * 60 + logDate.getMinutes();
+
+                if (filters.from_time) {
+                    const [h, m] = filters.from_time.split(":").map(Number);
+                    const fromMinutes = h * 60 + m;
+                    if (logMinutes < fromMinutes) return false;
+                }
+
+                if (filters.to_time) {
+                    const [h, m] = filters.to_time.split(":").map(Number);
+                    const toMinutes = h * 60 + m;
+                    if (logMinutes > toMinutes) return false;
+                }
+            }
 
             if (from || to) {
                 const logDate = new Date(log.created_at);
@@ -105,6 +125,8 @@ document.addEventListener("DOMContentLoaded", () => {
         domainInput.value = "";
         fromDateInput.value = "";
         toDateInput.value = "";
+        fromTimeInput.value = "";
+        toTimeInput.value = "";
     }
 
     function loadAllLogs() {

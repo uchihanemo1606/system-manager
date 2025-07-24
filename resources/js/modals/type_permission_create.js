@@ -62,14 +62,15 @@ window.initTypePermissionCreateModal = async function (data) {
     renderFilteredUserList();
     renderSelectedUsers();
     renderBulkPermissionOptions();
-    
+
     const searchInput = document.getElementById("userSearchInput");
     if (searchInput) {
         searchInput.addEventListener("input", renderFilteredUserList);
     }
     document.getElementById("selectedUserSearchInput").addEventListener("input", renderSelectedUsers);
 
-    
+    // ✅ Gán sự kiện cho nút "Thêm"
+    document.getElementById("addPermissionBtn").onclick = addPermissions;
 };
 
 // ===== LOAD USER LIST =====

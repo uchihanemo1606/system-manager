@@ -12,43 +12,51 @@
     </div>
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="mb-3">Bộ lọc tìm kiếm</h5>
 
-            <div class="row">
-                <div class="col-md-3 mb-2">
-                    <input type="text" id="filter-name" class="form-control" placeholder="Tên phần mềm">
-                </div>
-                <div class="col-md-3 mb-2">
-                    <input type="text" id="filter-language" class="form-control" placeholder="Ngôn ngữ">
-                </div>
-                <div class="col-md-3 mb-2">
-                    <input type="text" id="filter-version" class="form-control" placeholder="Phiên bản">
-                </div>
-                <div class="col-md-3 mb-2">
-                    <select id="filter-delete" class="form-control"> 
-                        <option value="false">Chưa xóa</option>
-                        <option value="true">Đã xóa</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="advanced-filters" style="display: none;">
+            <h5 class="mb-3 d-flex justify-content-between align-items-center">
+                 Bộ lọc tìm kiếm
+                <button class="btn btn-outline-secondary btn-sm d-md-none" type="button" data-toggle="collapse"
+                    data-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+                    <i class="mdi mdi-filter-outline"></i> Bộ lọc
+                </button>
+            </h5>
+            <div class="collapse d-md-block" id="filterCollapse">
                 <div class="row">
                     <div class="col-md-3 mb-2">
-                        <input type="text" id="filter-createdby" class="form-control" placeholder="Người tạo">
+                        <input type="text" id="filter-name" class="form-control" placeholder="Tên phần mềm">
                     </div>
                     <div class="col-md-3 mb-2">
-                        <input type="date" id="filter-createdat" class="form-control" placeholder="Ngày tạo">
+                        <input type="text" id="filter-language" class="form-control" placeholder="Ngôn ngữ">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <input type="text" id="filter-version" class="form-control" placeholder="Phiên bản">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select id="filter-delete" class="form-control">
+                            <option value="false">Chưa xóa</option>
+                            <option value="true">Đã xóa</option>
+                        </select>
                     </div>
                 </div>
-            </div>
 
-            <div class="mt-2 d-flex justify-content-between">
-                <button class="btn btn-link text-primary p-0" type="button" onclick="toggleAdvancedFilters()">
-                    <span id="toggle-text">Hiện thêm bộ lọc nâng cao</span>
-                </button>
-                <button class="btn btn-primary" onclick="loadSoftware()">Tìm kiếm</button>
+                <div id="advanced-filters" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <input type="text" id="filter-createdby" class="form-control" placeholder="Người tạo">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <input type="date" id="filter-createdat" class="form-control" placeholder="Ngày tạo">
+                        </div>
+                    </div>
+                </div>
 
+                <div class="mt-2 d-flex justify-content-between">
+                    <button class="btn btn-link text-primary p-0" type="button" onclick="toggleAdvancedFilters()">
+                        <span id="toggle-text">Hiện thêm bộ lọc nâng cao</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="loadSoftware()">Tìm kiếm</button>
+
+                </div>
             </div>
         </div>
     </div>

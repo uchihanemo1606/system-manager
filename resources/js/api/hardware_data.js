@@ -77,7 +77,7 @@ export async function get_all_hardware_database_version() {
 }
 
 export async function get_versions_by_dbname(dbname) {
-    const res = await fetch(`/api/hardwareDatabase/versions?name=${encodeURIComponent(dbname)}`, {
+    const res = await fetch(`/api/getdatabaseversionbyname/${encodeURIComponent(dbname)}`, {
         headers: defaultHeaders(),
     });
     const result = await res.json();

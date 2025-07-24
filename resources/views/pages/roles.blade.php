@@ -9,7 +9,7 @@
             </div>
         </div>
     </div>
-    <form class="form-row mb-3">
+    <form class="form-row mb-3 d-none">
         <div class="col">
             <input type="text" class="form-control" id="filter-name" placeholder="Tìm theo tên">
         </div>

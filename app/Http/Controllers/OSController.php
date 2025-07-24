@@ -573,7 +573,9 @@ class OSController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            $osVersion = OSVersionModel::where('os_name', 'like', '%' . $name . '%')->get();
+            // $osVersion = OSVersionModel::where('os_name', 'like', '%' . $name . '%')->get();
+            $osVersion = OSVersionModel::where('os_name', $name)->get();
+
             if ($osVersion->isEmpty()) {
                 return response()->json([
                     'status' => 'success',
