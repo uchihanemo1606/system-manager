@@ -38,7 +38,11 @@ Route::get('/getdomainbyhardware', [domainController::class, 'getdomainbyhardwar
     ->middleware('check.permission')
     ->name('hardwaredomain.list');
 
-Route::delete('/removehardwareindomain/{hardwareIp}/{domainId}',[domainController::class, 'removeHardwareInDomain'])
+Route::get('/getdomainsbyhardware', [domainController::class, 'getdomainsbyhardware'])
+    ->middleware('check.permission')
+    ->name('hardwaredomain.list');
+
+Route::delete('/removehardwareindomain/{hardwareIp}/{domainId}', [domainController::class, 'removeHardwareInDomain'])
     ->middleware('check.permission')
     ->name('hardwaredomain.delete');
     

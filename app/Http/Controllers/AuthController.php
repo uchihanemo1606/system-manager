@@ -84,11 +84,17 @@ class AuthController extends Controller
             $usercreate = UserModel::create([
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
+                'fullName' => $request->fullName,
+                'email' => $request->email,
+                'phone_number' => $request->phone_number,
+                'department' => $request->department,
             ]);
-
+            // Nếu là user đầu tiên thì $user sẽ không tồn tại
             LogController::createLogAuto([
-                'username' => $user->username,
-                'message' => "{$user->fullName} đã tạo tài khoản có username là '{$usercreate->username}'",
+                'username' => $userCount > 0 ? $user->username : $usercreate->username,
+                'message' => ($userCount > 0
+                    ? "{$user->fullName} đã tạo tài khoản có username là '{$usercreate->username}'"
+                    : "Tài khoản đầu tiên '{$usercreate->username}' đã được tạo"),
             ]);
 
             return response()->json([
@@ -161,7 +167,7 @@ class AuthController extends Controller
         //thêm kiểm tra tk bị khoá, xoá
 
         LogController::createLogAuto([
-            'username' => $request->username, 
+            'username' => $request->username,
             'message' => "{$user->fullName} đã đăng nhập vào hệ thống.",
         ]);
 
@@ -170,7 +176,32 @@ class AuthController extends Controller
             'token' => $token,
         ])->withCookie(cookie('auth_token', $token, 60, '/', null, false, false));
     }
+    public function refresh(Request $request)
+    {
+        try {
+            $token = JWTAuth::getToken();
 
+            if (!$token) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Token không tồn tại',
+                ], 401);
+            }
+
+            $newToken = JWTAuth::refresh($token);
+            $user = JWTAuth::setToken($newToken)->authenticate();
+
+            return response()->json([
+                'status' => 'success',
+                'token' => $newToken,
+            ])->withCookie(cookie('auth_token', $newToken, 60, '/', null, false, false));
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token không hợp lệ hoặc đã hết hạn',
+            ], 401);
+        }
+    }
     /**
      * Log out the authenticated user.
      *
@@ -190,7 +221,7 @@ class AuthController extends Controller
             $token = $request->cookie('auth_token') ?? $request->bearerToken();
             if ($token) {
                 JWTAuth::setToken($token)->invalidate(); // Hủy token
-            } 
+            }
             $cookie = cookie()->forget('auth_token');
 
             return response()->json([
@@ -564,30 +595,29 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6|confirmed'
-        ]);
+                'email' => 'required|email',
+                'password' => 'required|min:6|confirmed'
+            ]);
 
-        $record = passwordResetModel::where('email', $request->email)->first();
+            $record = passwordResetModel::where('email', $request->email)->first();
 
-        if (!$record || empty($record->isVerified)) {
-            return response()->json(['success' => false, 'message' => 'Bạn chưa xác thực OTP hoặc OTP không hợp lệ!'], 400);
-        }
+            if (!$record || empty($record->isVerified)) {
+                return response()->json(['success' => false, 'message' => 'Bạn chưa xác thực OTP hoặc OTP không hợp lệ!'], 400);
+            }
 
-        // Đổi mật khẩu
-        $user = UserModel::where('email', $request->email)->first();
-        $user->password = bcrypt($request->password);
-        $user->save();
+            // Đổi mật khẩu
+            $user = UserModel::where('email', $request->email)->first();
+            $user->password = bcrypt($request->password);
+            $user->save();
 
-        // Xóa dòng reset để bảo mật
-       passwordResetModel::where('email', $request->email)->delete();
+            // Xóa dòng reset để bảo mật
+            passwordResetModel::where('email', $request->email)->delete();
 
-        return response()->json(['success' => true, 'message' => 'Đổi mật khẩu thành công!']);
-    } catch (\Exception $e) {
+            return response()->json(['success' => true, 'message' => 'Đổi mật khẩu thành công!']);
+        } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi tạo lại mật khẩu: ' . $e->getMessage()], 500);
         }
     }
 
 
 }
-

@@ -1,154 +1,189 @@
 import { get_all_hardware } from "../api/hardware";
+import {
+    get_all_hardware_database,
+    get_versions_by_dbname,
+    get_all_hardware_os,
+    get_versions_by_os,
 
-let allHardwareCache = []; // Lưu dữ liệu tạm để lọc
+ 
+    // get_versions_by_dbname, 
+    // get_all_hardware_os,
+    // get_versions_by_os
+} from "../api/hardware_data";
+
+let allHardwareCache = [];
 
 async function loadHardware() {
     const container = document.getElementById("hardware-container");
-    container.innerHTML = ""; // Xóa cũ
-
+    container.innerHTML = "";
     try {
-        const allHardware = await get_all_hardware(); 
-        allHardwareCache = allHardware?.data || [];
+        const { data = [] } = await get_all_hardware();
+        allHardwareCache = data.sort((a, b) => b.is_active - a.is_active);
 
-        allHardwareCache.sort((a, b) => {
-            return (b.is_active === true) - (a.is_active === true);
-        });
-
-        renderHardware(allHardwareCache);
+        const isDelete = document.getElementById("filter-delete")?.value;
+        isDelete ? applyFilter() : renderHardware(allHardwareCache.filter(hw => !hw.is_delete));
     } catch (err) {
-        console.error("Lỗi khi tải danh sách phần cứng:", err);
+        console.error("Lỗi tải phần cứng:", err);
         container.innerHTML = `<div class="col-12 text-center text-danger">Lỗi khi tải dữ liệu!</div>`;
     }
 }
 
-function renderHardware(data) {
+function renderHardware(list) {
     const container = document.getElementById("hardware-container");
-    container.innerHTML = "";
-
-    if (data.length === 0) {
-        container.innerHTML = `<div class="col-12 text-center text-muted">Không có phần cứng nào.</div>`;
-        return;
-    }
-
-    data.forEach((hw) => {
-        const cssActive = !hw.is_active && "bg-light text-muted";
-        const cssbadge = !hw.is_active ? "badge-Secondary" : "badge-primary";
-        const badgeStyle = hw.is_active ? "opacity: 1;" : "opacity: 0.5;";
+    container.innerHTML = list.length ? "" : `<div class="col-12 text-center text-muted">Không có phần cứng nào.</div>`;
+    list.forEach(hw => {
+        const active = hw.is_active;
+        const deleted = hw.is_delete;
         const card = `
-    <div class="col-xl-3 col-sm-6 mb-3 ">
-        <div class="card shadow-sm h-100 position-relative   ${cssActive} border ">
-        
-            <!-- IP Góc trên trái --> 
-            <div class="position-absolute" style="top: 4px; left: 4px; font-size: 13px;">
-                IP: 
-                <span class="badge ${cssbadge}" style="font-size: 12px; ${badgeStyle}">
-                    ${hw.ip}
-                </span>
-            </div>
-            <div class="position-absolute" style="top: 4px; right: 4px; font-size: 13px;"> 
-                <span class="badge  " style="font-size: 12px; ${badgeStyle}">
-                    ${hw.OSver || "N/A"}
-                </span>
-            </div>
-            <div class="card-body text-center">
-            
-                <div class="avatar-sm mx-auto mb-3 mt-1">
-                    <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-18">
-                        ${hw.OS?.charAt(0) || "H"}
-                    </span>
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+            <div class="bg-white shadow-sm h-100 position-relative ${!active ? "bg-light text-muted border" : "border"}">
+                ${deleted ? `<div style="position:absolute;top:0;right:0;background:red;color:white;font-size:11px;padding:2px 6px;font-weight:600;border-bottom-left-radius:5px;z-index:10">ĐÃ XÓA</div>` : ""}
+                <div class="position-absolute" style="top:4px;left:4px;font-size:13px;z-index:2">
+                    <span class="badge ${active ? "badge-primary" : "badge-secondary"} badge-custom">IP: ${hw.ip}</span>
                 </div>
-                
-                <h5 class="font-size-15 mb-1">
-                    <a href="#" class="text-dark font-weight-bold">${hw.OS} - ${
-            hw.dbname
-        }</a>
-                </h5>
-
-                <div class="d-flex justify-content-center mb-2">
-                    <span class="badge badge-light mr-1 medium">RAM: ${
-                        hw.ram
-                    }</span>
-                    <span class="badge badge-light medium">HDD: ${hw.hdd}</span>
+                <div class="position-absolute" style="top:${deleted ? "24px" : "4px"}; right:4px; font-size:12px; z-index:2;">
+                    <span class="badge badge-info badge-custom" style="opacity: ${active ? 1 : 0.6}">${hw.OSver || "N/A"}</span>
                 </div>
-
-                <div class="d-flex justify-content-center flex-wrap mb-2">
-                    <span class="badge badge-${
-                        hw.isVirtualServer ? "secondary" : "info"
-                    } m-1">
-                        ${hw.isVirtualServer ? "Máy ảo" : "Máy vật lý"}
-                    </span>
-                    <span class="badge badge-${
-                        hw.is_active ? "success" : "secondary"
-                    } m-1">
-                        ${hw.is_active ? "Đang hoạt động" : "Không hoạt động"}
-                    </span>
+                <div class="p-4 text-center">
+                    <h5 class="font-size-15 mb-1 font-weight-bold text-dark">${hw.OS} - ${hw.dbname}</h5>
+                    <div class="d-flex justify-content-center gap-2 mb-2">
+                        <span class="badge badge-light badge-custom">RAM: ${hw.ram}</span>
+                        <span class="badge badge-light badge-custom">HDD: ${hw.hdd}</span>
+                    </div>
+                    <div class="d-flex justify-content-center flex-wrap gap-2">
+                        <span  class="badge badge-${hw.isVirtualServer ? "secondary" : "info"} badge-custom">${hw.isVirtualServer ? "Máy ảo" : "Máy vật lý"}</span>
+                        <span class="badge badge-${active ? "success" : "secondary"} badge-custom">${active ? "Đang hoạt động" : "Không hoạt động"}</span>
+                    </div>
+                    <p class="text-muted one-line mb-0 medium" title="${hw.services}">
+                        <i class="mdi mdi-server-network"></i> Dịch vụ: ${hw.services}
+                    </p>
                 </div>
-
-                <p class="text-muted mb-2 medium">Dịch vụ: ${hw.services}</p>
-            </div>
-
-            <div class="card-footer border-top ${cssActive}" style="background-color: white;">
-                <div class="d-flex justify-content-around font-size-18">
-                    <a  href="/hardware_detail?id=${
-                        hw.ip
-                    }&edit=true" title="Sửa"  class="text-primary">
-                        <i class="bx bx-wrench"></i>
-                    </a>
-                    <a href="#" title="Xem log" class="text-primary">
-                        <i class="bx bx-pie-chart-alt"></i>
-                    </a>
-                    <a href="/hardware_detail?id=${
-                        hw.ip
-                    }" title="Chi tiết" class="text-primary">
-                        <i class="bx bx-user-circle"></i>
-                    </a>
+                <div class="card-footer bg-white border-top ${!active ? "bg-light text-muted" : ""}">
+                    <div class="d-flex justify-content-around font-size-18">
+                        <a href="/hardware_detail?id=${hw.ip}&edit=true" title="Sửa" class="text-primary"><i class="bx bx-wrench"></i></a>
+                        <a href="#" title="Xem log" class="text-primary"><i class="bx bx-pie-chart-alt"></i></a>
+                        <a href="/hardware_detail?id=${hw.ip}" title="Chi tiết" class="text-primary"><i class="bx bx-user-circle"></i></a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    `;
+        </div>`;
         container.insertAdjacentHTML("beforeend", card);
     });
 }
 
-function applyFilter() {
-    const ip = document.getElementById("filter-ip").value.toLowerCase();
-    const dbname = document.getElementById("filter-dbname").value.toLowerCase();
-    const dbversion = document
-        .getElementById("filter-dbversion")
-        .value.toLowerCase();
-    const virtual = document.getElementById("filter-virtual").value;
-    const os = document.getElementById("filter-os").value.toLowerCase();
-    const osver = document.getElementById("filter-osver").value.toLowerCase();
-    const hdd = document.getElementById("filter-hdd").value.toLowerCase();
-    const ram = document.getElementById("filter-ram").value.toLowerCase();
-    const is_delete = document.getElementById("filter-delete").value;
-    const services = document
-        .getElementById("filter-services")
-        .value.toLowerCase();
-    const created_by = document
-        .getElementById("filter-createdby")
-        .value.toLowerCase();
-    const created_at = document.getElementById("filter-createdat").value;
-    const updated_at = document.getElementById("filter-updatedat").value;
+async function initHardwareFilterSelects() {
+    const [dbSelect, dbverSelect, osSelect, osverSelect] = [
+        "filter-dbname", "filter-dbversion", "filter-os", "filter-osver"
+    ].map(id => document.getElementById(id));
 
-    const filtered = allHardwareCache.filter((hw) => {
-        return (
-            (!ip || hw.ip?.toLowerCase().includes(ip)) &&
-            (!dbname || hw.dbname?.toLowerCase().includes(dbname)) &&
-            (!dbversion || hw.dbversion?.toLowerCase().includes(dbversion)) &&
-            (!virtual || String(hw.isVirtualServer) === virtual) &&
-            (!os || hw.OS?.toLowerCase().includes(os)) &&
-            (!osver || hw.OSver?.toLowerCase().includes(osver)) &&
-            (!hdd || hw.hdd?.toLowerCase().includes(hdd)) &&
-            (!ram || hw.ram?.toLowerCase().includes(ram)) &&
-            (!is_delete || String(hw.is_delete) === is_delete) &&
-            (!services || hw.services?.toLowerCase().includes(services)) &&
-            (!created_by ||
-                hw.created_by?.toLowerCase().includes(created_by)) &&
-            (!created_at || hw.created_at?.startsWith(created_at)) &&
-            (!updated_at || hw.updated_at?.startsWith(updated_at))
-        );
+    const setupSelect = (el, list) => {
+        el.innerHTML = `<option></option>` + list.map(val => `<option value="${val}">${val}</option>`).join('');
+    };
+
+    const dbNames = [...new Set((await get_all_hardware_database()).data.map(d => d.dbname))];
+    const osNames = [...new Set((await get_all_hardware_os()).data.map(o => o.name))];
+
+    setupSelect(dbSelect, dbNames);
+    setupSelect(osSelect, osNames);
+    [dbverSelect, osverSelect].forEach(el => el.disabled = true);
+
+    [dbSelect, dbverSelect, osSelect, osverSelect].forEach(el =>
+        $(el).select2({ placeholder: "Chọn hoặc tìm...", allowClear: true, width: "100%", dropdownParent: $('#hardware-container').parent() })
+    );
+
+    $(dbSelect).on("change", async function () {
+        dbverSelect.innerHTML = `<option></option>`;
+        $(dbverSelect).val(null).trigger("change");
+        dbverSelect.disabled = true;
+        // applyFilter();
+
+        if (!this.value) return;
+        const res = await get_versions_by_dbname(this.value);
+        setupSelect(dbverSelect, res.data.map(item => item.version));
+        dbverSelect.disabled = false;
+    });
+
+    $(osSelect).on("change", async function () {
+        osverSelect.innerHTML = `<option></option>`;
+        $(osverSelect).val(null).trigger("change");
+        osverSelect.disabled = true;
+        // applyFilter();
+
+        if (!this.value) return;
+        const res = await get_versions_by_os(this.value);
+        setupSelect(osverSelect, res.data.map(item => item.version)); 
+        osverSelect.disabled = false;
+    });
+}
+function parseCompareValue(str) {
+    if (!str) return null;
+    const match = str.match(/^([<>]=?|=)?\s*(\d+)\s*(gb|mb|tb)?$/i);
+
+    if (!match) return null;
+    const [, operator = "=", valueStr, unit = "GB"] = match;
+    const multiplier = { mb: 1, gb: 1024, tb: 1024 * 1024 };
+    const value = parseInt(valueStr, 10) * (multiplier[unit.toLowerCase()] || 1024);
+    return { operator, value };
+}
+
+function compareValue(hwValueStr, compare) {
+    const match = hwValueStr?.match(/^(\d+)\s*(gb|mb|tb)?$/i);
+
+    if (!match) return false;
+    const [, valueStr, unit = "GB"] = match;
+    const multiplier = { mb: 1, gb: 1024, tb: 1024 * 1024 };
+    const hwVal = parseInt(valueStr, 10) * (multiplier[unit.toLowerCase()] || 1024);
+    switch (compare.operator) {
+        case ">": return hwVal > compare.value;
+        case ">=": return hwVal >= compare.value;
+        case "<": return hwVal < compare.value;
+        case "<=": return hwVal <= compare.value;
+        case "=": return hwVal === compare.value;
+        default: return false;
+    }
+}
+
+function applyFilter() {
+    const getVal = id => document.getElementById(id).value?.toLowerCase() || "";
+    const getRaw = id => document.getElementById(id).value || "";
+
+    const f = {
+        ip: getVal("filter-ip"),
+        dbname: getRaw("filter-dbname"),
+        dbversion: getRaw("filter-dbversion"),
+        os: getRaw("filter-os"),
+        osver: getRaw("filter-osver"),
+        virtual: getRaw("filter-virtual"),
+        hdd: getRaw("filter-hdd"),
+        ram: getRaw("filter-ram"),
+        is_delete: getRaw("filter-delete"),
+        services: getVal("filter-services"),
+        created_by: getVal("filter-createdby"),
+        created_at_from: getRaw("filter-createdat-from"),
+        created_at_to: getRaw("filter-createdat-to"),
+        updated_at_from: getRaw("filter-updatedat-from"),
+        updated_at_to: getRaw("filter-updatedat-to")
+    };
+
+    const ramCompare = parseCompareValue(f.ram);
+    const hddCompare = parseCompareValue(f.hdd);
+
+    const filtered = allHardwareCache.filter(hw => {
+        return (!f.ip || hw.ip?.toLowerCase().includes(f.ip)) &&
+            (!f.dbname || hw.dbname === f.dbname) &&
+            (!f.dbversion || hw.dbversion === f.dbversion) &&
+            (!f.os || hw.OS === f.os) &&
+            (!f.osver || hw.OSver === f.osver) &&
+            (!f.virtual || String(hw.isVirtualServer) === f.virtual) &&
+            (!f.ram || (ramCompare && compareValue(hw.ram, ramCompare))) &&
+            (!f.hdd || (hddCompare && compareValue(hw.hdd, hddCompare))) &&
+            (!f.is_delete || String(hw.is_delete) === f.is_delete) &&
+            (!f.services || hw.services?.toLowerCase().includes(f.services)) &&
+            (!f.created_by || hw.created_by?.toLowerCase().includes(f.created_by)) &&
+            (!f.created_at_from || hw.created_at >= f.created_at_from) &&
+            (!f.created_at_to || hw.created_at <= f.created_at_to) &&
+            (!f.updated_at_from || hw.updated_at >= f.updated_at_from) &&
+            (!f.updated_at_to || hw.updated_at <= f.updated_at_to);
     });
 
     renderHardware(filtered);
@@ -157,15 +192,10 @@ function applyFilter() {
 window.loadHardware = loadHardware;
 window.applyFilter = applyFilter;
 window.addEventListener("hardwareCreated", loadHardware);
-loadHardware();
 
-// Gắn sự kiện cho tất cả input/select để lọc tự động
-document.addEventListener("DOMContentLoaded", () => {
-    const inputs = document.querySelectorAll(
-        "#filter-ip, #filter-dbname, #filter-dbversion, #filter-virtual, #filter-os, #filter-osver, #filter-hdd, #filter-ram, #filter-delete, #filter-services, #filter-createdby, #filter-createdat, #filter-updatedat"
-    );
-
-    inputs.forEach((input) => {
-        input.addEventListener("input", applyFilter);
-    });
+document.addEventListener("DOMContentLoaded", async () => {
+    await initHardwareFilterSelects();
+    // document.querySelectorAll("#filter-ip, #filter-dbname, #filter-dbversion, #filter-virtual, #filter-os, #filter-osver, #filter-hdd, #filter-ram, #filter-delete, #filter-services, #filter-createdby, #filter-createdat, #filter-updatedat")
+    //     .forEach(el => el.addEventListener("change", applyFilter));
+    loadHardware();
 });

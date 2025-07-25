@@ -266,51 +266,6 @@ function renderPermissionTable(permissions, selectedNames, roleName = "") {
             });
         });
 }
-
-// function renderPermissionTable(permissions, selectedNames) {
-//     const container = document.getElementById("permission-checkboxes");
-//     container.innerHTML = "";
-
-//     // Nhóm theo type
-//     const grouped = {};
-//     for (const p of permissions) {
-//         const type = p.type || "Không xác định";
-//         if (!grouped[type]) grouped[type] = [];
-//         grouped[type].push(p);
-//     }
-
-//     // Tạo table cho từng nhóm
-//     const groupTables = Object.entries(grouped)
-//         .map(([type, groupPermissions]) => {
-//             const rows = groupPermissions.map((p) =>
-//                 renderTableRow(p, selectedNames.includes(normalize(p.permissions_name)))
-//             );
-
-//             return `
-//                 <div class="mb-4">
-//                     <h5 class="text-primary mb-2 border-bottom pb-1">${type}</h5>
-//                     <table class="table table-hover table-bordered align-middle text-center">
-//                         <thead class="table-light">
-//                             <tr>
-//                                 <th>Chọn</th>
-//                                 <th>Tên Permission</th>
-//                                 <th>Loại</th>
-//                                 <th>Mô tả</th>
-//                             </tr>
-//                         </thead>
-//                         <tbody>
-//                             ${rows.join("")}
-//                         </tbody>
-//                     </table>
-//                 </div>
-//             `;
-//         })
-//         .join("");
-
-//     container.innerHTML = groupTables;
-// }
-
-// Render danh sách permission đã có
 function renderPermissionList(permissions) {
     const list = document.getElementById("permission-list");
     list.innerHTML = permissions.length
@@ -319,9 +274,6 @@ function renderPermissionList(permissions) {
                   (p) => `
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>${p.permission_name}</span>
-                <span class="badge badge-info">${
-                    p.description || "Không có mô tả"
-                }</span>
             </li>
         `
               )
@@ -421,7 +373,7 @@ async function initRoleDetailModal(data) {
         const activeElement = document.activeElement;
         if (
             activeElement &&
-            activeElement.classList.contains("create-role-permission-btn")
+            activeElement.classList.contains("create-missing-permission-btn")
         ) {
             return;
         }

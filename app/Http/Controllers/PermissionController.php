@@ -308,6 +308,8 @@ class PermissionController extends Controller
                 'phần cứng' => 'hardware',
                 'hardware' => 'hardware',
                 'phần mềm' => 'software',
+                'tệp tin phần mềm' => 'softwarefile',
+                'softwarefile' => 'softwarefile',
                 'software' => 'software',
                 'người dùng' => 'user',
                 'user' => 'user',

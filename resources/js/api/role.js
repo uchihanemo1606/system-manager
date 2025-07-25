@@ -244,13 +244,15 @@ export const permissionTypes = [
     "quyền người dùng",
     "quyền hệ thống",
     "tên miền",
+    "tệp tin phần mềm",
     "phần cứng vào domain",
 ];
 export const permissionActions = [
     "thêm",
     "sửa",
     "xoá",
+    "xem",
     "xem danh sách",
     "xem chi tiết",
-    "tìm kiếm",
+    // "tìm kiếm",
 ];

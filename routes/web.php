@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
+use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 
 Route::get('/login', fn() => view('pages/login'));
+Route::get('/forgot_password', fn() => view('pages/forgot_password'));
 Route::get('/apis', fn() => view('scribe/index'));
 // Route::get('/modal/{modal}', function ($modal, Request $request) {
 //     $view = 'modals.' . str_replace('/', '.', $modal);

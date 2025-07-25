@@ -1,27 +1,46 @@
-<div class="modal-body">
-    <h5 class="mb-3">Tìm kiếm tên miền</h5>
-    <div class="row">
-        <div class="col-md-3 mb-2">
-            <input type="text" id="hardware-domain-search-name" class="form-control" placeholder="Tên miền">
+<div class="p-4">
+    <div class="mb-3">
+        <strong>Chọn phần cứng cần liên kết với domain:</strong>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col">
+            <input type="text" id="filter-ip" class="form-control" placeholder="Lọc theo IP">
         </div>
-        <div class="col-md-3 mb-2">
-            <input type="text" id="hardware-domain-search-link" class="form-control" placeholder="Liên kết">
+        <div class="col">
+            <input type="text" id="filter-os" class="form-control" placeholder="Lọc theo Hệ điều hành">
         </div>
-        <div class="col-md-3 mb-2">
-            <input type="text" id="hardware-domain-search-createby" class="form-control" placeholder="Người tạo">
+        <div class="col">
+            <input type="text" id="filter-db" class="form-control" placeholder="Lọc theo Database">
         </div>
-        <div class="col-md-3 mb-2">
-            <input type="date" id="hardware-domain-search-date" class="form-control">
+        <div class="col">
+            <select id="filter-deleted" class="form-select">
+                <option value="false" selected>Chưa xóa</option>
+                <option value="true">Đã xóa</option>
+                <option value="all">Tất cả</option>
+            </select>
         </div>
     </div>
 
-    <div id="domain-list-container" class="mt-3" style="max-height: 450px; overflow-y: auto;">
-        <p class="text-center text-muted mt-2">Đang tải dữ liệu...</p>
-    </div>
 
-    <div class="mt-3 d-flex justify-content-end">
-        <button id="hardware-domain-save" class="btn btn-primary" disabled>
-            <i class="mdi mdi-check-circle-outline mr-1"></i> Gán tên miền
-        </button>
+    <table class="table table-bordered table-hover" id="hardware-select-table">
+        <thead class="table-light">
+            <tr>
+                <th style="width: 40px;"><input type="checkbox" id="select-all-hw" /></th>
+                <th>IP</th>
+                <th>Hệ điều h</th>
+                <th>Database</th>
+                <th style="width: 60px;">Xem</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="5" class="text-center text-muted">Đang tải danh sách phần cứng...</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="text-end">
+        <button class="btn btn-primary" id="link-selected-hardware">Liên kết</button>
     </div>
 </div>

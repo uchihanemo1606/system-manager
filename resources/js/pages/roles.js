@@ -25,19 +25,9 @@ function renderRoles(roles) {
             <tr>
                 <td>
                     <h5 class="text-truncate font-size-14"><a href="#" class="text-dark">${role.role_name}</a></h5>
-                </td>
-                <td>
-                    <div class="role_permission_list">
-                        <span class="badge badge-secondary">Chưa có dữ liệu</span>
-                    </div>
-                </td>
-                <td>${createdAt}</td>
-                <td>
-                    <div class="team">
-                        <span class="badge badge-secondary">Chưa có dữ liệu</span>
-                    </div>
-                </td>
-                <td>
+                </td> 
+                <td>${createdAt}</td> 
+                <td class="text-right">
                     <div class="dropdown" >
                         <button class="btn btn-link p-0 dropdown-toggle" 
                                 type="button"

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\logModel; 
+use App\Models\logModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -34,62 +34,60 @@ class LogController extends Controller
             'os_name',
 
         ];
-         $logData = array_intersect_key($data, array_flip($fields));
+        $logData = array_intersect_key($data, array_flip($fields));
 
-    // Thiết lập mặc định cho is_delete nếu chưa có
-    try {
-        logModel::create($logData);
-    } catch (\Exception $e) {
-        // Ghi log lỗi vào laravel.log để dễ debug
-        Log::error('Log ghi không thành công: ' . $e->getMessage(), $logData);
-    }
+        // Thiết lập mặc định cho is_delete nếu chưa có
+        try {
+            logModel::create($logData);
+        } catch (\Exception $e) {
+            // Ghi log lỗi vào laravel.log để dễ debug
+            Log::error('Log ghi không thành công: ' . $e->getMessage(), $logData);
+        }
     }
 
     public function createLogManual(Request $request)
     {
 
         try {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['please login to use the function'], 404);
-        }
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['please login to use the function'], 404);
+            }
 
-        $validator = Validator::make($request->all(), [
-            'username' => 'nullable|string|max:255',
-            'software_id' => 'nullable|integer',
-            'hardware_ip' => 'nullable|string|max:255',
-            'rule_id' => 'nullable|integer',
-            'message' => 'nullable|string|max:1000',
-            'software_file_id' => 'nullable|integer',
-            'link_domain' => 'nullable|string|max:255',
-            'sw_permission_user' => 'nullable|string|max:255',
-            'hw_permission_user' => 'nullable|string|max:255',
-            'permissions_name' => 'nullable|string|max:255',
-            'department' => 'nullable|string|max:255',
-            'database_name' => 'nullable|string|max:255',
-            'os_name' => 'nullable|string|max:255',
+            $validator = Validator::make($request->all(), [
+                'username' => 'nullable|string|max:255',
+                'software_id' => 'nullable|integer',
+                'hardware_ip' => 'nullable|string|max:255',
+                'rule_id' => 'nullable|integer',
+                'message' => 'nullable|string|max:1000',
+                'software_file_id' => 'nullable|integer',
+                'link_domain' => 'nullable|string|max:255',
+                'sw_permission_user' => 'nullable|string|max:255',
+                'hw_permission_user' => 'nullable|string|max:255',
+                'permissions_name' => 'nullable|string|max:255',
+                'department' => 'nullable|string|max:255',
+                'database_name' => 'nullable|string|max:255',
+                'os_name' => 'nullable|string|max:255',
 
-        ]);
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 422);
-        }
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 422);
+            }
 
-        $logData = $validator->validated();
-        $logData['is_delete'] = $logData['is_delete'] ?? false;
-
-        try {
-            logModel::create($logData);
-            return response()->json(['message' => 'Log created successfully'], 201);
-        } catch (\Exception $e) {
-            Log::error('Log creation failed: ' . $e->getMessage(), $logData);
-            return response()->json(['error' => 'Log creation failed'], 500);
-        } 
+            $logData = $validator->validated();
+            try {
+                logModel::create($logData);
+                return response()->json(['message' => 'Log created successfully'], 201);
+            } catch (\Exception $e) {
+                Log::error('Log creation failed: ' . $e->getMessage(), $logData);
+                return response()->json(['error' => 'Log creation failed'], 500);
+            }
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not create log. ' . $e->getMessage()], 500);
         }
@@ -136,12 +134,12 @@ class LogController extends Controller
                 $data = $log->toArray();
 
                 // Ghi đè các trường id bằng thông tin chi tiết
-                $data['username']       = $log->user ? $log->user->fullName : $log->username;
-                $data['software']       = $log->software ? $log->software->softwareName : $log->software_id;
-                $data['software_file']  = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
-                $data['hardware']       = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
-                $data['department']     = $log->department ? $log->department->name : $log->department ?? null;
-                $data['permission']     = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
+                $data['username'] = $log->user ? $log->user->fullName : $log->username;
+                $data['software'] = $log->software ? $log->software->softwareName : $log->software_id;
+                $data['software_file'] = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
+                $data['hardware'] = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
+                $data['department'] = $log->department ? $log->department->name : $log->department ?? null;
+                $data['permission'] = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
 
                 // Nếu muốn show thêm các trường khác, thêm vào đây
 
@@ -158,11 +156,11 @@ class LogController extends Controller
             return response()->json($logsTransformed);
 
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
         }
@@ -170,48 +168,48 @@ class LogController extends Controller
 
     public function getLogByType(Request $request)
     {
-    try {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 404);
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 404);
+            }
+
+            $query = logModel::where('is_delete', false);
+
+            if ($request->has('hardware')) {
+                $query->whereNotNull('hardware_ip');
+            } elseif ($request->has('software')) {
+                $query->whereNotNull('software_id');
+            } elseif ($request->has('software_file')) {
+                $query->whereNotNull('software_file_id');
+            } else {
+                // Log user: các trường hardware_ip, software_id, software_file_id đều null
+                $query->whereNull('hardware_ip')
+                    ->whereNull('software_id')
+                    ->whereNull('software_file_id');
+            }
+
+            $logs = $query->get();
+
+            if ($logs->isEmpty()) {
+                return response()->json(['message' => 'No logs found for this type'], 404);
+            }
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
         }
-    
-    $query = logModel::where('is_delete', false);
 
-    if ($request->has('hardware')) {
-        $query->whereNotNull('hardware_ip');
-    } elseif ($request->has('software')) {
-        $query->whereNotNull('software_id');
-    } elseif ($request->has('software_file')) {
-        $query->whereNotNull('software_file_id');
-    } else {
-        // Log user: các trường hardware_ip, software_id, software_file_id đều null
-        $query->whereNull('hardware_ip')
-              ->whereNull('software_id')
-              ->whereNull('software_file_id');
-    }
-
-    $logs = $query->get();
-
-    if ($logs->isEmpty()) {
-        return response()->json(['message' => 'No logs found for this type'], 404);
-    }
-
-    }catch (TokenExpiredException $e) {
-        return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
-    } catch (TokenInvalidException $e) {
-        return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
-    } catch (JWTException $e) {
-        return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
-    }
-
-    return response()->json($logs);
+        return response()->json($logs);
     }
 
     public function getAllLog()
     {
-        $logs = logModel::where('is_delete', false)->get();
+        $logs = logModel::get();
         return response()->json($logs);
     }
 
@@ -243,12 +241,12 @@ class LogController extends Controller
             $data = $log->toArray();
 
             // Ghi đè các trường id bằng thông tin chi tiết
-            $data['username']       = $log->user ? $log->user->fullName : $log->username;
-            $data['software']       = $log->software ? $log->software->softwareName : $log->software_id;
-            $data['software_file']  = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
-            $data['hardware']       = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
-            $data['department']     = $log->department ? $log->department->name : $log->department ?? null;
-            $data['permission']     = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
+            $data['username'] = $log->user ? $log->user->fullName : $log->username;
+            $data['software'] = $log->software ? $log->software->softwareName : $log->software_id;
+            $data['software_file'] = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
+            $data['hardware'] = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
+            $data['department'] = $log->department ? $log->department->name : $log->department ?? null;
+            $data['permission'] = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
 
             // Nếu muốn show thêm các trường khác, thêm vào đây
 
@@ -262,11 +260,11 @@ class LogController extends Controller
             return response()->json($data);
 
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve log. ' . $e->getMessage()], 500);
         }
@@ -281,13 +279,14 @@ class LogController extends Controller
             }
 
             // Nhận và chuyển đổi định dạng ngày từ d/m/Y sang Y-m-d
-            $date = $request->query('date'); 
-            $from = $request->query('from'); 
-            $to = $request->query('to');     
+            $date = $request->query('date');
+            $from = $request->query('from');
+            $to = $request->query('to');
 
             // Hàm chuyển đổi d/m/Y sang Y-m-d
-            $convertDate = function($str) {
-                if (!$str) return null;
+            $convertDate = function ($str) {
+                if (!$str)
+                    return null;
                 $dt = \DateTime::createFromFormat('d/m/Y', $str);
                 return $dt ? $dt->format('Y-m-d') : null;
             };
@@ -296,8 +295,8 @@ class LogController extends Controller
             $from = $convertDate($from);
             $to = $convertDate($to);
 
-            $query = logModel::where('is_delete', false);
-
+            // $query = logModel::where('is_delete', false);
+            $query = logModel::query(); // ✅ Đây là chỗ sửa
             if ($date) {
                 $query->whereDate('created_at', $date);
             } elseif ($from && $to) {
@@ -355,7 +354,6 @@ class LogController extends Controller
             }
 
             $logs = logModel::where('username', $username)
-                ->where('is_delete', false)
                 ->get();
 
             if ($logs->isEmpty()) {
@@ -364,11 +362,11 @@ class LogController extends Controller
 
             return response()->json($logs);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
         }
@@ -382,7 +380,6 @@ class LogController extends Controller
             }
 
             $logs = logModel::where('hardware_ip', $hardwareIP)
-                ->where('is_delete', false)
                 ->get();
 
             if ($logs->isEmpty()) {
@@ -391,11 +388,11 @@ class LogController extends Controller
 
             return response()->json($logs);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
         }
@@ -403,14 +400,12 @@ class LogController extends Controller
 
     public function getLogBySoftware(Request $request, $softwareId)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 404);
             }
 
             $logs = logModel::where('software_id', $softwareId)
-                ->where('is_delete', false)
                 ->get();
 
             if ($logs->isEmpty()) {
@@ -419,11 +414,11 @@ class LogController extends Controller
 
             return response()->json($logs);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
         }

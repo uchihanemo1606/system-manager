@@ -18,63 +18,63 @@ class SoftwareController extends Controller
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 401);
-        }
-
-        // Validate the request data
-        $request->validate([
-            'softwareName' => 'required|string|max:255',
-            'language' => 'required|string|max:100',
-            'version' => 'nullable|string|max:255',
-            'user_createby' => $user->username,
-            'description' => 'nullable|string|max:1000',
-        ]);
-
-        // Create a new software record
-        $software = new SoftwareModel();
-        $software->softwareName = $request->input('softwareName');
-        $software->language = $request->input('language');
-        $software->version = $request->input('version');
-        $software->description = $request->input('description');
-        $software->user_createby = $user->username;
-        $software->created_at = now();
-        $software->updated_at = now();
-
-        // Save the software record
-        if ($software->save()) {
-
-            $fullPermissions = [
-                'xem phần mềm',
-                'sửa phần mềm',
-                'xóa phần mềm',
-                'danh sách người dùng quản lý phần mềm',
-                'sửa người dùng quản lý phần mềm',
-                'thêm người dùng quản lý phần mềm',
-                'xoá người dùng quản lý phần mềm',
-            ];
-            foreach ($fullPermissions as $permission) {
-                softwarePermissionModel::create([
-                    'software_id' => $software->id,
-                    'user_name' => $user->username,
-                    'permissions_name' => $permission,
-                    'create_by' => $user->username,
-                    'assigned_at' => now(),
-                ]);
+                return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            LogController::createLogAuto([
-                'username' => $user->username,
-                'software_id' => $software->id,
-                'message' => " user {$user->fullName} created software '{$software->softwareName}'.",
-                'is_delete' => false
+            // Validate the request data
+            $request->validate([
+                'softwareName' => 'required|string|max:255',
+                'language' => 'required|string|max:100',
+                'version' => 'nullable|string|max:255',
+                'user_createby' => $user->username,
+                'description' => 'nullable|string|max:1000',
             ]);
-            return response()->json(['message' => 'Software created successfully', 'data' => $software], 201);
-        } else {
-            return response()->json([
-                'message' => 'Failed to create software'
-            ], 500);
-        }
-    } catch (TokenExpiredException $e) {
+
+            // Create a new software record
+            $software = new SoftwareModel();
+            $software->softwareName = $request->input('softwareName');
+            $software->language = $request->input('language');
+            $software->version = $request->input('version');
+            $software->description = $request->input('description');
+            $software->user_createby = $user->username;
+            $software->created_at = now();
+            $software->updated_at = now();
+
+            // Save the software record
+            if ($software->save()) {
+
+                $fullPermissions = [
+                    'xem phần mềm',
+                    'sửa phần mềm',
+                    'xoá phần mềm',
+                    'xem danh sách người dùng quản lý phần mềm',
+                    'sửa người dùng quản lý phần mềm',
+                    'thêm người dùng quản lý phần mềm',
+                    'xoá người dùng quản lý phần mềm',
+                ];
+                foreach ($fullPermissions as $permission) {
+                    softwarePermissionModel::create([
+                        'software_id' => $software->id,
+                        'user_name' => $user->username,
+                        'permissions_name' => $permission,
+                        'create_by' => $user->username,
+                        'assigned_at' => now(),
+                    ]);
+                }
+
+                LogController::createLogAuto([
+                    'username' => $user->username,
+                    'software_id' => $software->id,
+                    'message' => " user {$user->fullName} created software '{$software->softwareName}'.",
+                    'is_delete' => false
+                ]);
+                return response()->json(['message' => 'Software created successfully', 'data' => $software], 201);
+            } else {
+                return response()->json([
+                    'message' => 'Failed to create software'
+                ], 500);
+            }
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'
@@ -104,7 +104,7 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            
+
             $id = $request->query('id');
             if (!$id) {
                 return response()->json(['message' => 'Software id is required'], 400);
@@ -112,7 +112,6 @@ class SoftwareController extends Controller
 
             $software = SoftwareModel::findOrFail($id);
 
-            // Validate the request data
             $request->validate([
                 'softwareName' => 'required|string|max:255',
                 'language' => 'required|string|max:100',
@@ -124,20 +123,17 @@ class SoftwareController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'You do not have permission to update this software.'], 403);
             }
 
-            // Update the software record
             $software->softwareName = $request->input('softwareName');
             $software->language = $request->input('language');
             $software->version = $request->input('version');
             $software->description = $request->input('description');
             $software->updated_at = now();
 
-            // Save the updated software record
             if ($software->save()) {
-                // Log the update of the software
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'software_id' => $software->id,
-                    'message' => "user {$user->fullName} is update software '{$software->softwareName}'.",
+                    'message' => "user {$user->fullName} updated software '{$software->softwareName}'.",
                     'is_delete' => false
                 ]);
                 return response()->json(['message' => 'Software updated successfully', 'data' => $software], 200);
@@ -147,11 +143,11 @@ class SoftwareController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Software not found'], 404);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not update software. ' . $e->getMessage()], 500);
         }
@@ -195,11 +191,11 @@ class SoftwareController extends Controller
             ], 200);
 
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve software. ' . $e->getMessage()], 500);
         }
@@ -213,7 +209,7 @@ class SoftwareController extends Controller
             }
 
             if ($user->cannot('viewAny', softwareModel::class)) {
-            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
             }
 
             $software = SoftwareModel::where('is_delete', false)->get();
@@ -222,11 +218,11 @@ class SoftwareController extends Controller
                 'data' => $software
             ], 200);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve software. ' . $e->getMessage()], 500);
         }
@@ -240,7 +236,7 @@ class SoftwareController extends Controller
             }
 
             if ($user->cannot('viewAny', softwareModel::class)) {
-            return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
             }
 
             $software = SoftwareModel::where('is_delete', true)->get();
@@ -249,11 +245,11 @@ class SoftwareController extends Controller
                 'data' => $software
             ], 200);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve software. ' . $e->getMessage()], 500);
         }
@@ -282,17 +278,17 @@ class SoftwareController extends Controller
                 'data' => $software
             ], 200);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve software by name. ' . $e->getMessage()], 500);
         }
     }
 
-    public function deleteSoftware(Request $request, $id)
+    public function deleteSoftware(Request $request)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
@@ -320,14 +316,35 @@ class SoftwareController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Software not found'], 404);
         } catch (TokenExpiredException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token has expired.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is invalid.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
         } catch (JWTException $e) {
-            return response()->json(['status'=> 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not delete software. ' . $e->getMessage()], 500);
         }
     }
-
+    public function getSoftwareById(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+            $id = $request->query('id');
+            if (!$id) {
+                return response()->json(['message' => 'Software id is required'], 400);
+            }
+            $software = SoftwareModel::where('id', 'like', '%' . $id . '%')->get();
+            if ($software->isEmpty()) {
+                return response()->json(['message' => 'No software found with that id'], 404);
+            }
+            return response()->json([
+                'status' => 'success',
+                'data' => $software[0]
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'ERRRR'], 401);
+        }
+    }
 }

@@ -9,11 +9,12 @@ class softwarePermissionModel extends Model
     protected $table = 'software_permissions';
     protected $fillable = [
         'software_id',
+        'create_by',
         'user_name',
         'user_createdby',
         'assigned_at',
         'permissions_name',
-        
+
     ];
     public function software()
     {
