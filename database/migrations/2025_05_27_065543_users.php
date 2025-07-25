@@ -16,7 +16,6 @@ public function up(): void
             $table->string('password', 500);
             $table->string('fullName', 100)->nullable();
             $table->string('email', 100) ->nullable() ->unique();
-            $table->string('phone_number', 12)->nullable();
             $table->string('avatar', 255)->nullable();
             $table->boolean('hidden')->default(false);
             $table->boolean('is_delete')->default(false);

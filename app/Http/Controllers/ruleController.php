@@ -715,4 +715,67 @@ class ruleController extends Controller
         }
     }
 
+    public function downloadRule(Request $request, $id)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rule = DB::table('rules')->where('id', $id)->first();
+            if (!$rule || !$rule->file_url) {
+                return response()->json(['status' => 'error', 'message' => 'Rule not found or no file associated.'], 404);
+            }
+
+            $filePath = storage_path('app/public/' . $rule->file_url);
+            if (!file_exists($filePath)) {
+                return response()->json(['status' => 'error', 'message' => 'File not found.'], 404);
+            }
+
+            return response()->download($filePath, $rule->name . '.zip');
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not download rule file. ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getFileRule(Request $request, $id)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $rule = DB::table('rules')->where('id', $id)->first();
+            if (!$rule || !$rule->file_url) {
+                return response()->json(['status' => 'error', 'message' => 'Rule not found or no file associated.'], 404);
+            }
+
+            $filePath = storage_path('app/public/' . $rule->file_url);
+            if (!file_exists($filePath)) {
+                return response()->json(['status' => 'error', 'message' => 'File not found.'], 404);
+            }
+
+            return response()->json([
+                'message' => 'File retrieved successfully.',
+                'file_url' => asset('storage/' . $rule->file_url),
+            ], 200);
+
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve rule file. ' . $e->getMessage()], 500);
+        }
+    }
+
 }
