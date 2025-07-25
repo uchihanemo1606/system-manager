@@ -183,4 +183,71 @@ public function getUserByUSerName(Request $request)
         ], 500);
     }
   }
+
+public function updateUserbyUserName(Request $request, $username)
+{
+    try{
+
+        if (!$user = JWTAuth::parseToken()->authenticate()) {
+        return response()->json(['please login to use the function'], 404);
+        }
+        $user = UserModel::where('username', $username)->first();
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.'
+            ], 404);
+        }
+        
+        $userupdate = $request->validate([
+            'fullName' => 'required|string|max:100',
+            'email' => 'nullable|email|max:100|unique:users,email,' . $user->username,
+            'phone_number' => 'nullable|string|max:12',
+            'department' => 'nullable|string|max:100',
+        ]);
+
+        $user->update($userupdate);
+        if($user->save()){
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "{$user->fullName} đã thay đổi thông tin tài khoản.",
+            ]);
+
+            return response()->json([
+            'status' => 'success',
+            'message' => 'User updated successfully.',
+            'user' => $user,
+        ]);
+        }
+
+    } catch (ModelNotFoundException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'User not found.'
+        ], 404);
+    } catch (TokenExpiredException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Token has expired.'
+        ], 401);
+    } catch (TokenInvalidException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Token is invalid.'
+        ], 401);
+    } catch (JWTException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Token is absent or could not be parsed.'
+        ], 401);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Could not retrieve user. ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
 }
