@@ -465,9 +465,7 @@ class AuthController extends Controller
                     return response()->json([
                         'success' => false,
                         'message' => "Bạn vừa yêu cầu OTP, vui lòng đợi {$wait} giây nữa để gửi lại.",
-                        "create" => "$lastOtp->created_at",
-                        "now" => now()->toDateTimeString(),
-                        "cr-now" => $lastOtp->created_at->diffInSeconds(now())
+                        'time' => $wait,
                     ], 429);
                 }
             }
