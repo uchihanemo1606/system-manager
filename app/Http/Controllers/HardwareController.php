@@ -71,12 +71,44 @@ class HardwareController extends Controller
                 'hardware_ip' => $hardware->ip,
                 'message' => "User {$user->fullName} Created new hardware with IP {$hardware->ip}",
             ]);
-            return response()->json(['message' => 'Hardware created successfully', 'data' => $hardware], 201);
-        } else {
-            return response()->json(['message' => 'Failed to create hardware'], 500);
-        }
-        
-        }catch (TokenExpiredException $e) {
+
+            // Create a new hardware record
+            $hardware = new hardwareModel();
+            $hardware->ip = $request->input('ip');
+            $hardware->dbname = $request->input('dbname');
+            $hardware->dbversion = $request->input('dbversion');
+            $hardware->isVirtualServer = $request->input('isVirtualServer');
+            $hardware->OS = $request->input('OS');
+            $hardware->OSver = $request->input('OSver');
+            $hardware->hdd = $request->input('hdd');
+            $hardware->ram = $request->input('ram');
+            $hardware->services = $request->input('services');
+            $hardware->created_by = $user->username;
+
+            // Save the hardware record
+            if ($hardware->save()) {
+
+                $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xoá phần cứng', 'xem danh sách người dùng quản lý phần cứng', 'thêm người dùng quản lý phần cứng', 'sửa người dùng quản lý phần cứng', 'xoá người dùng quản lý phần cứng'];
+                foreach ($fullPermissions as $permission) {
+                    hardwarePemisssionModel::create([
+                        'hardware_ip' => $hardware->ip,
+                        'user_name' => $user->username,
+                        'permissions_name' => $permission,
+                        'user_createby' => $user->username,
+                        'assigned_at' => now(),
+                    ]);
+                }
+                LogController::createLogAuto([
+                    'username' => $user->username,
+                    'hardware_ip' => $hardware->ip,
+                    'message' => "User {$user->fullName} Created new hardware with IP {$hardware->ip}",
+                ]);
+                return response()->json(['message' => 'Hardware created successfully', 'data' => $hardware], 201);
+            } else {
+                return response()->json(['message' => 'Failed to create hardware'], 500);
+            }
+
+        } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
@@ -95,12 +127,11 @@ class HardwareController extends Controller
                 Log::warning('User not authenticated in getAllHardware');
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            
+
             // if ($user->cannot('list', hardwareModel::class)) {
             // return response()->json(['status' => 'error', 'message' => 'You do not have permission to view hardware'], 403);
             // }
 
-            // Sử dụng policy để kiểm tra người dùng có phải là quản lý phần cứng không
             $isManager = $user->can('viewAny', hardwareModel::class);
             Log::info('Policy check result for viewAny', [
                 'username' => $user->username,
@@ -120,8 +151,6 @@ class HardwareController extends Controller
 
                 Log::info('Found allowed IPs for user', ['username' => $user->username, 'allowedIps' => $allowedIps->toArray()]);
 
-                // Query sẽ chỉ lấy các hardware có IP nằm trong danh sách được phép.
-                // Nếu $allowedIps rỗng, query sẽ không trả về kết quả nào (đây là hành vi đúng).
                 $hardwareQuery->whereIn('ip', $allowedIps);
             } else {
                 Log::info('User is a manager, will fetch all hardware.', ['username' => $user->username]);
@@ -193,7 +222,15 @@ class HardwareController extends Controller
             }
 
             $oldData = $hardware->only([
-                'ip', 'dbname', 'dbversion', 'isVirtualServer', 'OS', 'OSver', 'hdd', 'ram', 'services',
+                'ip',
+                'dbname',
+                'dbversion',
+                'isVirtualServer',
+                'OS',
+                'OSver',
+                'hdd',
+                'ram',
+                'services',
             ]);
 
             // Cập nhật các trường nếu có truyền lên (bao gồm cả ip mới nếu có)
@@ -210,7 +247,15 @@ class HardwareController extends Controller
             $hardware->save();
 
             $newData = $hardware->only([
-                'ip', 'dbname', 'dbversion', 'isVirtualServer', 'OS', 'OSver', 'hdd', 'ram', 'services',
+                'ip',
+                'dbname',
+                'dbversion',
+                'isVirtualServer',
+                'OS',
+                'OSver',
+                'hdd',
+                'ram',
+                'services',
             ]);
 
 
@@ -243,53 +288,53 @@ class HardwareController extends Controller
         }
     }
     //delete hardware
-public function deleteHardware(Request $request)
-{
-    try {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 401);
+    public function deleteHardware(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            // Lấy IP từ query hoặc body
+            $ip = $request->query('ip') ?? $request->input('ip');
+            if (!$ip) {
+                return response()->json(['status' => 'error', 'message' => 'IP is required'], 400);
+            }
+
+            $hardware = hardwareModel::where('ip', $ip)->first();
+            if (!$hardware) {
+                return response()->json(['status' => 'error', 'message' => 'No hardware found'], 404);
+            }
+
+            if ($user->cannot('delete', $hardware)) {
+                return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this hardware.'], 403);
+            }
+
+            // Cập nhật is_delete thay vì xóa
+            $hardware->is_delete = true;
+            $hardware->save();
+
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'hardware_ip' => $hardware->ip,
+                'message' => "User {$user->fullName} marked hardware with IP {$hardware->ip} as deleted",
+            ]);
+
+            return response()->json(['message' => 'Hardware marked as deleted successfully']);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not delete hardware. ' . $e->getMessage()], 500);
         }
-
-        // Lấy IP từ query hoặc body
-        $ip = $request->query('ip') ?? $request->input('ip');
-        if (!$ip) {
-            return response()->json(['status' => 'error', 'message' => 'IP is required'], 400);
-        }
-
-        $hardware = hardwareModel::where('ip', $ip)->first();
-        if (!$hardware) {
-            return response()->json(['status' => 'error', 'message' => 'No hardware found'], 404);
-        }
-
-        if ($user->cannot('delete', $hardware)) {
-            return response()->json(['status' => 'error', 'message' => 'You do not have permission to delete this hardware.'], 403);
-        }
-
-        // Cập nhật is_delete thay vì xóa
-        $hardware->is_delete = true;
-        $hardware->save();
-
-        LogController::createLogAuto([
-            'username' => $user->username,
-            'hardware_ip' => $hardware->ip,
-            'message' => "User {$user->fullName} marked hardware with IP {$hardware->ip} as deleted",
-        ]);
-
-        return response()->json(['message' => 'Hardware marked as deleted successfully']);
-    } catch (TokenExpiredException $e) {
-        return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
-    } catch (TokenInvalidException $e) {
-        return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
-    } catch (JWTException $e) {
-        return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => 'Could not delete hardware. ' . $e->getMessage()], 500);
     }
-}
 
     public function getHardwareByIP(Request $request)
     {
-        try{
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
@@ -305,17 +350,17 @@ public function deleteHardware(Request $request)
             }
 
             return response()->json($hardware);
-            } catch (TokenExpiredException $e) {
-                return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
-            } catch (TokenInvalidException $e) {
-                return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
-            } catch (JWTException $e) {
-                return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
-            } catch (\Exception $e) {
-                return response()->json(['status' => 'error', 'message' => 'Could not retrieve hardware. ' . $e->getMessage()], 500);
-            }
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve hardware. ' . $e->getMessage()], 500);
+        }
     }
 
-    
+
 }
 

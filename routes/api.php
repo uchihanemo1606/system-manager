@@ -17,3 +17,5 @@ require __DIR__.'/softwarePermission.routes.php';
 require __DIR__.'/domain.routes.php';
 require __DIR__.'/SoftwarePermission.routes.php';
 require __DIR__.'/HardwareData.routes.php';
+require __DIR__.'/database.routes.php';
+require __DIR__.'/OS.routes.php';

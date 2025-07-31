@@ -12,20 +12,10 @@
                     <div class="small text-muted mt-1">
                         &copy; {{ date('Y') }} Công ty ABC. Mọi quyền được bảo lưu.
                     </div>
-                </div>
-
+                </div> 
                 <!-- Liên kết -->
                 <div class="col-md-6 text-center text-md-end">
-                    <ul class="list-inline mb-0">
-                        <li class="list-inline-item">
-                            <a href="{{ url('/about') }}" class="text-muted text-decoration-none">Giới thiệu</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="{{ url('/terms') }}" class="text-muted text-decoration-none">Điều khoản</a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="{{ url('/privacy') }}" class="text-muted text-decoration-none">Bảo mật</a>
-                        </li>
+                    <ul class="list-inline mb-0"> 
                         <li class="list-inline-item">
                             <a href="{{ url('/contact') }}" class="text-muted text-decoration-none">Liên hệ</a>
                         </li>

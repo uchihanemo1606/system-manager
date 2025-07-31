@@ -18,10 +18,10 @@ class softwarefileController extends Controller
 
     public function createSoftwarefile(Request $request)
     {
-        try {
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['message' => 'Please login to use this function'], 401);
-            }
+    try {
+        if (!$user = JWTAuth::parseToken()->authenticate()) {
+            return response()->json(['message' => 'Please login to use this function'], 401);
+        }
 
             $validated = $request->validate([
                 'software_id' => 'required|string|exists:software,id|max:25',

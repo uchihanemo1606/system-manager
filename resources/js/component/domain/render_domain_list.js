@@ -43,11 +43,9 @@ export function renderDomainList(domains, is_Delete_Hardware_Domain = false, is_
                 </span> 
             </td>
             <td>
-                <h5 class="font-size-14 mb-1">
-                    <a href="${domain.link}" target="_blank" class="text-dark">${domain.name}</a> 
-                    | <a href="${domain.link}" target="_blank" class="text-primary">${domain.link}</a>
-                </h5>
-                <small>Ngày tạo: ${formatDate(domain.created_at)}</small>
+                <h5 class="font-size-14 mb-1"> 
+                    <a href="${domain.link}" target="_blank" class="text-primary">${domain.link}</a>
+                </h5> 
             </td> 
             <td class="text-right text-nowrap">
                 <button class="btn btn-sm btn-light me-2"

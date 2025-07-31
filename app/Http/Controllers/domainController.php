@@ -21,8 +21,8 @@ class domainController extends Controller
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 401);
-        }
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
 
             // Validate the request data
             $request->validate([
@@ -130,7 +130,6 @@ class domainController extends Controller
                     $changes[] = "$key: '$oldValue' => '$newValue'";
                 }
             }
-            $changeString = $changes ? implode(', ', $changes) : 'No changes';
 
             // Log the update of the domain
             LogController::createLogAuto([
@@ -150,7 +149,7 @@ class domainController extends Controller
         } catch (JWTException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Could not update domain. ' . $e->getMessage()], 500);   
+            return response()->json(['status' => 'error', 'message' => 'Could not update domain. ' . $e->getMessage()], 500);
         }
     }
 
@@ -189,9 +188,9 @@ class domainController extends Controller
     }
 
 
-     public function createHardwareDomain(Request $request)
+    public function createHardwareDomain(Request $request)
     {
-        try{
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
@@ -206,17 +205,17 @@ class domainController extends Controller
             $domainLink = $domain ? $domain->link : $domain_id;
             // Check if the user has permission to add domains to hardware
             $exists = hardwareAccessDomainModel::where([
-            'hardware_ip' => $hardware_ip,
-            'domain_id' => $domain_id,
+                'hardware_ip' => $hardware_ip,
+                'domain_id' => $domain_id,
             ])->exists();
             if ($exists) {
                 return response()->json(['status' => 'error', 'message' => 'This domain is already assigned to this hardware'], 409);
             }
 
             $hardwareaccessdomain = hardwareAccessDomainModel::create([
-            'hardware_ip' => $hardware_ip,
-            'domain_id' => $domain_id,
-        ]);
+                'hardware_ip' => $hardware_ip,
+                'domain_id' => $domain_id,
+            ]);
 
             LogController::createLogAuto([
                 'username' => $user->username,
@@ -281,20 +280,20 @@ class domainController extends Controller
             $name = $request->query('name', $request->input('name'));
 
             // Lấy domain
-             $domainQuery = domainModel::query();
-        if ($link) {
-            $domainQuery->where('link', $link);
-        }
-        if ($name) {
-            $domainQuery->where('name', $name);
-        }
-        $domain = $domainQuery->with('software')->first();
+            $domainQuery = domainModel::query();
+            if ($link) {
+                $domainQuery->where('link', $link);
+            }
+            if ($name) {
+                $domainQuery->where('name', $name);
+            }
+            $domain = $domainQuery->with('software')->first();
 
-        if (!$domain) {
-            return response()->json(['message' => 'Domain not found'], 404);
-        }
+            if (!$domain) {
+                return response()->json(['message' => 'Domain not found'], 404);
+            }
 
-        // Lấy hardware liên kết với domain
+            // Lấy hardware liên kết với domain
             $hardware = hardwareAccessDomainModel::where('domain_id', $domain->id)
                 ->with('hardware')
                 ->get()

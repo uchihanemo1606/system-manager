@@ -90,7 +90,7 @@ function renderSoftwareInfo(software) {
     setText("software-createdby-view", software.user_createby);
     setText("software-created-view", formatDate(software.created_at));
     setText("software-updated-view", formatDate(software.updated_at));
-    setText("software-is-delete-view", software.is_delete ? "Đã xóa" : "Đang hoạt động", software.is_delete ? "text-danger" : "text-success");
+    setText("software-is-delete-view", software.is_delete ? "Đã xóa" : "Hoạt động", software.is_delete ? "text-danger" : "text-success");
 }
 
 function showInputFields() {

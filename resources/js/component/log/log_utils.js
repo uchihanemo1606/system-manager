@@ -14,46 +14,108 @@ export function formatDateTimeVN(dateStr) {
 }
 
 export function matchDateTime(dateStr, dateInput, timeInput) {
-    if (!dateInput) return true;
-
+    if (!dateStr) return false;
     const date = new Date(dateStr);
-    const inputDate = new Date(dateInput);
 
-    if (date.getFullYear() !== inputDate.getFullYear() || date.getMonth() !== inputDate.getMonth() || date.getDate() !== inputDate.getDate()) return false;
+    // So khớp ngày
+    if (dateInput) {
+        const inputDate = new Date(dateInput);
+        if (
+            date.getFullYear() !== inputDate.getFullYear() ||
+            date.getMonth() !== inputDate.getMonth() ||
+            date.getDate() !== inputDate.getDate()
+        ) return false;
+    }
 
+    // So khớp giờ:phút
     if (timeInput) {
         const [hStr, mStr] = timeInput.split(":");
-        if (hStr && date.getHours() !== parseInt(hStr, 10)) return false;
-        if (mStr && date.getMinutes() !== parseInt(mStr, 10)) return false;
+        const hour = parseInt(hStr, 10);
+        const minute = parseInt(mStr, 10);
+        if (!isNaN(hour) && date.getHours() !== hour) return false;
+        if (!isNaN(minute) && date.getMinutes() !== minute) return false;
+    }
+
+    return true;
+}
+function normalizeText(text) {
+    return text
+        .normalize("NFD")                  // Tách dấu khỏi chữ (vd: "ẽ" -> "e" + "~")
+        .replace(/[\u0300-\u036f]/g, "")   // Loại bỏ các dấu
+        .replace(/\s+/g, "")               // Xoá khoảng trắng
+        .toLowerCase();                    // Chuyển về chữ thường
+}
+
+export function filterLog(log) {
+    const startDate = document.getElementById("filter-start-date")?.value;
+    const endDate = document.getElementById("filter-end-date")?.value;
+    const startTime = document.getElementById("filter-start-time")?.value;
+    const endTime = document.getElementById("filter-end-time")?.value;
+    const username = document.getElementById("filter-username")?.value.trim().toLowerCase();
+    const messageInput = document.getElementById("filter-message")?.value.trim();
+    const isDelete = document.getElementById("filter-is-delete")?.value;
+
+    const logDate = new Date(log.created_at);
+    if (isNaN(logDate)) return false;
+
+    // So sánh khoảng thời gian từ ngày -> đến ngày
+    if (startDate) {
+        const start = new Date(startDate);
+        if (logDate < start) return false;
+    }
+
+    if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999); // để bao gồm cả ngày đó
+        if (logDate > end) return false;
+    }
+
+    // So sánh khoảng giờ:phút
+    if (startTime) {
+        const [h, m] = startTime.split(":").map(Number);
+        if (logDate.getHours() < h || (logDate.getHours() === h && logDate.getMinutes() < m)) return false;
+    }
+
+    if (endTime) {
+        const [h, m] = endTime.split(":").map(Number);
+        if (logDate.getHours() > h || (logDate.getHours() === h && logDate.getMinutes() > m)) return false;
+    }
+
+    // So khớp username
+    if (username && !log.username?.toLowerCase().includes(username)) return false;
+
+    // So khớp message không dấu
+    if (messageInput) {
+        const msgNorm = normalizeText(log.message || "");
+        const inputNorm = normalizeText(messageInput);
+        if (!msgNorm.includes(inputNorm)) return false;
+    }
+
+    // So khớp is_delete
+    if (isDelete) {
+        const boolValue = isDelete === "true";
+        if (log.is_delete !== boolValue) return false;
     }
 
     return true;
 }
 
-export function filterLog(log) {
-    const createdDate = document.getElementById("filter-created-date")?.value;
-    const createdTime = document.getElementById("filter-created-time")?.value;
-    const updatedDate = document.getElementById("filter-updated-date")?.value;
-    const updatedTime = document.getElementById("filter-updated-time")?.value;
-    const username = document.getElementById("filter-username")?.value.trim().toLowerCase();
-    const message = document.getElementById("filter-message")?.value.trim().toLowerCase();
-    const isDelete = document.getElementById("filter-is-delete")?.value;
-
-    if (!matchDateTime(log.created_at, createdDate, createdTime)) return false;
-    if (!matchDateTime(log.updated_at, updatedDate, updatedTime)) return false;
-    if (username && !log.username?.toLowerCase().includes(username)) return false;
-    if (message && !log.message?.toLowerCase().includes(message)) return false;
-    if (isDelete && log.is_delete !== (isDelete === "true")) return false;
-
-    return true;
-}
 
 export function resetFilters() {
-    ["filter-created-date", "filter-created-time", "filter-updated-date", "filter-updated-time", "filter-username", "filter-message", "filter-is-delete"].forEach(id => {
+    [
+        "filter-start-date",
+        "filter-end-date",
+        "filter-start-time",
+        "filter-end-time",
+        "filter-username",
+        "filter-message",
+        "filter-is-delete"
+    ].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = "";
     });
 }
+
 
 export function toggleFilter() {
     const content = document.getElementById("filter-content");

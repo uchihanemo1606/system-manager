@@ -7,13 +7,17 @@ async function initSoftwareFileEditModal(data) {
 
     const form = document.getElementById("edit-software-file-form");
     const fileNameInput = document.getElementById("edit-file-name");
-    const filePathInput = document.getElementById("edit-file-path");
+    // const filePathInput = document.getElementById("edit-file-path");
     const descriptionInput = document.getElementById("edit-description");
     const deleteBtn = document.getElementById("delete-software-file");
+    const fileLink = document.getElementById("edit-file-link");
+    const fileLinkText = document.getElementById("edit-file-link-text");
+    fileLink.href = file.file_path || "#";
+    fileLinkText.textContent = file.file_path || "Không có đường dẫn";
 
     // Gán giá trị ban đầu
     fileNameInput.value = file.file_name || "";
-    filePathInput.value = file.file_path || "";
+    // filePathInput.value = file.file_path || "";
     descriptionInput.value = file.description || "";
 
     // Sửa
@@ -21,9 +25,9 @@ async function initSoftwareFileEditModal(data) {
         e.preventDefault();
 
         const updatedData = {
-            software_id: file.software_id, 
+            software_id: file.software_id,
             file_name: fileNameInput.value.trim(),
-            file_path: filePathInput.value.trim(),
+            file_path: file.file_path, // dùng lại đường dẫn cũ vì không thay đổi
             description: descriptionInput.value.trim(),
         };
 
@@ -35,6 +39,7 @@ async function initSoftwareFileEditModal(data) {
             showToast({ message: err.message || "Cập nhật thất bại", type: "error" });
         }
     };
+
 
     // Xóa
     deleteBtn.onclick = async () => {

@@ -9,7 +9,7 @@
             </div>
         </div>
     </div>
-    <form class="form-row mb-3">
+    <form class="form-row mb-3 d-none">
         <div class="col">
             <input type="text" class="form-control" id="filter-name" placeholder="Tìm theo tên">
         </div>
@@ -49,11 +49,9 @@
                     <table class="table project-list-table table-nowrap table-centered table-borderless">
                         <thead>
                             <tr>
-                                <th scope="col">Tên Quyền Hạng</th>
-                                <th scope="col">Permission</th>
-                                <th scope="col">Ngày tạo</th>
-                                <th scope="col">Người dùng liên quan</th>
-                                <th scope="col">Action</th>
+                                <th scope="col">Tên Quyền Hạng</th> 
+                                <th scope="col">Ngày tạo</th> 
+                                <th scope="col" class="text-right">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="role-table-body"></tbody>

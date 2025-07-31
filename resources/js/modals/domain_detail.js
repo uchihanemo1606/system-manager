@@ -70,9 +70,7 @@ async function initDomainDetailModal(domain) {
             await get_hardware_software_by_domain({
                 link: domain.link,
                 name: domain.name,
-            });
-        // Hiển thị thông tin domain
-        document.getElementById("domain-name").textContent = fullDomain.name;
+            });  
         const linkEl = document.getElementById("domain-link");
         linkEl.textContent = fullDomain.link;
         linkEl.href = fullDomain.link;
@@ -148,10 +146,7 @@ async function initDomainDetailModal(domain) {
         }
     });
     document.getElementById("edit-domain-btn").addEventListener("click", async () => {
-        isEditMode = !isEditMode;
-
-        const nameView = document.getElementById("domain-name");
-        const nameInput = document.getElementById("domain-name-input");
+        isEditMode = !isEditMode; 
 
         const linkView = document.getElementById("domain-link");
         const linkInput = document.getElementById("domain-link-input");
@@ -159,42 +154,35 @@ async function initDomainDetailModal(domain) {
         const editBtn = document.getElementById("edit-domain-btn");
 
         if (isEditMode) {
-            // Hiện input để chỉnh sửa
-            nameInput.value = nameView.textContent;
+            // Hiện input để chỉnh sửa 
             linkInput.value = linkView.textContent;
-
-            nameView.classList.add("d-none");
+ 
             linkView.classList.add("d-none");
-
-            nameInput.classList.remove("d-none");
+ 
             linkInput.classList.remove("d-none");
 
             editBtn.innerHTML = `<i class="mdi mdi-content-save"></i>`;
-        } else {
-            const newName = nameInput.value.trim();
+        } else { 
             const newLink = linkInput.value.trim();
 
-            if (!newName || !newLink) {
+            if (!newLink) {
                 showToast({ message: "Tên miền và link không được để trống.", type: "warning" });
                 return;
             }
 
             try {
-                if (newName === domain.name && newLink === domain.link) {
+                if (newLink === domain.link) {
                     showToast({
                         message: "Không có thay đổi nào để cập nhật.", type: "info"
                     });
                 } else {
                     await update_domain_by_name({
                         id: domain.id,
-                        name: newName,
+                        name: domain.name,
                         link: newLink,
-                    });
-
-                    domain.name = newName;
+                    }); 
                     domain.link = newLink;
-
-                    nameView.textContent = newName;
+ 
                     linkView.textContent = newLink;
                     linkView.href = newLink;
                     window.dispatchEvent(new CustomEvent("domainUpdated"));
@@ -204,11 +192,9 @@ async function initDomainDetailModal(domain) {
                 console.error(err);
                 showToast({ message: err.message || "Lỗi khi cập nhật tên miền.", type: "error" });
             }
-
-            nameView.classList.remove("d-none");
+ 
             linkView.classList.remove("d-none");
-
-            nameInput.classList.add("d-none");
+ 
             linkInput.classList.add("d-none");
 
             editBtn.innerHTML = `<i class="bx bx-pencil"></i>`;

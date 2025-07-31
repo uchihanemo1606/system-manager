@@ -1,12 +1,14 @@
 // Gộp tất cả mã thành một file hoàn chỉnh
 
 import {
-    get_all_hardware_database,
+    get_all_hardware_database, 
     get_versions_by_dbname,
     get_all_hardware_os,
     get_versions_by_os,
-    create_hardware_os_data,
-    create_hardware_database
+    create_hardware_database,
+    create_hardware_database_version,
+    create_hardware_os,
+    create_hardware_os_version
 } from "../api/hardware_data";
 import { create_hardware } from "../api/hardware";
 import { showToast } from "../component/toast";
@@ -23,9 +25,8 @@ async function populateDropdowns() {
 
     const dbs = await get_all_hardware_database();
     const oss = await get_all_hardware_os();
-
     const uniqueDbNames = [...new Set(dbs.data.map(d => d.dbname))];
-    const uniqueOSNames = [...new Set(oss.data.map(o => o.OS))];
+    const uniqueOSNames = [...new Set(oss.data.map(o => o.name))];
 
     dbSelect.innerHTML = `<option></option>` + uniqueDbNames.map(name => `<option value="${name}">${name}</option>`).join('');
     osSelect.innerHTML = `<option></option>` + uniqueOSNames.map(name => `<option value="${name}">${name}</option>`).join('');
@@ -47,7 +48,8 @@ async function populateDropdowns() {
 
         try {
             const res = await get_versions_by_dbname(name);
-            dbVersionSelect.innerHTML = `<option></option>` + res.data.map(ver => `<option value="${ver}">${ver}</option>`).join('');
+            console.log(res)
+            dbVersionSelect.innerHTML = `<option></option>` + res.data.map(ver => `<option value="${ver.version}">${ver.version}</option>`).join('');
             dbVersionSelect.disabled = false;
         } catch (err) {
             console.error("Lỗi lấy phiên bản DB:", err);
@@ -64,7 +66,7 @@ async function populateDropdowns() {
 
         try {
             const res = await get_versions_by_os(name);
-            osVersionSelect.innerHTML = `<option></option>` + res.data.map(ver => `<option value="${ver}">${ver}</option>`).join('');
+            osVersionSelect.innerHTML = `<option></option>` + res.data.map(ver => `<option value="${ver.version}">${ver.version}</option>`).join('');
             osVersionSelect.disabled = false;
         } catch (err) {
             console.error("Lỗi lấy phiên bản OS:", err);
@@ -99,7 +101,7 @@ window.initHardwareCreateModal = async function () {
         try {
             const res = await create_hardware(data);
             showToast({ message: res.message || "Tạo phần cứng thành công!", type: "success" });
- 
+
             setTimeout(() => {
                 window.location.href = `/hardware_detail?id=${encodeURIComponent(data.ip)}`;
             }, 1000); // chờ 1s cho người dùng thấy thông báo
@@ -120,6 +122,8 @@ window.initHardwareDataCreateModal = function (data) {
 
     form.reset();
     nameInput.disabled = false;
+    nameInput.classList.remove("disabled-input");
+
 
     const type = data.type;
     const isDb = type.includes("db");
@@ -137,11 +141,14 @@ window.initHardwareDataCreateModal = function (data) {
     if (type === "dbversion" && data.data?.dbname) {
         nameInput.value = data.data.dbname;
         nameInput.disabled = true;
+        nameInput.classList.add("disabled-input");
     }
     if (type === "OSver" && data.data?.OS) {
         nameInput.value = data.data.OS;
         nameInput.disabled = true;
+        nameInput.classList.add("disabled-input");
     }
+
 
     form.onsubmit = async function (e) {
         e.preventDefault();
@@ -155,27 +162,55 @@ window.initHardwareDataCreateModal = function (data) {
 
         try {
             if (isDb) {
-                await create_hardware_database({ dbname: name, dbversion: version });
+                if (type === "dbname") {
+                    try {
+                        await create_hardware_database({ dbname: name });
+                    } catch (err) {
+                        if (err.message.includes("Duplicate entry")) {
+                            showToast({ message: "Tên database đã tồn tại!", type: "error" });
+                            return; // Không tạo version nếu đã tồn tại
+                        } else {
+                            throw err;
+                        }
+                    }
+                }
+
+                // Tạo version nếu không phải đang tạo tên mới hoặc tên mới đã tạo thành công
+                await create_hardware_database_version({ dbname: name, version: version });
+
             } else {
-                await create_hardware_os_data({ OS: name, OSver: version });
+                if (type === "OS") {
+                    try {
+                        await create_hardware_os({ name: name, architecture: "bug", version_description: "bug" });
+                    } catch (err) {
+                        if (err.message.includes("Duplicate entry")) {
+                            showToast({ message: "Tên hệ điều hành đã tồn tại!", type: "error" });
+                            return; // Không tạo version nếu đã tồn tại
+                        } else {
+                            throw err;
+                        }
+                    }
+                }
+
+                await create_hardware_os_version({ os_name: name, version: version });
             }
 
             showToast({ message: "Tạo thành công!", type: "success" });
 
-            // Gọi callback nếu có
             if (typeof data.onSuccess === "function") {
-                await data.onSuccess();  // <-- callback gọi lại populateDropdowns
+                await data.onSuccess();
             } else {
-                // fallback: gọi lại toàn bộ dropdown nếu không có callback
                 await populateDropdowns();
             }
 
-            // Đóng modal
             $('#hardware-data-modal').modal('hide');
+
         } catch (err) {
             showToast({ message: err.message || "Lỗi khi tạo dữ liệu.", type: "error" });
         }
+
     };
+
 
 };
 

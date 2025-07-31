@@ -21,14 +21,9 @@
                                 <i class="bx bx-trash"></i>
                             </button>
                         </div>
-                    </h5>
+                    </h5> 
                     <p>
-                        <i class="bx bx-globe"></i> <strong>Tên:</strong>
-                        <span id="domain-name">...</span>
-                        <input type="text" id="domain-name-input" class="form-control form-control-sm d-none mt-2" />
-                    </p>
-                    <p>
-                        <i class="bx bx-globe"></i> <strong>Link:</strong>
+                        <i class="bx bx-globe"></i> <strong>Tên miền:</strong>
                         <a href="#" id="domain-link" target="_blank" class="text-primary" title="Truy cập">
 
                         </a>

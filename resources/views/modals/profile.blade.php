@@ -16,7 +16,7 @@
         </div>
 
 
-        <div class="form-group">
+        <div class="form-group d-none" >
             <label for="phone_number">Số điện thoại</label>
             <input type="text" id="phone_number" name="phone_number" class="form-control" readonly>
         </div>

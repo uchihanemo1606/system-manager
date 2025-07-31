@@ -56,7 +56,7 @@ export const get_log_by_time = async (from, to) => {
 
 // Lấy chi tiết log theo ID
 export const get_log_by_id = async (id) => {
-    const res = await fetch(`api/getLogById/${id}`, {
+    const res = await fetch(`api/getlogbyid/${id}`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();

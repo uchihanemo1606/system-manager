@@ -4,15 +4,17 @@
     $id = request()->query($idParam); 
 @endphp
 
+@if ($id)
+    <div class="user-member-list-add mb-2">
+        <button class="btn btn-success btn-sm"
+            onclick="loadModal('type_permission_create', { type: '{{ $type }}', id: '{{ $id }}' },'xl')">
+            <i class="mdi mdi-plus"></i> Thêm người dùng
+        </button>
+    </div>
+@endif
 <div class="table-responsive table-user-member-list mt-3 shadow-sm" {{ $type }}>
-    
-    @if ($id)
-        <div class="user-member-list-add mb-2">
-            <button class="btn btn-success btn-sm" onclick="loadModal('type_permission_create', { type: '{{ $type }}', id: '{{ $id }}' },'xl')">
-                <i class="mdi mdi-plus"></i> Thêm người dùng
-            </button>
-        </div>
-    @endif
+
+
 
     <table class="table table-bordered table-hover mb-0 align-middle text-center">
         <thead class="table-light">

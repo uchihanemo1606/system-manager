@@ -3,7 +3,12 @@ import {
     get_all_hardware_database,
     get_versions_by_dbname,
     get_all_hardware_os,
-    get_versions_by_os
+    get_versions_by_os,
+
+ 
+    // get_versions_by_dbname, 
+    // get_all_hardware_os,
+    // get_versions_by_os
 } from "../api/hardware_data";
 
 let allHardwareCache = [];
@@ -76,7 +81,7 @@ async function initHardwareFilterSelects() {
     };
 
     const dbNames = [...new Set((await get_all_hardware_database()).data.map(d => d.dbname))];
-    const osNames = [...new Set((await get_all_hardware_os()).data.map(o => o.OS))];
+    const osNames = [...new Set((await get_all_hardware_os()).data.map(o => o.name))];
 
     setupSelect(dbSelect, dbNames);
     setupSelect(osSelect, osNames);
@@ -94,7 +99,7 @@ async function initHardwareFilterSelects() {
 
         if (!this.value) return;
         const res = await get_versions_by_dbname(this.value);
-        setupSelect(dbverSelect, res.data);
+        setupSelect(dbverSelect, res.data.map(item => item.version));
         dbverSelect.disabled = false;
     });
 
@@ -106,7 +111,7 @@ async function initHardwareFilterSelects() {
 
         if (!this.value) return;
         const res = await get_versions_by_os(this.value);
-        setupSelect(osverSelect, res.data);
+        setupSelect(osverSelect, res.data.map(item => item.version)); 
         osverSelect.disabled = false;
     });
 }
