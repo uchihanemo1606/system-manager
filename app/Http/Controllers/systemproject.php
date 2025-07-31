@@ -4,27 +4,36 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SystemProjectModel;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class systemproject extends Controller
 {
+
     public function updateAvatarSystem(Request $request)
     {
-        // Validate the request
         $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:8096',
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096',
         ]);
 
-        // Handle the file upload
-        if ($request->hasFile('avatar')) {
-            $file = $request->file('avatar');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/avatars'), $filename);
+        $systemProject = SystemProjectModel::first();
+        if ($systemProject) {
+            // Upload lên Cloudinary
+            $uploadedFileUrl = Cloudinary::upload($request->file('avatar')->getRealPath(), [
+                'folder' => 'system_avatars',
+                'upload_preset' => env('CLOUDINARY_UPLOAD_PRESET', 'ml_default')
+            ])->getSecurePath();
 
+            // Lưu link vào DB
+            $systemProject->avatar = $uploadedFileUrl;
+            $systemProject->save();
 
-            return response()->json(['success' => 'Avatar updated successfully', 'filename' => $filename]);
+            return response()->json([
+                'success' => 'Avatar updated successfully',
+                'avatar' => $uploadedFileUrl
+            ]);
         }
 
-        return response()->json(['error' => 'No file uploaded'], 400);
+        return response()->json(['error' => 'System project not found'], 404);
     }
 
     public function updateFooterSystem(Request $request)

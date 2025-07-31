@@ -12,6 +12,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class UserController extends Controller
 {
@@ -248,6 +249,30 @@ public function updateUserbyUserName(Request $request, $username)
     }
 }
 
+public function updateAvatarUser(Request $request)
+{
+    $request->validate([
+        'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096',
+    ]);
 
+    if (!$user = JWTAuth::parseToken()->authenticate()) {
+        return response()->json(['please login to use the function'], 404);
+    }
+
+    // Upload lên Cloudinary
+    $uploadedFileUrl = Cloudinary::upload($request->file('avatar')->getRealPath(), [
+        'folder' => 'avatars',
+        'upload_preset' => env('CLOUDINARY_UPLOAD_PRESET', 'ml_default')
+    ])->getSecurePath();
+
+    // Lưu link vào DB
+    $user->avatar = $uploadedFileUrl;
+    $user->save();
+
+    return response()->json([
+        'success' => 'Avatar updated successfully',
+        'avatar' => $uploadedFileUrl
+    ]);
+}
 
 }
