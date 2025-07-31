@@ -4,9 +4,9 @@ import { renderPagination } from "../log/log_utils"; // Đảm bảo đã import
 const ITEMS_PER_PAGE = 6;
 let allSoftwarePermissions = [];
 let currentPage = 1;
-
+ const id = new URLSearchParams(window.location.search).get("id");
 async function getSoftwarePermissions() {
-    const id = new URLSearchParams(window.location.search).get("id");
+   
     if (!id) {
         console.error("Thiếu tham số id trên URL");
         return;
@@ -36,8 +36,7 @@ function renderSoftwarePage(page) {
     }
 
     data.forEach((item, index) => {
-        const tr = document.createElement("tr");
-
+        const tr = document.createElement("tr"); 
         const user = item.user_info || {};
         const permissions = Array.isArray(item.permissions) ? item.permissions : [];
         const visible = permissions.slice(0, 2);
@@ -67,7 +66,7 @@ function renderSoftwarePage(page) {
             <td>${permissionsHTML}</td>
             <td>
                 <button class="btn btn-primary btn-sm"
-                    onclick="loadModal('user_software_permission_edit', { username: '${user.username}', targetId: '${item.target_id}' })">
+                    onclick="loadModal('user_software_permission_edit', { username: '${user.username}', targetId: '${id}' })">
                     <i class="mdi mdi-pencil"></i> Sửa
                 </button>
             </td>

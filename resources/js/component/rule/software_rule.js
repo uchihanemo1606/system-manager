@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 tableBody.appendChild(row);
             });
         } catch (error) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">Lỗi tải quy chế</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-primary text-center">Không có quy chế nào</td></tr>`;
             console.error(error);
         }
     }
