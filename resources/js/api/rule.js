@@ -22,7 +22,7 @@ export async function update_category_rule(data) {
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Lỗi cập nhật loại quy chế");
     return result;
-}   
+}
 
 // Xóa loại quy chế
 export async function delete_category_rule(id) {
@@ -96,16 +96,29 @@ export async function delete_software_rule_by_id(id) {
     return result;
 }
 export async function update_software_rule_by_id(payload) {
-    const res = await fetch("api/updatesoftwarerule", {
-        method: "PATCH",
+    const { id, name, description, category_rule_id, file } = payload;
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("id", id);
+    formData.append("description", description || "");
+    formData.append("category_rule_id", category_rule_id);
+    if (file && file instanceof File) {
+        formData.append("file", file);
+    }
+
+    const res = await fetch(`/api/updaterule`, {
+        method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            Authorization: defaultHeaders().Authorization
+            Authorization: defaultHeaders().Authorization,
         },
-        body: JSON.stringify(payload)
+        body: (() => {
+            formData.append("_method", "PATCH");
+            return formData;
+        })(),
     });
 
     const result = await res.json();
-    if (!res.ok) throw result;
+    if (!res.ok) throw new Error(result.message || "Lỗi khi cập nhật quy chế phần mềm.");
     return result;
 }

@@ -59,16 +59,9 @@
                             <tbody id="user-table-body">
                             </tbody>
                         </table>
+                        <div id="pagination" class="mt-3"></div>
 
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="text-center my-3">
-                            <a href="javascript:void(0);" class="text-success"><i
-                                    class="bx bx-loader bx-spin font-size-18 align-middle mr-2"></i> Load more </a>
-                        </div>
-                    </div> <!-- end col-->
                 </div>
             </div>
         </div>

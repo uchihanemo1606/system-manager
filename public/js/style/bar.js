@@ -17,6 +17,7 @@ const routes = {
     profile: "#",
     lock: "#",
     logout: "#",
+    setting: "/setting",
 };
 
 const sidebar = document.querySelector(".sidebar");

@@ -189,32 +189,65 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderPagination(totalPages) {
         pagination.innerHTML = "";
-
         if (totalPages <= 1) return;
 
-        const createPageItem = (page, text = page, active = false) => {
+        const ul = document.createElement("ul");
+        ul.className = "pagination pagination-sm justify-content-center";
+
+        const addPage = (page, text = page, isActive = false, isDisabled = false) => {
             const li = document.createElement("li");
-            li.className = `page-item ${active ? "active" : ""}`;
-            li.innerHTML = `<button class="page-link">${text}</button>`;
-            li.addEventListener("click", () => {
-                currentPage = page;
-                renderPage();
-            });
-            return li;
+            li.className = `page-item ${isActive ? "active" : ""} ${isDisabled ? "disabled" : ""}`;
+            li.innerHTML = `<a class="page-link" href="#">${text}</a>`;
+            if (!isDisabled) {
+                li.addEventListener("click", e => {
+                    e.preventDefault();
+                    currentPage = page;
+                    renderPage();
+                });
+            }
+            ul.appendChild(li);
         };
 
-        if (currentPage > 1) {
-            pagination.appendChild(createPageItem(currentPage - 1, "«"));
+        addPage(currentPage - 1, "‹", false, currentPage === 1);
+
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            if (startPage === 1) endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            else if (endPage === totalPages) startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
 
-        for (let i = 1; i <= totalPages; i++) {
-            pagination.appendChild(createPageItem(i, i, i === currentPage));
+        if (startPage > 1) {
+            addPage(1);
+            if (startPage > 2) {
+                const li = document.createElement("li");
+                li.className = "page-item disabled";
+                li.innerHTML = `<span class="page-link">...</span>`;
+                ul.appendChild(li);
+            }
         }
 
-        if (currentPage < totalPages) {
-            pagination.appendChild(createPageItem(currentPage + 1, "»"));
+        for (let i = startPage; i <= endPage; i++) {
+            addPage(i, i, i === currentPage);
         }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const li = document.createElement("li");
+                li.className = "page-item disabled";
+                li.innerHTML = `<span class="page-link">...</span>`;
+                ul.appendChild(li);
+            }
+            addPage(totalPages);
+        }
+
+        addPage(currentPage + 1, "›", false, currentPage === totalPages);
+
+        pagination.appendChild(ul);
     }
+
 
     function formatDatetime(datetimeStr) {
         if (!datetimeStr) return "";

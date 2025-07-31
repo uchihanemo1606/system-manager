@@ -18,3 +18,4 @@ require __DIR__.'/SoftwarePermission.routes.php';
 require __DIR__.'/HardwareData.routes.php';
 require __DIR__.'/database.routes.php';
 require __DIR__.'/OS.routes.php';
+require __DIR__.'/systemproject.routes.php';

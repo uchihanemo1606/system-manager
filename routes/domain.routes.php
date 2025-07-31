@@ -38,7 +38,7 @@ Route::get('/getdomainbyhardware', [domainController::class, 'getdomainbyhardwar
     ->middleware('check.permission')
     ->name('hardwaredomain.list');
 
-Route::get('/getdomainsbyhardware', [domainController::class, 'getdomainsbyhardware'])
+Route::get('/getdomainsbyhardware', [domainController::class, 'getAllDomainsByHardware'])
     ->middleware('check.permission')
     ->name('hardwaredomain.list');
 

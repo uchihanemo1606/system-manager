@@ -20,14 +20,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         tableBody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">Không tìm thấy ID phần mềm trên URL</td></tr>`;
         return;
     }
-    
+
     async function loadSoftwareRules() {
         try {
             const { data = [] } = await get_all_software_rule(softwareId);
             if (data.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="5" class="text-center">Chưa có quy chế nào</td></tr>`;
                 return;
-            } 
+            }
             tableBody.innerHTML = "";
             data.forEach((item, index) => {
                 const ruleName = item.rule_name.length > 50
@@ -165,7 +165,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         const name = document.getElementById("edit-rule-name").value.trim();
         const description = document.getElementById("edit-rule-description").value.trim();
         const category_rule_id = document.getElementById("edit-rule-category").value;
-
+        const fileInput = document.getElementById("edit-rule-file");
+        const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
         if (!id || !name || !category_rule_id) {
             showToast("Vui lòng nhập đầy đủ thông tin", "error");
             return;
@@ -176,7 +177,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             name,
             description,
             category_rule_id: parseInt(category_rule_id), // <-- Đảm bảo là số
-            // file_url: null // Vì bạn không cho sửa file
+            file
         };
 
         try {

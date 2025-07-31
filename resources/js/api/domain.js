@@ -90,8 +90,8 @@ export async function get_domain_by_hardware({ ip }) {
         }
     );
     const data = await res.json();
-    if (res.ok && data?.data?.hardware_ip == ip) {
-        return data;
+    if (res.ok && data?.data) {
+        return data.data;
     }
     return [];
 }

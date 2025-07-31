@@ -90,7 +90,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-success">Lưu</button> 
+                            <button type="submit" class="btn btn-success">Lưu</button>
                         </div>
                     </div>
                 </form>
@@ -116,26 +116,25 @@
                         <label for="edit-rule-name">Tên quy chế</label>
                         <input type="text" class="form-control" id="edit-rule-name" required>
                     </div>
-                    <div class="form-group">
-                        <label for="edit-rule-description">Mô tả</label>
-                        <textarea class="form-control" id="edit-rule-description"></textarea>
-                    </div>
+
                     <div class="form-group">
                         <label for="edit-rule-category">Loại quy chế</label>
                         <select class="form-control" id="edit-rule-category" required>
                             <option value="">-- Chọn loại --</option>
                         </select>
                     </div>
-                </div>
-                <div class="alert alert-warning d-flex align-items-center" role="alert">
-                    <i class="mdi mdi-alert-circle-outline mr-2"></i>
-                    <div>
-                        Chúng tôi không hỗ trợ sửa tệp quy chế. Vui lòng xóa và tạo lại quy chế mới nếu cần thay đổi tệp
-                        tin.
+                    <div class="form-group">
+                        <label for="edit-rule-file">Tệp quy chế mới(nếu không đổi có thể bỏ qua)</label>
+                        <input type="file" class="form-control" id="edit-rule-file" accept=".pdf,.doc,.docx">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-rule-description">Mô tả</label>
+                        <textarea class="form-control" id="edit-rule-description"></textarea>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Lưu thay đổi</button> 
+                    <button type="submit" class="btn btn-success">Lưu thay đổi</button>
                 </div>
             </div>
         </form>
