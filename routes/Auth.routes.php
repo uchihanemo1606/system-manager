@@ -36,3 +36,10 @@ Route::patch('/resetpassword', [AuthController::class, 'resetPassword']);
 
 
 Route::patch('/updateavataruser', [UserController::class, 'updateAvatarUser']);
+
+Route::patch('/deleteUser', [AuthController::class, 'deleteUser'])
+    ->middleware('check.permission')
+    ->name('user.delete');
+Route::patch('/hideUser', [AuthController::class, 'hideUser'])
+    ->middleware('check.permission')
+    ->name('user.delete');
