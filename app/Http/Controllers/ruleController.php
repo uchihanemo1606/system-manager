@@ -12,6 +12,7 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\rulesModel;
+use App\Models\categoryRulesModel;
 
 
 class ruleController extends Controller
@@ -42,7 +43,7 @@ class ruleController extends Controller
             logController::createLogAuto([
                 'username' => $user->username,
                 'category_rule_id' => $categoryRule,
-                'message' => 'Created category rule with ID: ' . $categoryRule,
+                'message' => " {$user->fullName} đã tạo loại quy tắc mới: " . $categoryRule,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -92,6 +93,12 @@ class ruleController extends Controller
                     'message' => 'No category rule updated or rule not found.'
                 ], 404);
             }
+            logController::createLogAuto([
+                'username' => $user->username,
+                'category_rule_id' => $request->input('id'),
+                'message' => " {$user->fullName} đã cập nhật loại quy tắc: " . $request->input('name'),
+                'updated_at' => now(),
+            ]);
 
             return response()->json([
                 'message' => 'Category rule updated successfully.',
@@ -111,6 +118,9 @@ class ruleController extends Controller
     public function getRulesBySoftware(Request $request)
     {
         try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
             $software_id = $request->query('software_id');
 
             $query = DB::table('software_rule')
@@ -127,7 +137,7 @@ class ruleController extends Controller
                     'rules.date_release',
                     'rules.username',
                     'category_rule.id as  category_rule_id',
-                    'category_rule.name as category_rule_name', // Lấy tên loại quy chế
+                    'category_rule.name as category_rule_name',
                     'software_rule.created_at'
                 );
 
@@ -136,6 +146,18 @@ class ruleController extends Controller
             }
 
             $data = $query->orderByDesc('software_rule.created_at')->get();
+
+            if ($data->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No rules found for the specified software.'
+                ], 404);
+            }
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $software_id,
+                'message' => "{$user->fullName} đã xem danh sách quy tắc cho phần mềm ID: {$software_id}",
+            ]);
 
             return response()->json(['data' => $data]);
         } catch (\Exception $e) {
@@ -155,7 +177,7 @@ class ruleController extends Controller
 
             // Lấy ID từ request
             $id = $request->input('id');
-
+            $category = categoryRulesModel::find($id);
             // Validate ID
             $validator = Validator::make(['id' => $id], [
                 'id' => 'required|integer|exists:category_rule,id',
@@ -174,6 +196,12 @@ class ruleController extends Controller
                     'message' => 'Không tìm thấy quy chế để xóa.'
                 ], 404);
             }
+
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'category_rule_id' => $id,
+                'message' => "{$user->fullName} đã xóa loại quy chế tên {$category->name} ID: {$id}",
+            ]);
 
             return response()->json([
                 'status' => 'success',
@@ -200,6 +228,17 @@ class ruleController extends Controller
             }
 
             $categoryRules = DB::table('category_rule')->get();
+
+            if ($categoryRules->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No category rules found.'
+                ], 404);
+            }
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "{$user->fullName} đã xem danh sách loại quy chế.",
+            ]);
 
             return response()->json([
                 'message' => 'Category rules retrieved successfully.',
@@ -353,7 +392,8 @@ class ruleController extends Controller
         }
     }
 
-    public function updateRule(Request $request)
+
+   public function updateRule(Request $request)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
@@ -362,38 +402,46 @@ class ruleController extends Controller
 
             $rules = [
                 'id' => 'required|integer|exists:rules,id',
-                'name' => 'required|string|max:100',
+                'name' => 'nullable|string|max:100',
                 'description' => 'nullable|string|max:200',
-                'category_rule_id' => 'required|integer|exists:category_rule,id',
-                'file_url' => 'string|nullable|max:255',
-                'descripton' => 'string|nullable|max:600',
+                'category_rule_id' => 'nullable|integer|exists:category_rule,id',
+                'file' => 'nullable|file|max:10240',
             ];
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            $affected = DB::table('rules')
-                ->where('id', $request->input('id'))
-                ->update([
-                    'name' => $request->input('name'),
-                    'description' => $request->input('description'),
-                    'category_rule_id' => $request->input('category_rule_id'),
-                    'file_url' => $request->input('file_url', null),
-                    'descripton' => $request->input('descripton', null),
-                    'updated_at' => now(),
-                ]);
-
-            if ($affected === 0) {
+            // Lấy rule hiện tại bằng Eloquent
+            $rule = rulesModel::find($request->input('id'));
+            if (!$rule) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'No rule updated or rule not found.'
+                    'message' => 'Rule not found.'
                 ], 404);
             }
 
+            // Xử lý upload file nếu có file mới, nếu không giữ file cũ
+            if ($request->hasFile('file')) {
+                $fileUrl = $request->file('file')->store('rules_files', 'public');
+                $rule->file_url = $fileUrl;
+            }
+
+            $rule->name = $request->input('name');
+            $rule->description = $request->input('description');
+            $rule->category_rule_id = $request->input('category_rule_id');
+            $rule->updated_at = now();
+            $rule->save();
+
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'rule_id' => $rule->id,
+                'message' => '' . $user->username . ' đã cập nhật file quy tắc ' . $rule->name . ' id:' . $rule->id,
+            ]);
+
             return response()->json([
                 'message' => 'Rule updated successfully.',
-                'id' => $request->input('id'),
+                'data' => $rule, // hoặc $rule->fresh() nếu muốn chắc chắn lấy bản mới nhất
             ], 200);
 
         } catch (TokenExpiredException $e) {
@@ -404,7 +452,6 @@ class ruleController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not update rule. ' . $e->getMessage()], 500);
-
         }
     }
 
@@ -432,6 +479,12 @@ class ruleController extends Controller
                 ], 404);
             }
 
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'rule_id' => $request->input('id'),
+                'message' => "{$user->fullName} đã xóa quy tắc ID: {$request->input('id')}",
+            ]);
+
             return response()->json([
                 'message' => 'Rule deleted successfully.',
                 'id' => $request->input('id'),
@@ -455,7 +508,16 @@ class ruleController extends Controller
             }
 
             $rules = DB::table('rules')->get();
-
+            if ($rules->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No rules found.'
+                ], 404);
+            }
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "{$user->fullName} đã xem danh sách quy tắc.",
+            ]);
             return response()->json([
                 'message' => 'Rules retrieved successfully.',
                 'data' => $rules,
@@ -491,6 +553,14 @@ class ruleController extends Controller
             $softwareRuleId = DB::table('software_rule')->insertGetId([
                 'software_id' => $request->input('software_id'),
                 'rule_id' => $request->input('rule_id'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'software_id' => $request->input('software_id'),
+                'rule_id' => $request->input('rule_id'),
+                'message' => "{$user->fullName} đã tạo quy tắc phần mềm mới với ID: {$softwareRuleId}",
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -549,6 +619,12 @@ class ruleController extends Controller
                 ], 404);
             }
 
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'rule_id' => $request->input('id'),
+                'message' => "{$user->fullName} đã cập nhật quy tắc phần mềm ID: {$request->input('id')}",
+            ]);
+
             return response()->json([
                 'message' => 'Software rule updated successfully.',
                 'id' => $request->input('id'),
@@ -592,6 +668,12 @@ class ruleController extends Controller
                 ], 404);
             }
 
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'software_rule_id' => $request->input('id'),
+                'message' => "{$user->fullName} đã xóa quy tắc phần mềm ID: {$request->input('id')}",
+            ]);
+
             return response()->json([
                 'message' => 'Software rule deleted successfully.',
                 'id' => $request->input('id'),
@@ -619,6 +701,17 @@ class ruleController extends Controller
                 ->join('rules', 'software_rules.rule_id', '=', 'rules.id')
                 ->select('software_rules.*', 'rules.name as rule_name', 'rules.description as rule_description')
                 ->get();
+
+            if ($rules->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No software rules found.'
+                ], 404);
+            }
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "{$user->fullName} đã xem danh sách quy tắc phần mềm.",
+            ]);
 
             return response()->json([
                 'message' => 'Software rules retrieved successfully.',
@@ -743,6 +836,11 @@ class ruleController extends Controller
                 ], 404);
             }
 
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "{$user->fullName} đã tìm kiếm quy tắc theo tên: {$request->input('name')}",
+            ]);
+
             return response()->json([
                 'message' => 'Rule retrieved successfully.',
                 'data' => $rule,
@@ -776,6 +874,12 @@ class ruleController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'File not found.'], 404);
             }
 
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'rule_id' => $rule->id,
+                'message' => "{$user->fullName} đã tải xuống quy tắc {$rule->name} ID: {$rule->id}",
+            ]);
+
             return response()->download($filePath, $rule->name . '.zip');
 
         } catch (TokenExpiredException $e) {
@@ -805,6 +909,11 @@ class ruleController extends Controller
             if (!file_exists($filePath)) {
                 return response()->json(['status' => 'error', 'message' => 'File not found.'], 404);
             }
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'rule_id' => $rule->id,
+                'message' => "{$user->fullName} đã truy cập file quy tắc {$rule->name} ID: {$rule->id}",
+            ]);
 
             return response()->json([
                 'message' => 'File retrieved successfully.',
