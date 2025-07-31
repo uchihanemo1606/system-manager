@@ -41,21 +41,16 @@ class systemproject extends Controller
         // Validate the request
         $request->validate([
             'footer' => 'required|string|max:255',
-        ]);
-
+        ]); 
         // Update the footer in the database
         $systemProject = SystemProjectModel::first();
         if ($systemProject) {
             $systemProject->foodter = $request->input('footer');
-            $systemProject->save();
-
+            $systemProject->save(); 
             return response()->json(['success' => 'Footer updated successfully']);
-        }
-
+        } 
         return response()->json(['error' => 'System project not found'], 404);
-    }
-
-
+    } 
     public function getAvatarSystem()
     {
         // Retrieve the system project

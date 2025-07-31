@@ -30,7 +30,7 @@ async function getHardwarePermissions() {
 
             visiblePermissions.forEach(p => {
                 permissionsHTML += `
-                    <span class="badge badge-primary mr-1 mb-1 px-2 py-1" style="font-size: 0.85rem;">
+                    <span class="badge badge-primary mr-1 mb-1 px-2 py-1" style="font-size: 0.65rem;">
                         ${p}
                     </span>`;
             });

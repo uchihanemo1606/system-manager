@@ -68,7 +68,7 @@
                 <!-- Thêm block mới dưới phần đã xóa -->
                 <div class="row text-center mt-3">
                     <div class="col-md-6 border-end">
-                        <p class="text-muted mb-1">Tổng dung lượng đã giải phóng</p>
+                        <p class="text-muted mb-1">Tổng dung lượng</p>
                         <h5 id="software-space-saved">-- MB</h5>
                     </div>
                     <div class="col-md-6">
@@ -153,6 +153,5 @@
             </div>
         </div>
     </div>
-
-    @vite('resources/js/pages/dashboard.js')
+@vite('resources/js/pages/dashboard.js') 
 @endsection
