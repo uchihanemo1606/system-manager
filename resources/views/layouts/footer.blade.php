@@ -7,17 +7,19 @@
                     <a href="{{ url('/') }}"
                         class="d-inline-flex align-items-center mb-2 text-decoration-none text-dark">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo" height="32" class="me-2">
-                        <strong>Hệ thống quản lý</strong>
+                        <strong id="name_system">Hệ thống quản lý</strong>
                     </a>
-                    <div class="small text-muted mt-1">
-                        &copy; {{ date('Y') }} Công ty ABC. Mọi quyền được bảo lưu.
-                    </div>
-                </div> 
+
+                </div>
                 <!-- Liên kết -->
                 <div class="col-md-6 text-center text-md-end">
-                    <ul class="list-inline mb-0"> 
+                    <ul class="list-inline mb-0">
+                        <div class="medium text-muted mt-1">
+                            &copy; {{ date('Y') }} Công ty : <strong id="name_company"></strong>
+                        </div>
                         <li class="list-inline-item">
-                            <a href="{{ url('/contact') }}" class="text-muted text-decoration-none">Liên hệ</a>
+                            <span href="#" class="text-muted text-decoration-none">Liên hệ<span
+                                    id="phone"></span></span>
                         </li>
                     </ul>
                 </div>

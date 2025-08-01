@@ -21,9 +21,25 @@ window.initUserSoftwarePermissionEditModal = function (data) {
     if (container) container.innerHTML = ""; // Reset giao diện checkbox
     document.getElementById("savePermissionBtn").onclick = async () => {
         try {
-            let selected = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"))
-                .map(input => input.value);
+            // let selected = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"))
+            //     .map(input => input.value);
 
+            let selectedInputs = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"));
+            let selected = new Set();
+
+            selectedInputs.forEach(input => {
+                const val = input.value;
+
+                // Nếu là nhóm thì thêm tất cả quyền con
+                const group = permissionSets.software.group.find(groupObj => groupObj[val]);
+                if (group) {
+                    group[val].forEach(p => selected.add(p));
+                } else {
+                    selected.add(val);
+                }
+            });
+
+            selected = Array.from(selected);
             await remove_user_permission_in_software({
                 username: currentEditing.username,
                 softwareId: currentEditing.softwareId

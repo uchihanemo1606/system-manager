@@ -16,7 +16,7 @@ public function up(): void
             $table->string('password', 500);
             $table->string('fullName', 100)->nullable();
             $table->string('email', 100) ->nullable() ->unique();
-            $table->string('phone_number', 12)->nullable();
+            $table->string('avatar', 255)->default('https://res.cloudinary.com/dr7k1pifk/image/upload/v1753947959/pngtree-avatar-user-basic-abstract-circle-background-flat-color-icon-png-image_4960382_nmifwp.png'); // Default avatar
             $table->boolean('hidden')->default(false);
             $table->boolean('is_delete')->default(false);
             $table->string('department', 100)->nullable();

@@ -31,7 +31,7 @@ return new class extends Migration
             $table->foreign('dbname')->references('dbname')->on('database')->onUpdate('cascade');
             $table->foreign(['dbname', 'dbversion'])->references(['dbname', 'version'])->on('database_version')->onUpdate('cascade');
             $table->foreign('OS')->references('name')->on('os')->onUpdate('cascade');
-            $table->foreign(['OS', 'OSver'])->references(['os_name', 'version'])->on('_o_s_version')->onUpdate('cascade');
+            $table->foreign(['OS', 'OSver'])->references(['os_name', 'version'])->on('os_version')->onUpdate('cascade');
             $table->timestamps();
         });
     }

@@ -1,7 +1,14 @@
 <!-- Thông tin Role -->
 <div class="card shadow-sm mb-4">
     <div class="card-body d-flex flex-column" style="max-height: 90vh; overflow: hidden;">
-        <h4 class="card-title mb-4 text-primary">Thông tin Role</h4>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title text-primary">Thông tin Role</h4>
+            @hasPermission('role.delete')
+            <button id="delete-role-btn" class="btn btn-danger btn-sm mr-4">
+                <i class="bx bx-trash mr-1"></i> Xóa Role
+            </button>
+            @endhasPermission
+        </div>
 
         <div class="mb-3">
             <i class="mdi mdi-shield-account text-info mr-2"></i>
@@ -12,9 +19,9 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="text-primary mb-0">Danh sách Quyền hiện tại</h5>
             @hasPermission('permission.list')
-                <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addPermissionModal">
-                    <i class="bx bx-plus mr-1"></i> Thêm Permission
-                </button>
+            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addPermissionModal">
+                <i class="bx bx-plus mr-1"></i> Thêm Permission
+            </button>
             @endhasPermission
         </div>
         <div class="flex-grow-1 overflow-auto border rounded p-2" style="max-height: 60vh;">
@@ -40,30 +47,6 @@
                     &times;
                 </button>
             </div>
-
-            <!-- Filter cố định -->
-            {{-- <div class= "border-bottom px-4 py-3">
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text bg-white"><i class="mdi mdi-magnify"></i></span>
-                            </div>
-                            <input type="text" class="form-control" id="filter-name" placeholder="Tìm theo tên quyền">
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <select class="form-control" id="filter-type"></select>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <select class="form-control" id="filter-selected">
-                            <option value="">Tất cả quyền</option>
-                            <option value="selected">Đã chọn</option>
-                            <option value="unselected">Chưa chọn</option>
-                        </select>
-                    </div>
-                </div>
-            </div> --}}
             <div class="px-4">
                 <div class="d-flex justify-content-between align-items-center ">
                     <h5 class="text-primary border-bottom pb-2 mb-0">Danh sách Permission</h5>

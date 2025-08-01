@@ -479,7 +479,7 @@ class AuthController extends Controller
             $lastOtp = passwordResetModel::where('email', $email)->first();
             if ($lastOtp && $lastOtp->created_at) {
                 $createdAtAdjusted = $lastOtp->created_at->setTimezone('Asia/Ho_Chi_Minh');
-                $timeDiff = now()->diffInSeconds($createdAtAdjusted);
+                $timeDiff =  $lastOtp->created_at->diffInSeconds(now());
                 Log::info('Time difference check', [
                     'now' => now()->toDateTimeString(),
                     'created_at_original' => $lastOtp->created_at->toDateTimeString(),
@@ -494,7 +494,8 @@ class AuthController extends Controller
                     Log::info('Wait time applied', ['wait' => $wait]);
                     return response()->json([
                         'success' => false,
-                        'message' => "Bạn vừa yêu cầu OTP, vui lòng đợi {$wait} giây nữa để gửi lại."
+                        'message' => "Bạn vừa yêu cầu OTP, vui lòng đợi {$wait} giây nữa để gửi lại.",
+                        'time' => $wait,
                     ], 429);
                 }
             }

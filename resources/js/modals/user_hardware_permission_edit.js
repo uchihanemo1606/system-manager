@@ -21,23 +21,66 @@ window.initUserHardwarePermissionEditModal = function (data) {
 
     currentEditing = { username, hardwareIp: ip, permissions: [] };
 
+    // document.getElementById("savePermissionBtn").onclick = async () => {
+    //     try {
+    //         // Thu thập quyền được chọn
+    //         const selected = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"))
+    //             .map(input => input.value);
+
+    //         await remove_user_permission_in_hardware({
+    //             username: currentEditing.username,
+    //             hardwareIp: currentEditing.hardwareIp
+    //         });
+
+    //         if (selected.length > 0) {
+    //             await create_hardware_permission({
+    //                 hardware_ip: currentEditing.hardwareIp,
+    //                 users: [
+    //                     {
+    //                         user_name: currentEditing.username,
+    //                         permissions: selected
+    //                     }
+    //                 ]
+    //             });
+    //         }
+
+    //         showToast({ message: "Cập nhật quyền thành công!", type: "success" });
+    //     } catch (e) {
+    //         showToast({ message: "Lỗi: " + e.message, type: "error" });
+    //     }
+    // };
     document.getElementById("savePermissionBtn").onclick = async () => {
         try {
-            // Thu thập quyền được chọn
-            const selected = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"))
+            // 1. Thu thập tất cả giá trị checkbox được chọn
+            let selectedRaw = Array.from(document.querySelectorAll("#permissionCheckboxList input.form-check-input:checked"))
                 .map(input => input.value);
+
+            // 2. Mở rộng quyền nhóm thành quyền con
+            const expandedPermissions = new Set();
+
+            selectedRaw.forEach(value => {
+                const group = permissionSets.hardware.group.find(obj => obj[value]);
+                if (group) {
+                    group[value].forEach(child => expandedPermissions.add(child));
+                } else {
+                    expandedPermissions.add(value);
+                }
+            });
+
+            const finalPermissions = Array.from(expandedPermissions);
+
             await remove_user_permission_in_hardware({
                 username: currentEditing.username,
                 hardwareIp: currentEditing.hardwareIp
             });
 
-            if (selected.length > 0) {
+            if (finalPermissions.length > 0) {
                 await create_hardware_permission({
                     hardware_ip: currentEditing.hardwareIp,
                     users: [
                         {
                             user_name: currentEditing.username,
-                            permissions: selected
+                            permissions: finalPermissions
                         }
                     ]
                 });

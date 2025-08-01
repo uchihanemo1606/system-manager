@@ -1,7 +1,8 @@
 import { get_all_user } from "../api/user";
-import { create_hardware_permission } from "../api/hardware";
-import { create_software_permission } from "../api/software";
+import { create_hardware_permission, get_all_user_permission_hardware } from "../api/hardware";
+import { create_software_permission, get_all_user_permission_software } from "../api/software";
 import { showToast } from "../component/toast";
+
 
 export const permissionSets = {
     hardware: {
@@ -74,14 +75,51 @@ window.initTypePermissionCreateModal = async function (data) {
 };
 
 // ===== LOAD USER LIST =====
+// async function loadUserList() {
+//     try {
+//         const res = await get_all_user();
+//         modalState.allUsers = res;
+//         renderFilteredUserList();
+//     } catch (e) {
+//         showToast({ message: "Lỗi tải danh sách người dùng: " + e.message, type: "error" });
+//     }
+// }
 async function loadUserList() {
     try {
-        const res = await get_all_user();
-        modalState.allUsers = res;
+        const allUsers = await get_all_user();
+
+        let usersWithPermission = [];
+        if (modalState.type === "hardware") {
+            usersWithPermission = await get_all_user_permission_hardware(modalState.targetId);
+        } else {
+            usersWithPermission = await get_all_user_permission_software(modalState.targetId);
+        }
+
+        const usernamesWithPermission = usersWithPermission.data.map(u => u.user_name);
+
+        // Lọc user chưa có quyền
+        modalState.allUsers = allUsers.filter(user => !usernamesWithPermission.includes(user.username));
+
         renderFilteredUserList();
     } catch (e) {
         showToast({ message: "Lỗi tải danh sách người dùng: " + e.message, type: "error" });
     }
+}
+
+function expandGroupPermissions(permissions, type) {
+    const { group } = permissionSets[type];
+    const expanded = new Set();
+
+    permissions.forEach(p => {
+        const matchGroup = group.find(g => Object.keys(g)[0] === p);
+        if (matchGroup) {
+            Object.values(matchGroup)[0].forEach(child => expanded.add(child));
+        } else {
+            expanded.add(p);
+        }
+    });
+
+    return Array.from(expanded);
 }
 
 // ===== ADD PERMISSIONS =====
@@ -91,9 +129,13 @@ async function addPermissions() {
     button.disabled = true;
     spinner.classList.remove("d-none");
 
+    // const users = Object.entries(modalState.selectedUsers).map(([username, data]) => ({
+    //     user_name: username,
+    //     permissions: data.permissions
+    // }));
     const users = Object.entries(modalState.selectedUsers).map(([username, data]) => ({
         user_name: username,
-        permissions: data.permissions
+        permissions: expandGroupPermissions(data.permissions, modalState.type)
     }));
 
     if (users.length === 0) {
@@ -318,7 +360,7 @@ function removeSelectedUser(username) {
     delete modalState.selectedUsers[username];
     renderSelectedUsers();
     renderFilteredUserList();
-    renderBulkPermissionOptions(); 
+    renderBulkPermissionOptions();
 }
 function renderBulkPermissionOptions() {
     const container = document.getElementById("bulkPermissionContainer");

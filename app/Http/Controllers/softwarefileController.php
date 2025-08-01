@@ -55,6 +55,12 @@ class softwarefileController extends Controller
                 'description' => $validated['description'] ?? null,
             ]);
 
+            LogController::createLogAuto([
+                    'username' => $user->username,
+                    'software_file_id' => $softwareFile->id,
+                    'message' => "$user->fullName đã thêm một file phần mềm mới: $softwareFile->file_name",
+                ]);
+
             return response()->json([
                 'message' => 'Software file uploaded and created successfully.',
                 'data' => $softwareFile,
@@ -146,6 +152,8 @@ class softwarefileController extends Controller
 
     // }
 
+    
+    
     public function updateSoftwareFile(Request $request, $softwareFileid)
     {
         try {
@@ -161,21 +169,31 @@ class softwarefileController extends Controller
             }
 
             $validated = $request->validate([
-                'software_id' => 'required|integer|exists:software,id',
-                'file_name' => 'required|string|max:255',
-                'file_path' => 'required|string|max:10000',
+                'software_id' => 'nullable|integer|exists:software,id',
+                'file_name' => 'nullable|string|max:255',
+                'file' => 'nullable|file|max:10240', // file là optional
                 'description' => 'nullable|string|max:10000',
             ]);
+
             $softwareFile = softwareFileModel::findOrFail($softwareFileid);
 
-            if (!$softwareFile) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Software file not found.'
-                ], 404);
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $filePath = $file->store('software_files', 'public');
+                $softwareFile->file_path = $filePath;
             }
 
-            $softwareFile->update($validated);
+            $softwareFile->software_id = $validated['software_id'];
+            $softwareFile->file_name = $validated['file_name'];
+            $softwareFile->description = $validated['description'] ?? $softwareFile->description;
+            $softwareFile->save();
+
+            LogController::createLogAuto([
+                    'username' => $user->username,
+                    'software_file_id' => $softwareFile->id,
+                    'message' => "$user->fullName đã sửa file phần mềm: $softwareFile->file_name",
+                ]);
+
             return response()->json([
                 'message' => 'Software file updated successfully.',
                 'data' => $softwareFile,
@@ -198,10 +216,9 @@ class softwarefileController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Could not create hardware permission. ' . $e->getMessage()
+                'message' => 'Could not update software file. ' . $e->getMessage()
             ], 500);
         }
-
     }
 
     public function deleteSoftwareFile(Request $request, $softwareFileid)
@@ -228,6 +245,13 @@ class softwarefileController extends Controller
             }
 
             $softwareFile->delete();
+
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'software_file_id' => $softwareFile->id,
+                'message' => "$user->fullName đã xóa file phần mềm: $softwareFile->file_name",
+            ]);
+
             return response()->json([
                 'message' => 'Software file deleted successfully.',
             ], 200);
@@ -262,6 +286,17 @@ class softwarefileController extends Controller
             }
 
             $softwareFiles = softwareFileModel::with('software')->get();
+            if ($softwareFiles->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No software files found.'
+                ], 404);
+            }
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "$user->fullName đã xem danh sách file phần mềm",
+            ]);
+
             return response()->json([
                 'message' => 'Software files retrieved successfully.',
                 'data' => $softwareFiles,
@@ -309,7 +344,11 @@ class softwarefileController extends Controller
                     'status' => 'error',
                     'message' => 'No software files found for this software.'
                 ], 404);
-            }
+            }  
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "$user->fullName đã xem danh sách file phần mềm của phần mềm ID: $softwareId",
+            ]);
 
             return response()->json([
                 'message' => 'Software files retrieved successfully.',

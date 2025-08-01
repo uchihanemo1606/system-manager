@@ -19,26 +19,51 @@ export const get_all_software = async () => {
     }
     return [];
 };
-export const update_software_file_by_id = async (id, data) => {
-    try {
-        const res = await fetch(`/api/updatesoftwarefile/${id}`, {
-            method: "PATCH",
-            headers: defaultHeaders(),
-            body: JSON.stringify(data),
-        });
+// export const update_software_file_by_id = async (id, data) => {
+//     try {
+//         const res = await fetch(`/api/updatesoftwarefile/${id}`, {
+//             method: "PATCH",
+//             headers: defaultHeaders(),
+//             body: JSON.stringify(data),
+//         });
 
-        if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.message || "Lỗi không xác định");
-        }
+//         if (!res.ok) {
+//             const error = await res.json();
+//             throw new Error(error.message || "Lỗi không xác định");
+//         }
 
-        const result = await res.json();
-        return result;
-    } catch (err) {
-        console.error("Lỗi khi cập nhật tập tin phần mềm:", err);
-        throw err;
-    }
-};
+//         const result = await res.json();
+//         return result;
+//     } catch (err) {
+//         console.error("Lỗi khi cập nhật tập tin phần mềm:", err);
+//         throw err;
+//     }
+// };
+export async function update_software_file_by_id(id, { software_id, file_name, file, description }) {
+    const formData = new FormData();
+    formData.append("software_id", software_id);
+    formData.append("file_name", file_name);
+    if (file) formData.append("file", file); // Chỉ gửi nếu có file mới
+    if (description) formData.append("description", description);
+
+    const res = await fetch(`/api/updatesoftwarefile/${id}`, {
+        method: "POST", // Laravel không hỗ trợ PATCH với multipart/form-data trực tiếp
+        headers: {
+            Authorization: defaultHeaders().Authorization, // hoặc bỏ nếu Laravel không cần
+        },
+        body: (() => {
+            formData.append("_method", "PATCH"); // Laravel sẽ hiểu là PATCH nhờ dòng này
+            return formData;
+        })(),
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi khi cập nhật tệp phần mềm.");
+    return result;
+}
+
+
+
 export async function delete_software_file_by_id(id) {
     const res = await fetch(`/api/deletesoftwarefile/${id}`, {
         method: "DELETE",
@@ -177,7 +202,7 @@ export async function create_software_file({ software_id, file_name, file, descr
     const res = await fetch("/api/createsoftwarefile", {
         method: "POST",
         headers: {
-            Authorization: defaultHeaders().Authorization, 
+            Authorization: defaultHeaders().Authorization,
         },
         body: formData,
     });

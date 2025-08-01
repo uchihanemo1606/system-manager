@@ -1,4 +1,36 @@
-const token = localStorage.getItem("jwt_token"); 
+const token = localStorage.getItem("jwt_token");
+
+async function get_system_project() {
+    const res = await fetch("/api/getfootersystem", {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+        },
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Lỗi lấy thông tin hệ thống");
+    return result;
+}
+
+get_system_project()
+    .then(response => {
+        console.log("Response from get_system_project:", response);
+
+        // Chuỗi JSON: parse lần nữa
+        const footerData = JSON.parse(`{${response.footer}}`);
+
+        // Gán vào HTML
+        document.getElementById("name_company").textContent = footerData.name_company || "Tên công ty";
+        document.getElementById("name_system").textContent = footerData.name_system || "Tên hệ thống";
+        document.getElementById("phone").textContent = " : " + (footerData.phone || "SĐT");
+
+    })
+    .catch(error => {
+        console.error("Lỗi khi gọi API:", error);
+    });
+
 
 if (token) {
     const originalFetch = window.fetch;

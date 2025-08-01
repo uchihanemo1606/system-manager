@@ -47,11 +47,14 @@ async function initHardwareDomainCreateModal(data) {
         await Promise.all(
             hardwareList.map(hw =>
                 get_domain_by_hardware({ ip: hw.ip }).then(res => {
-                    const domains = res?.data?.domains || [];
+                    const domains = Array.isArray(res) ? res : [];
+
                     if (domains.some(d => d.id == data.id)) {
                         linkedIPs.add(hw.ip);
                         selectedIPs.add(hw.ip); // Mặc định các IP đã liên kết cũng được chọn
                     }
+                }).catch(err => {
+                    console.error("Lỗi khi gọi get_domain_by_hardware:", err);
                 })
             )
         );
@@ -175,7 +178,8 @@ async function initHardwareDomainCreateModal(data) {
             }
 
             showToast({
-                message: `Liên kết: ${successCreate}, Gỡ bỏ: ${successRemove}, lỗi: ${failCreate + failRemove}`,
+                message:"cập nhật thành công",
+                // message: `bạn vừa liên kết: ${successCreate}, Gỡ bỏ: ${successRemove}`,
                 type: (failCreate || failRemove) ? "warning" : "success",
                 timeout: 6000,
             });

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('_o_s_version', function (Blueprint $table) {
+        Schema::create('os_version', function (Blueprint $table) {
             $table->id();
             $table->string('os_name',100);
             $table->string('version',100);
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('_o_s_version');
+        Schema::dropIfExists('os_version');
     }
 };

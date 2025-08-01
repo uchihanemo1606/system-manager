@@ -1,18 +1,33 @@
 import { get_all_user } from "../api/user";
 import { get_all_role } from "../api/role";
+import { renderPagination } from "../component/log/log_utils";
 let hasLoadedRolesForFilter = false;
 let allUsers = [];
+let currentPage = 1;
+const ITEMS_PER_PAGE = 10; // hoặc số khác tùy ý
+let filteredUsers = [];
+
 async function loadUsers() {
     const tbody = document.getElementById("user-table-body");
     if (!tbody) return;
 
     try {
         allUsers = await get_all_user();
-        renderUsers(allUsers);
+        filteredUsers = allUsers;
+        renderUsersPage(1); // render trang đầu tiên
     } catch (err) {
         console.error("Lỗi khi tải danh sách người dùng:", err);
     }
 }
+function renderUsersPage(page = 1) {
+    currentPage = page;
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    const usersToShow = filteredUsers.slice(start, end);
+    renderUsers(usersToShow);
+    renderPagination(filteredUsers.length, ITEMS_PER_PAGE, currentPage, renderUsersPage);
+}
+
 function hasPermission(code) {
     return window.userPermissionCodes?.includes(code);
 }
@@ -60,18 +75,17 @@ function renderUsers(users) {
                             <a href="#" class="text-dark">${u.username}</a>
                         </h5>
                     </td>
-                    <td class="text-center">${
-                        u.fullName ||
-                        `  <div class="team">
+                    <td class="text-center">${u.fullName ||
+                `  <div class="team">
                         <span class="badge badge-secondary">Chưa có dữ liệu</span>
                     </div>`
-                    }</td>
+                }</td>
                     <td class="text-center">${(u.roles || [])
-                        .map(
-                            (r) =>
-                                `<a href="#" class="badge badge-soft-primary font-size-11 m-1">${r}</a>`
-                        )
-                        .join("")}</td>
+                    .map(
+                        (r) =>
+                            `<a href="#" class="badge badge-soft-primary font-size-11 m-1">${r}</a>`
+                    )
+                    .join("")}</td>
                     <td class="text-center">${u.email ?? 0}</td>
                     <td class="text-right">
                         <ul class="list-inline font-size-20 contact-links mb-0">
@@ -108,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     filterForm?.addEventListener("submit", (e) => {
         e.preventDefault();
         const params = Object.fromEntries(new FormData(filterForm).entries());
-        
+
         const filtered = allUsers.filter((u) =>
             (!params.username || u.username?.toLowerCase().includes(params.username.toLowerCase())) &&
             (!params.email || u.email?.toLowerCase().includes(params.email.toLowerCase())) &&
@@ -116,7 +130,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             (!params.role || (u.roles || []).includes(params.role))
         );
 
-        renderUsers(filtered);
+        filteredUsers = filtered;
+        renderUsersPage(1);
     });
 
     await loadUsers();
@@ -140,14 +155,12 @@ window.initUserCreateModal = async function () {
             .map(
                 (r) => `
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="roles[]" id="role_${
-                        r.role_name
+                    <input class="form-check-input" type="checkbox" name="roles[]" id="role_${r.role_name
                     }" value="${r.role_name}">
                     <label class="form-check-label" for="role_${r.role_name}">
-                        ${
-                            r.role_name.charAt(0).toUpperCase() +
-                            r.role_name.slice(1)
-                        }
+                        ${r.role_name.charAt(0).toUpperCase() +
+                    r.role_name.slice(1)
+                    }
                     </label>
                 </div>`
             )
@@ -157,6 +170,6 @@ window.initUserCreateModal = async function () {
         container.innerHTML = "<p class='text-danger'>Không thể tải quyền</p>";
     }
 };
-window.addEventListener("userCreated", () => { 
+window.addEventListener("userCreated", () => {
     loadUsers();
 });

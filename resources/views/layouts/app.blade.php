@@ -59,7 +59,7 @@
     </div>
 
     @include('layouts.navbar')
-    <main class="main-content" style="min-height: 90dvh;" id="layout-main-content">
+    <main class="main-content" style="min-height: 70dvh;" id="layout-main-content">
         @include('layouts.main_modal')
         @yield('content')
     </main>
@@ -83,7 +83,7 @@
 @endif
 
 @yield('scripts')
-<script src="/js/app.js"></script>
+<script src="/js/app.js" ></script>
 <script src="js/style/app.js"></script>
 <script src="assets/libs/metismenu/metisMenu.min.js"></script>
 <script src="assets/libs/summernote/summernote-bs4.min.js"></script>

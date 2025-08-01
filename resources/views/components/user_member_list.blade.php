@@ -29,4 +29,7 @@
             <!-- Dữ liệu sẽ được JS đẩy vào đây -->
         </tbody>
     </table>
+    <div class="pagination-container mt-2 d-flex justify-content-end">
+        <nav id="pagination-user-list"></nav>
+    </div>
 </div>

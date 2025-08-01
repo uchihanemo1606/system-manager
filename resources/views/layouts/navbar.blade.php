@@ -5,12 +5,13 @@
 
 <body>
     <nav class="sidebar locked">
-        <div class="logo_items flex">
+        <div class="logo_items flex w-full position-relative">
             <a style="scale: 2" href="/login" class="nav_image">
                 <img src="images/logo.png" alt="logo_img" />
             </a>
-            <span class="logo_name ">Hệ thống</span> 
-            <i class="bx bx-lock-alt" id="lock-icon" title="Unlock Sidebar"></i>
+            <span class="logo_name" id="name_system">...</span>
+              <i ></i>
+            <i class="bx bx-lock-alt" style="position: absolute;right: 0;" id="lock-icon" title="Unlock Sidebar"></i>
             <i class="bx bx-x" id="sidebar-close"></i>
         </div>
         <div class="menu_container text-nowrap">
@@ -56,6 +57,7 @@
                         </a>
                     </li>
                     @endhasPermission
+
                     @hasPermission('software.list')
                     <li class="item">
                         <a data-key="software" class="link flex">
@@ -64,31 +66,36 @@
                         </a>
                     </li>
                     @endhasPermission
-
-                    <li class="item">
-                        <a data-key="log" class="link flex">
-                            <i class="mdi mdi-history"></i>
-                            <span>Bản ghi hệ thống</span>
-                        </a>
-                    </li>
+                </ul>
+                <ul class="menu_item">
+                    <div class="menu_title flex">
+                        <span class="title">Khác</span>
+                        <span class="line"></span>
+                    </div>
+                    @hasPermission('legal.list')
                     <li class="item">
                         <a data-key="rule" class="link flex">
                             <i class="mdi mdi-gavel"></i>
                             <span>Loại pháp lý</span>
                         </a>
                     </li>
-                </ul>
-                <ul class="menu_item">
-                    <div class="menu_title flex">
-                        <span class="title">Khác</span>
-                        <span class="line"></span>
-                    </div> 
+                    @endhasPermission
+                    @hasPermission('system.get')
                     <li class="item">
-                        <a href="#" class="link flex">
+                        <a data-key="log" class="link flex">
+                            <i class="mdi mdi-history"></i>
+                            <span>Bản ghi hệ thống</span>
+                        </a>
+                    </li>
+                    @endhasPermission
+                    @hasPermission('system.get')
+                    <li class="item">
+                        <a data-key="setting" class="link flex">
                             <i class="bx bx-cog"></i>
                             <span>Cài Đặt</span>
                         </a>
                     </li>
+                    @endhasPermission
                 </ul>
             </div>
 

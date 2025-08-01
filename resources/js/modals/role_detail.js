@@ -6,6 +6,7 @@ import {
     create_permission,
     permissionTypes,
     permissionActions,
+    delete_role,
 } from "../api/role";
 import { showToast } from "../component/toast";
 let selectedPermissionsGlobal = new Set(); // chứa normalize(permission_name)
@@ -26,6 +27,25 @@ function generateExpectedPermissions() {
     }
 
     return result;
+}
+async function deleteRole(role_name) {
+    if (!confirm("Bạn có chắc muốn xóa role này không?")) return;
+    try {
+        await delete_role(role_name);
+        showToast({
+            message: "Đã xóa role thành công!",
+            type: "success",
+            timeout: 2000,
+        });
+        window.dispatchEvent(new CustomEvent("roleListUpdated")); // Reload danh sách role
+    } catch (err) {
+        console.error("Lỗi xóa role:", err);
+        showToast({
+            message: err.message || "Lỗi khi xóa role",
+            type: "error",
+            timeout: 2000,
+        });
+    }
 }
 // Chuẩn hóa string
 const normalize = (str) =>
@@ -51,7 +71,7 @@ async function get_all_permission() {
 }
 
 // Cập nhật quyền cho role
-function update_role_permission(roleId, permissionIds) { 
+function update_role_permission(roleId, permissionIds) {
     return Promise.resolve(true);
 }
 function renderTypeOptions(selected = "") {
@@ -96,9 +116,8 @@ function renderTableRow(p, isChecked, isMissing = false, roleName) {
                     </span>
                 </td>
                 <td>
-                    <span class="badge badge-secondary">${
-                        p.type || "Không xác định"
-                    }</span>
+                    <span class="badge badge-secondary">${p.type || "Không xác định"
+            }</span>
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-success create-missing-permission-btn shadow-sm"
@@ -135,16 +154,14 @@ function renderTableRow(p, isChecked, isMissing = false, roleName) {
                     </span>
                 </td>
                 <td>
-                    <span class="badge badge-info">${
-                        p.type || "Không xác định"
-                    }</span>
+                    <span class="badge badge-info">${p.type || "Không xác định"
+        }</span>
                 </td>
                 <td>
-                    ${
-                        p.description
-                            ? `<span class="text-muted">${p.description}</span>`
-                            : '<span class="text-muted fst-italic">Không có mô tả</span>'
-                    }
+                    ${p.description
+            ? `<span class="text-muted">${p.description}</span>`
+            : '<span class="text-muted fst-italic">Không có mô tả</span>'
+        }
                 </td>
             </tr>
 
@@ -232,7 +249,7 @@ function renderPermissionTable(permissions, selectedNames, roleName = "") {
                         permissions_name: permissionName,
                         type: permissionType,
                         description: permissionDescription,
-                    }); 
+                    });
                     showToast({
                         message: `Đã tạo permission "${permissionName}"`,
                         type: "success",
@@ -270,14 +287,14 @@ function renderPermissionList(permissions) {
     const list = document.getElementById("permission-list");
     list.innerHTML = permissions.length
         ? permissions
-              .map(
-                  (p) => `
+            .map(
+                (p) => `
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>${p.permission_name}</span>
             </li>
         `
-              )
-              .join("")
+            )
+            .join("")
         : "<li>Chưa có permission nào</li>";
 }
 
@@ -298,8 +315,8 @@ function applyFilters() {
             selectedFilter === "selected"
                 ? isSelected
                 : selectedFilter === "unselected"
-                ? !isSelected
-                : true;
+                    ? !isSelected
+                    : true;
 
         return matchName && matchType && matchSelected;
     });
@@ -367,6 +384,28 @@ async function initRoleDetailModal(data) {
         });
         return;
     }
+    document.getElementById("delete-role-btn")?.addEventListener("click", async () => {
+        if (!confirm("Bạn có chắc chắn muốn xóa role này không?")) return;
+
+        try {
+            await delete_role(data.role_name);
+            showToast({
+                message: "Đã xóa role thành công!",
+                type: "success",
+                timeout: 2000,
+            });
+
+            $("#addPermissionModal").modal("hide");
+            window.dispatchEvent(new CustomEvent("roleListUpdated"));
+        } catch (err) {
+            console.error("Lỗi khi xóa role:", err);
+            showToast({
+                message: "Không thể xóa role này",
+                type: "error",
+                timeout: 2000,
+            });
+        }
+    });
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
