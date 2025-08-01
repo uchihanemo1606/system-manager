@@ -86,7 +86,7 @@ class HardwareController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Could not create hardware. ' . $e->getMessage()], 500);
         }
 
-    } ///áhdakjsdajkgsdjhavsd
+    }
 
     public function getAllHardware()
     {
@@ -241,7 +241,7 @@ class HardwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'hardware_ip' => $hardware->ip,
-                'message' => "User {$user->fullName} updated hardware with IP {$hardware->ip}. Changes: $changeString",
+                'message' => "User {$user->fullName} đã sửa phần cứng có IP là  {$hardware->ip}. Changes: $changeString",
             ]);
 
             return response()->json(['message' => 'Hardware updated successfully', 'data' => $hardware]);
@@ -285,7 +285,7 @@ class HardwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'hardware_ip' => $hardware->ip,
-                'message' => "User {$user->fullName} marked hardware with IP {$hardware->ip} as deleted",
+                'message' => "User {$user->fullName} đã đánh dấu phần cứng có IP là  {$hardware->ip} là xóa",
             ]);
 
             return response()->json(['message' => 'Hardware marked as deleted successfully']);

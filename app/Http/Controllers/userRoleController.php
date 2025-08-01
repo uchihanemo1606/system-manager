@@ -49,7 +49,7 @@ class userRoleController extends Controller
 
             LogController::createLogAuto([
                 'username' => $user->username,
-                'message' => "User {$user->fullName} created a new user role: {$request->input('role_name')}.",
+                'message' => "User {$user->fullName} đã tạo vai trò mới là {$request->input('role_name')}.",
                 'is_delete' => false
             ]);
 
@@ -152,7 +152,7 @@ class userRoleController extends Controller
 
         LogController::createLogAuto([
             'username' => $user->username,
-            'message' => "User {$user->fullName} updated user role.",
+            'message' => "User {$user->fullName} đã cập nhật vai trò của người dùng {$request->input('username')} từ {$request->input('old_role')} sang {$request->input('new_role')}.",
             'is_delete' => false
         ]);
 
@@ -221,7 +221,7 @@ class userRoleController extends Controller
 
             LogController::createLogAuto([
                 'username' => $user->username,
-                'message' => "User {$user->fullName} removed user role: {$request->input('role_name')}.",
+                'message' => "User {$user->fullName} đã xóa vai trò {$request->input('role_name')} của người dùng {$request->input('username')}.",
                 'is_delete' => true
             ]);
 

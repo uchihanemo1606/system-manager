@@ -79,7 +79,7 @@ class HardwarePermissionController extends Controller
         LogController::createLogAuto([
             'username' => $user->username,
             'hardware_ip' => $validated['hardware_ip'],
-            'message' => "User {$user->fullName} created hardware permissions for " . count($created) . " users.",
+            'message' => "User {$user->fullName} đã cấp quyền cho phần cứng với quyền " . count($created) . " người dùng.",
         ]);
 
 

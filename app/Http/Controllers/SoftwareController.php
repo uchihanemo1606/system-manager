@@ -65,7 +65,7 @@ class SoftwareController extends Controller
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'software_id' => $software->id,
-                    'message' => " user {$user->fullName} created software '{$software->softwareName}'.",
+                    'message' => " user {$user->fullName} đã tạo phần mềm mới là {$software->softwareName}.",
                     'is_delete' => false
                 ]);
                 return response()->json(['message' => 'Software created successfully', 'data' => $software], 201);
@@ -132,7 +132,7 @@ class SoftwareController extends Controller
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'software_id' => $software->id,
-                    'message' => "user {$user->fullName} updated software '{$software->softwareName}'.",
+                    'message' => "user {$user->fullName} đã cập nhật phần mềm {$software->softwareName}.",
                     'is_delete' => false
                 ]);
                 return response()->json(['message' => 'Software updated successfully', 'data' => $software], 200);
@@ -307,7 +307,7 @@ class SoftwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'software_id' => $software->id,
-                'message' => "User '{$user->fullName}' delete software'{$software->softwareName}.'",
+                'message' => "User {$user->fullName} đã xóa phần mềm {$software->softwareName}.",
                 'is_delete' => false
             ]);
 

@@ -47,7 +47,7 @@ class domainController extends Controller
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'link_domain' => $domain->link,
-                    'message' => " user {$user->fullName} created domain '{$domain->name}'.",
+                    'message' => " user {$user->fullName} đã tạo domain mới là {$domain->name}.",
                     'is_delete' => false
                 ]);
                 return response()->json(['message' => 'Domain created successfully', 'data' => $domain], 201);
@@ -135,7 +135,7 @@ class domainController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'domain_id' => $domain->id,
-                'message' => "User {$user->fullName} updated domain '{$domain->name}'. Changes: $changeString ",
+                'message' => "User {$user->fullName} đã cập nhật domain {$domain->name} từ {$oldData['name']} sang {$newData['name']}.",
                 'is_delete' => false
             ]);
             return response()->json(['message' => 'Domain updated successfully', 'data' => $domain], 200);
@@ -169,7 +169,7 @@ class domainController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'domain_id' => $domain->id,
-                'message' => "User {$user->fullName} deleted domain '{$domain->name}'.",
+                'message' => "User {$user->fullName} đã xóa domain {$domain->name}.",
                 'is_delete' => true
             ]);
             // Delete the domain
@@ -221,7 +221,7 @@ class domainController extends Controller
                 'username' => $user->username,
                 'hardware_ip' => $hardware_ip,
                 'link_domain' => $domainLink,
-                'message' => "User {$user->fullName} added hardware in {$domainLink} to hardware with IP {$hardware_ip}",
+                'message' => "User {$user->fullName} đã thêm phần cứng {$hardware_ip} vào domain {$domainLink}",
             ]);
             return response()->json([
                 'message' => 'Domain added to hardware successfully',
@@ -448,7 +448,7 @@ class domainController extends Controller
                 'username' => $user->username,
                 'hardware_ip' => $hardwareIp,
                 'link_domain' => $domainLink,
-                'message' => "User {$user->fullName} removed hardware with IP {$hardwareIp} from domain {$domainLink}",
+                'message' => "User {$user->fullName} đã xóa phần cứng {$hardwareIp} khỏi domain {$domainLink}",
             ]);
 
             return response()->json(['message' => 'Hardware removed from domain successfully'], 200);
