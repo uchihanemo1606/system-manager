@@ -107,7 +107,7 @@ class HardwareController extends Controller
             } else {
                 return response()->json(['message' => 'Failed to create hardware'], 500);
             }
-
+        }
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {

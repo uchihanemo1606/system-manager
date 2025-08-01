@@ -130,12 +130,12 @@ class domainController extends Controller
                     $changes[] = "$key: '$oldValue' => '$newValue'";
                 }
             }
-
+            $changeString = implode(', ', $changes);
             // Log the update of the domain
             LogController::createLogAuto([
                 'username' => $user->username,
                 'domain_id' => $domain->id,
-                'message' => "User {$user->fullName} updated domain '{$domain->name}'. Changes: $changeString",
+                'message' => "User {$user->fullName} updated domain '{$domain->name}'. Changes: $changeString ",
                 'is_delete' => false
             ]);
             return response()->json(['message' => 'Domain updated successfully', 'data' => $domain], 200);
