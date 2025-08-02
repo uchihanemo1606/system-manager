@@ -332,6 +332,77 @@ class HardwareController extends Controller
         }
     }
 
+    public function statisticalHardware(Request $request)
+    {
+        try {
+            if(!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            // Chỉ lấy hardware chưa bị xóa
+            $baseQuery = hardwareModel::where('is_delete', false);
+
+            // 1. Thống kê máy thực, máy ảo
+            $virtualStats = (clone $baseQuery)
+                ->groupBy('isVirtualServer')
+                ->selectRaw('isVirtualServer, COUNT(*) as total')
+                ->get();
+
+            // 2. Thống kê OS (Windows, Linux, ...)
+            $osStats = (clone $baseQuery)
+                ->groupBy('OS')
+                ->selectRaw('OS, COUNT(*) as total')
+                ->get();
+
+            // 3. Thống kê database (theo dbname)
+            $dbStats = (clone $baseQuery)
+                ->groupBy('dbname')
+                ->selectRaw('dbname, COUNT(*) as total')
+                ->get();
+
+            // 4. Thống kê số máy theo OS version (Windows 10, Windows 11, ...)
+            $osVerStats = (clone $baseQuery)
+                ->groupBy('OSver')
+                ->selectRaw('OSver, COUNT(*) as total')
+                ->get();
+
+            // 5. Thống kê version của database
+            $dbVerStats = (clone $baseQuery)
+                ->groupBy('dbversion')
+                ->selectRaw('dbversion, COUNT(*) as total')
+                ->get();
+
+            // 6. Thống kê dung lượng HDD
+            $hddStats = (clone $baseQuery)
+                ->groupBy('hdd')
+                ->selectRaw('hdd, COUNT(*) as total')
+                ->get();
+
+            // 7. Thống kê RAM
+            $ramStats = (clone $baseQuery)
+                ->groupBy('ram')
+                ->selectRaw('ram, COUNT(*) as total')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'virtualStats' => $virtualStats,
+                'osStats' => $osStats,
+                'dbStats' => $dbStats,
+                'osVerStats' => $osVerStats,
+                'dbVerStats' => $dbVerStats,
+                'hddStats' => $hddStats,
+                'ramStats' => $ramStats,
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not get hardware statistics. ' . $e->getMessage()], 500);
+        }
+    }
 
 }
-

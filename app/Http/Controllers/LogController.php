@@ -187,7 +187,7 @@ class LogController extends Controller
 
             $logs->setCollection(collect($logsTransformed));
 
-            return response()->json([
+            return response()->json([ 
                 'status' => 'success',
                 'total' => $logs->total(),
                 'current_page' => $logs->currentPage(),

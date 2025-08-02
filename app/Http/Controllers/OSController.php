@@ -177,18 +177,33 @@ class OSController extends Controller
         }
     }
 
-    public function getAllOS()
+    public function getAllOS(Request $request)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            $os = OSModel::get();
+
+            $perPage = $request->input('per_page', 10);
+            $page = $request->input('page', 1);
+
+            $os = OSModel::paginate($perPage, ['*'], 'page', $page);
+
+            if ($os->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No Operating Systems found.'
+                ], 404);
+            }
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Operating Systems retrieved successfully.',
-                'data' => $os
+                'total' => $os->total(),
+                'current_page' => $os->currentPage(),
+                'last_page' => $os->lastPage(),
+                'per_page' => $os->perPage(),
+                'data' => $os->items()
             ], 200);
         } catch (TokenExpiredException $e) {
             return response()->json([
@@ -201,7 +216,6 @@ class OSController extends Controller
                 'message' => 'Token is invalid.'
             ], 401);
         } catch (JWTException $e) {
-
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token is absent or could not be parsed.'
@@ -212,10 +226,9 @@ class OSController extends Controller
                 'message' => 'Could not retrieve Operating Systems. ' . $e->getMessage()
             ], 500);
         }
-
     }
 
-    public function getOSActive()
+    public function getOSActive(Request $request)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
@@ -223,10 +236,25 @@ class OSController extends Controller
             }
             $os = OSModel::where('is_deleted', false)->get();
 
+            if ($os->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No active Operating Systems found.'
+                ], 404);
+            }
+
+            $perPage = $request->input('per_page', 15);
+            $page = $request->input('page', 1);
+
+            $os = OSModel::where('is_deleted', false)->paginate($perPage, ['*'], 'page', $page);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Active Operating Systems retrieved successfully.',
-                'data' => $os
+                'total' => $os->total(),
+                'current_page' => $os->currentPage(),
+                'last_page' => $os->lastPage(),
+                'per_page' => $os->perPage(),
+                'data' => $os->items()
             ], 200);
         } catch (TokenExpiredException $e) {
             return response()->json([
@@ -258,13 +286,32 @@ class OSController extends Controller
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
+ 
+
             $os = OSModel::where('is_deleted', true)->get();
+
+            if ($os->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No deleted Operating Systems found.'
+                ], 404);
+            }
+
+            $perPage = request()->input('per_page', 15);
+            $page = request()->input('page', 1);
+
+            $os = OSModel::where('is_deleted', true)->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Deleted Operating Systems retrieved successfully.',
-                'data' => $os
+                'total' => $os->total(),
+                'current_page' => $os->currentPage(),
+                'last_page' => $os->lastPage(),
+                'per_page' => $os->perPage(),
+                'data' => $os->items()
             ], 200);
+
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
@@ -303,11 +350,21 @@ class OSController extends Controller
                     'message' => 'oop!! operating System not found.'
                 ], 404);
             }
+
+            $page = request()->input('page', 1);
+            $perPage = request()->input('per_page', 15);
+            $os = OSModel::where('name', 'like', '%' . $name . '%')->paginate($perPage, ['*'], 'page', $page);
+            
             return response()->json([
                 'status' => 'success',
                 'message' => 'Operating System retrieved successfully.',
-                'data' => $os
+                'total' => $os->total(),
+                'current_page' => $os->currentPage(),
+                'last_page' => $os->lastPage(),
+                'per_page' => $os->perPage(),
+                'data' => $os->items()
             ])->setStatusCode(200, 'OK');
+
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
