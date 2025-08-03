@@ -23,6 +23,10 @@ Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareByIP'])
     ->middleware('check.permission')
     ->name('hardware.list');
 
+Route::get('/statisticalhardware', [HardwareController::class, 'statisticalHardware'])
+    ->middleware('check.permission')
+    ->name('hardware.list');
+
 
 // ======================================================================================================================================================================================================================================================
 // HARDWARE PERMISSION CONTROLLER

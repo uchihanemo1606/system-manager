@@ -166,6 +166,13 @@ class AuthController extends Controller
         $user = JWTAuth::setToken($token)->authenticate();
         //thêm kiểm tra tk bị khoá, xoá
 
+        if ($user->is_delete || $user->hidden) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Tài khoản đã bị khóa hoặc bị ẩn, vui lòng liên hệ quản trị viên.',
+        ], 403);
+    }
+
         LogController::createLogAuto([
             'username' => $request->username,
             'message' => "{$user->fullName} đã đăng nhập vào hệ thống.",
@@ -619,7 +626,126 @@ class AuthController extends Controller
         }
     }
 
-    
+    public function deleteUser(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.'
+                ], 404);
+            }
 
+            $username = $request->input('username');
+            if (!$username) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Username is required.'
+                ], 400);
+            }
+
+            if ($user->username !== $username) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You can only delete your own account.'
+                ], 403);
+            }
+
+            $user = UserModel::where('username', $username)->first();
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.'
+                ], 404);
+            }
+
+            $user->is_delete = true;
+            $user->save();
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "{$user->fullName} đã xóa tài khoản.",
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User deleted successfully.',
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not delete user. ' . $e->getMessage()
+            ], 500);
+        }
+    }   
+
+    public function hiddenUser(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.'
+                ], 404);
+            }
+
+            $username = $request->input('username');
+            if (!$username) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Username is required.'
+                ], 400);
+            }
+
+            if ($user->username !== $username) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You can only hide your own account.'
+                ], 403);
+            }
+
+            $user->hidden = true;
+            $user->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User hidden successfully.'
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not hide user. ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 }

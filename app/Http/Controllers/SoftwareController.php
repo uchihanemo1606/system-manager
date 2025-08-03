@@ -172,8 +172,11 @@ class SoftwareController extends Controller
                 $softwareQuery->whereIn('id', $allowedIds);
             }
 
-            $software = $softwareQuery->get();
-            $total = $software->count();
+            $perPage = $request->input('per_page', 15);
+            $page = $request->input('page', 1);
+
+            $software = $softwareQuery->paginate($perPage, ['*'], 'page', $page);
+            $total = $software->total();
 
             if ($software->isEmpty()) {
                 return response()->json([
@@ -185,10 +188,13 @@ class SoftwareController extends Controller
             }
 
             return response()->json([
-                'status' => 'success',
-                'total' => $total,
-                'data' => $software
-            ], 200);
+            'status' => 'success',
+            'total' => $software->total(),
+            'current_page' => $software->currentPage(),
+            'last_page' => $software->lastPage(),
+            'per_page' => $software->perPage(),
+            'data' => $software->items()
+        ], 200);
 
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
@@ -212,11 +218,20 @@ class SoftwareController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
             }
 
-            $software = SoftwareModel::where('is_delete', false)->get();
+            $perPage = $request->input('per_page', 15);
+            $page = $request->input('page', 1);
+
+            $software = SoftwareModel::where('is_delete', false)
+            ->paginate($perPage, ['*'], 'page', $page);
+
             return response()->json([
-                'status' => 'success',
-                'data' => $software
-            ], 200);
+            'status' => 'success',
+            'total' => $software->total(),
+            'current_page' => $software->currentPage(),
+            'last_page' => $software->lastPage(),
+            'per_page' => $software->perPage(),
+            'data' => $software->items()
+        ], 200);
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
@@ -238,11 +253,19 @@ class SoftwareController extends Controller
             if ($user->cannot('viewAny', softwareModel::class)) {
                 return response()->json(['status' => 'error', 'message' => 'You do not have permission to view software'], 403);
             }
+            $perPage = $request->input('per_page', 15);
+            $page = $request->input('page', 1);
 
-            $software = SoftwareModel::where('is_delete', true)->get();
+            $software = SoftwareModel::where('is_delete', true)
+            ->paginate($perPage, ['*'], 'page', $page);
+
             return response()->json([
                 'status' => 'success',
-                'data' => $software
+                'total' => $software->total(),
+                'current_page' => $software->currentPage(),
+                'last_page' => $software->lastPage(),
+                'per_page' => $software->perPage(),
+                'data' => $software->items()
             ], 200);
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
