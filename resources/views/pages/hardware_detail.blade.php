@@ -34,15 +34,14 @@
                             <div class="text-primary">
                                 <h6 class="mb-1">Hệ điều hành</h6>
                                 <p class="fw-bold mb-0" id="hardware-os-view">Ubuntu 22.04</p>
-                                <input type="text" id="hardware-os-input" class="form-control form-control-sm d-none">
+                                <select id="hardware-os-input" class="form-select form-select-sm d-none"></select>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="text-primary">
                                 <h6 class="mb-1">Phiên bản</h6>
                                 <p class="fw-bold mb-0" id="hardware-osver-view">v1.0.5</p>
-                                <input type="text" id="hardware-osver-input"
-                                    class="form-control form-control-sm d-none">
+                                <select id="hardware-osver-input" class="form-select form-select-sm d-none"></select>
                             </div>
                         </div>
 
@@ -139,16 +138,14 @@
                                     <th scope="row" class="text-primary">Database :</th>
                                     <td>
                                         <span id="hardware-db-view">Mysql</span>
-                                        <input type="text" id="hardware-db-input"
-                                            class="form-control form-control-sm d-none">
+                                        <select id="hardware-db-input" class="form-select form-select-sm d-none"></select>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="row" class="text-primary"> Database Version:</th>
                                     <td>
                                         <span id="hardware-dbver-view">1.0.0</span>
-                                        <input type="text" id="hardware-dbver-input"
-                                            class="form-control form-control-sm d-none">
+                                        <select id="hardware-dbver-input" class="form-select form-select-sm d-none"></select>
                                     </td>
                                 </tr>
                             </tbody>
@@ -196,7 +193,7 @@
                             <div class="media">
                                 <div class="media-body">
                                     <p class="text-muted font-weight-medium">
-                                        Trạng thái phần cứng
+                                        Trạng thái
                                     </p>
                                     <h5 class="mb-0 text-success" id="hardware-is-active">hoạt động</h5>
                                 </div>

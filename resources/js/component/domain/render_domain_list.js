@@ -31,7 +31,7 @@ export function renderDomainList(domains, is_Delete_Hardware_Domain = false, is_
 
         const deleteButton = is_Delete_Hardware_Domain
             ? `<button class="btn btn-sm btn-outline-danger"
-                onclick="deleteDomain('${domain.link}')">
+                onclick="deleteDomain('${domain.id}')">
             Xoá
        </button>`
             : "";

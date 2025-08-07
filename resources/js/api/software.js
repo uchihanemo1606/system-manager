@@ -211,3 +211,13 @@ export async function create_software_file({ software_id, file_name, file, descr
     if (!res.ok) throw new Error(result.message || "Lỗi khi tạo tệp phần mềm.");
     return result;
 }
+export const get_software_analytics = async (filters = {}) => {
+    const query = new URLSearchParams(filters).toString();
+
+    const res = await fetch(`api/getsoftwareanalytics?${query}`, {
+        headers: defaultHeaders(),
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch hardware analytics");
+    return await res.json();
+};

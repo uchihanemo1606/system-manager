@@ -115,5 +115,5 @@ export async function remove_hardware_in_domain(hardwareIp, domainId) {
     });
 
     if (!res.ok) throw new Error(`Failed to remove ${hardwareIp} from domain ${domainId}`);
-    return res.json();
+    return res;
 }

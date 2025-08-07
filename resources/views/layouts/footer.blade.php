@@ -7,9 +7,8 @@
                     <a href="{{ url('/') }}"
                         class="d-inline-flex align-items-center mb-2 text-decoration-none text-dark">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo" height="32" class="me-2">
-                        <strong id="name_system">Hệ thống quản lý</strong>
-                    </a>
-
+                        <strong id="name_system_footer">Hệ thống quản lý</strong>
+                    </a> 
                 </div>
                 <!-- Liên kết -->
                 <div class="col-md-6 text-center text-md-end">
@@ -18,7 +17,7 @@
                             &copy; {{ date('Y') }} Công ty : <strong id="name_company"></strong>
                         </div>
                         <li class="list-inline-item">
-                            <span href="#" class="text-muted text-decoration-none">Liên hệ<span
+                            <span href="#" class="text-muted text-decoration-none">Hỗ trợ<span
                                     id="phone"></span></span>
                         </li>
                     </ul>

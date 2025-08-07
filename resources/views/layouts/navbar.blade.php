@@ -6,34 +6,39 @@
 <body>
     <nav class="sidebar locked">
         <div class="logo_items flex w-full position-relative">
-            <a style="scale: 2" href="/login" class="nav_image">
+            <a style="scale: 2" href="/" class="nav_image">
                 <img src="images/logo.png" alt="logo_img" />
             </a>
-            <span class="logo_name" id="name_system">...</span>
-              <i ></i>
+            <span class="logo_name" id="name_system">Hệ Thống</span>
+            <i></i>
             <i class="bx bx-lock-alt" style="position: absolute;right: 0;" id="lock-icon" title="Unlock Sidebar"></i>
             <i class="bx bx-x" id="sidebar-close"></i>
         </div>
         <div class="menu_container text-nowrap">
             <div class="menu_items">
                 <ul class="menu_item">
+                    @hasPermission('system.get')
                     <div class="menu_title flex">
                         <span class="title">BẢNG ĐIỀU KHIỂN</span>
                         <span class="line"></span>
                     </div>
+
                     <li class="item">
                         <a data-key="overview" class="link flex">
                             <i class="mdi 	mdi-counter"></i>
                             <span>Thống Kê</span>
                         </a>
                     </li>
+                    @endhasPermission
                     @hasPermission('user.list')
+                    @hasPermission('user.update')
                     <li class="item">
                         <a data-key="users" class="link flex">
                             <i class="bx bx-group"></i>
                             <span>Danh Sách Người Dùng</span>
                         </a>
                     </li>
+                    @endhasPermission
                     @endhasPermission
                     @hasPermission('role.list')
                     <li class="item">
@@ -72,13 +77,15 @@
                         <span class="title">Khác</span>
                         <span class="line"></span>
                     </div>
-                    @hasPermission('legal.list')
+                    @hasPermission('category.list')
+                    @hasPermission('category.update')
                     <li class="item">
                         <a data-key="rule" class="link flex">
                             <i class="mdi mdi-gavel"></i>
                             <span>Loại pháp lý</span>
                         </a>
                     </li>
+                    @endhasPermission
                     @endhasPermission
                     @hasPermission('system.get')
                     <li class="item">
@@ -89,12 +96,14 @@
                     </li>
                     @endhasPermission
                     @hasPermission('system.get')
+                    @hasPermission('system.update')
                     <li class="item">
                         <a data-key="setting" class="link flex">
                             <i class="bx bx-cog"></i>
                             <span>Cài Đặt</span>
                         </a>
                     </li>
+                    @endhasPermission
                     @endhasPermission
                 </ul>
             </div>
@@ -129,5 +138,14 @@
     </nav>
 
 </body>
+<script>
+    document.querySelectorAll("ul.menu_item").forEach((ul) => {
+        const liItems = ul.querySelectorAll("li.item");
+        if (liItems.length === 0) {
+            ul.style.display = "none";
+        }
+    });
+</script>
+
 <script src="{{ asset('js/style/bar.js') }}"></script>
 <script src="{{ asset('js/bar.js') }}"></script>

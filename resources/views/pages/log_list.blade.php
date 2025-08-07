@@ -2,6 +2,7 @@
 
 @section('content')
 @hasPermission('system.get')
+@hasPermission('system.update')
 <div>
     <div class="page-title-box d-flex align-items-center justify-content-between">
         <h4 class="mb-0 font-size-18">
@@ -61,12 +62,12 @@
                         <input type="date" id="filter-to-date" class="form-control">
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label>Từ giờ</label>
-                        <input type="time" id="filter-from-time" class="form-control">
+                        <label>Từ giờ<small class="text-danger ml-1">SA(sáng)-CH(chiều)</small></label>
+                        <input type="time" id="filter-from-time" class="form-control" step="60" />
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label>Đến giờ</label>
-                        <input type="time" id="filter-to-time" class="form-control">
+                        <label>Đến giờ<small class="text-danger ml-1">SA(sáng)-CH(chiều)</small></label>
+                        <input type="time" id="filter-to-time" class="form-control" step="60" />
                     </div>
                 </div>
             </div>
@@ -139,5 +140,6 @@
     }
 </script>
 @vite('resources/js/pages/log_list.js')
+@endhasPermission
 @endhasPermission
 @endsection

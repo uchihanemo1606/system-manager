@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Carbon\Carbon;
 
 class LogController extends Controller
 {
@@ -158,7 +159,29 @@ class LogController extends Controller
                     $query->whereNotNull($column);
                 }
             }
+            // Lọc theo khoảng thời gian
+            $fromDate = $request->query('from_date');
+            $toDate = $request->query('to_date');
+            $fromTime = $request->query('from_time');
+            $toTime = $request->query('to_time');
+            if ($fromDate || $toDate || $fromTime || $toTime) { 
+                $fromDateTime = null;
+                $toDateTime = null;
 
+                if ($fromDate || $fromTime) {
+                    $fromDateTime = Carbon::parse(($fromDate ?? date('Y-m-d')) . ' ' . ($fromTime ?? '00:00:00'));
+                }
+                if ($toDate || $toTime) {
+                    $toDateTime = Carbon::parse(($toDate ?? date('Y-m-d')) . ' ' . ($toTime ?? '23:59:59'));
+                }
+
+                if ($fromDateTime) {
+                    $query->where('created_at', '>=', $fromDateTime);
+                }
+                if ($toDateTime) {
+                    $query->where('created_at', '<=', $toDateTime);
+                }
+            }
             $logs = $query->with([
                 'software',
                 'user',
@@ -187,7 +210,7 @@ class LogController extends Controller
 
             $logs->setCollection(collect($logsTransformed));
 
-            return response()->json([ 
+            return response()->json([
                 'status' => 'success',
                 'total' => $logs->total(),
                 'current_page' => $logs->currentPage(),

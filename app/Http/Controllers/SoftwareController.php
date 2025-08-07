@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\softwareFileModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\SoftwareModel;
@@ -12,6 +13,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 class SoftwareController extends Controller
 {
     public function createSoftware(Request $request)
@@ -188,13 +191,13 @@ class SoftwareController extends Controller
             }
 
             return response()->json([
-            'status' => 'success',
-            'total' => $software->total(),
-            'current_page' => $software->currentPage(),
-            'last_page' => $software->lastPage(),
-            'per_page' => $software->perPage(),
-            'data' => $software->items()
-        ], 200);
+                'status' => 'success',
+                'total' => $software->total(),
+                'current_page' => $software->currentPage(),
+                'last_page' => $software->lastPage(),
+                'per_page' => $software->perPage(),
+                'data' => $software->items()
+            ], 200);
 
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
@@ -222,16 +225,16 @@ class SoftwareController extends Controller
             $page = $request->input('page', 1);
 
             $software = SoftwareModel::where('is_delete', false)
-            ->paginate($perPage, ['*'], 'page', $page);
+                ->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
-            'status' => 'success',
-            'total' => $software->total(),
-            'current_page' => $software->currentPage(),
-            'last_page' => $software->lastPage(),
-            'per_page' => $software->perPage(),
-            'data' => $software->items()
-        ], 200);
+                'status' => 'success',
+                'total' => $software->total(),
+                'current_page' => $software->currentPage(),
+                'last_page' => $software->lastPage(),
+                'per_page' => $software->perPage(),
+                'data' => $software->items()
+            ], 200);
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
@@ -257,7 +260,7 @@ class SoftwareController extends Controller
             $page = $request->input('page', 1);
 
             $software = SoftwareModel::where('is_delete', true)
-            ->paginate($perPage, ['*'], 'page', $page);
+                ->paginate($perPage, ['*'], 'page', $page);
 
             return response()->json([
                 'status' => 'success',
@@ -370,4 +373,96 @@ class SoftwareController extends Controller
             return response()->json(['status' => 'error', 'message' => 'ERRRR'], 401);
         }
     }
+    public function getSoftwareAnalytics(Request $request)
+    {
+        try {
+            // Lấy ngày từ request (ví dụ ?from=2025-01-01&to=2025-12-31)
+            $from = $request->query('from');
+            $to = $request->query('to');
+
+            $fromDate = $from ? Carbon::parse($from)->startOfSecond() : null;
+            $toDate = $to ? Carbon::parse($to)->endOfSecond() : null;
+
+            // Đếm phần mềm chưa xóa (trong khoảng thời gian nếu có)
+            $totalSoftwareQuery = softwareModel::where('is_delete', false);
+            if ($fromDate && $toDate) {
+                $totalSoftwareQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            }
+            $totalSoftware = $totalSoftwareQuery->count();
+
+            // Đếm phần mềm đã xóa (trong khoảng thời gian nếu có)
+            $deletedSoftwareQuery = softwareModel::where('is_delete', true);
+            if ($fromDate && $toDate) {
+                $deletedSoftwareQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            }
+            $deletedSoftware = $deletedSoftwareQuery->count();
+
+            // File phần mềm chưa xóa
+            $softwareFilesQuery = softwareFileModel::whereHas('software', function ($query) use ($fromDate, $toDate) {
+                $query->where('is_delete', false);
+                if ($fromDate && $toDate) {
+                    $query->whereBetween('created_at', [$fromDate, $toDate]);
+                }
+            });
+
+            $softwareFiles = $softwareFilesQuery->get();
+
+            // File phần mềm đã xóa
+            $deletedSoftwareFilesQuery = softwareFileModel::whereHas('software', function ($query) use ($fromDate, $toDate) {
+                $query->where('is_delete', true);
+                if ($fromDate && $toDate) {
+                    $query->whereBetween('created_at', [$fromDate, $toDate]);
+                }
+            });
+
+            $deletedSoftwareFiles = $deletedSoftwareFilesQuery->get();
+
+            $totalStorageSize = 0;
+            foreach ($softwareFiles as $file) {
+                $path = storage_path('app/public/' . $file->file_path);
+                if (file_exists($path)) {
+                    $totalStorageSize += filesize($path);
+                }
+            }
+
+            $deletedStorageSize = 0;
+            foreach ($deletedSoftwareFiles as $file) {
+                $path = storage_path('app/public/' . $file->file_path);
+                if (file_exists($path)) {
+                    $deletedStorageSize += filesize($path);
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'total_software' => $totalSoftware,
+                    'deleted_software' => $deletedSoftware,
+                    'storage_size_bytes' => $totalStorageSize,
+                    'storage_size_readable' => $this->formatBytes($totalStorageSize),
+                    'deleted_storage_size_bytes' => $deletedStorageSize,
+                    'deleted_storage_size_readable' => $this->formatBytes($deletedStorageSize),
+                ]
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve software analytics. ' . $e->getMessage()], 500);
+        }
+    }
+
+    private function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        return round($bytes / pow(1024, $pow), $precision) . ' ' . $units[$pow];
+    }
+
 }

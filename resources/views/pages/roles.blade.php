@@ -1,3 +1,4 @@
+@hasPermission('role.list')
 @extends('layouts.app')
 @section('content')
     <div class="row">
@@ -62,3 +63,4 @@
     </div> 
     @vite('resources/js/pages/roles.js')
 @endsection
+@endhasPermission 

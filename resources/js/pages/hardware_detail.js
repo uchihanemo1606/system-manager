@@ -1,4 +1,10 @@
 import { get_hardware_by_ip, update_hardware } from "../api/hardware";
+import {
+    get_all_hardware_database,
+    get_versions_by_dbname,
+    get_all_hardware_os,
+    get_versions_by_os
+} from "../api/hardware_data";
 import { validateHardwareDataUpdate } from "../component/requiredFields/hardware_required";
 import { showToast } from "../component/toast";
 
@@ -98,7 +104,7 @@ function hideInputFields() {
     ["ip", "os", "osver", "domain", "hdd", "ram", "db", "dbver", "services"].forEach(hideField);
 }
 
-function showField(field) {
+async function showField(field) {
     const viewEl = document.getElementById(`hardware-${field}-view`);
     const inputEl = document.getElementById(`hardware-${field}-input`);
     const groupEl = document.getElementById(`hardware-${field}-input-group`);
@@ -111,11 +117,73 @@ function showField(field) {
         viewEl.classList.add("d-none");
         groupEl.classList.remove("d-none");
     } else if (viewEl && inputEl) {
-        inputEl.value = viewEl.textContent;
         viewEl.classList.add("d-none");
         inputEl.classList.remove("d-none");
+
+        if (field === "os") {
+            const osList = await get_all_hardware_os();
+            inputEl.innerHTML = osList.data
+                .map(e => `<option value="${e.name}" ${e.name === viewEl.textContent.trim() ? "selected" : ""}>${e.name}</option>`)
+                .join("");
+            inputEl.dispatchEvent(new Event("change")); // <-- Thêm dòng này để trigger load OS version
+        } 
+        
+        else if (field === "osver") {
+            const osValue = getValue("os");
+            if (!osValue) return;
+            const versionList = await get_versions_by_os(osValue);
+            renderSelect(inputEl, versionList, viewEl.textContent.trim());
+        } 
+        
+        else if (field === "db") {
+            const dbList = await get_all_hardware_database();
+            inputEl.innerHTML = dbList.data
+                .map(e => `<option value="${e.dbname}" ${e.dbname === viewEl.textContent.trim() ? "selected" : ""}>${e.dbname}</option>`)
+                .join("");
+            inputEl.dispatchEvent(new Event("change")); // <-- Thêm dòng này để trigger load DB version
+        } 
+        
+        else if (field === "dbver") {
+            const dbValue = getValue("db");
+            if (!dbValue) return;
+            const versionList = await get_versions_by_dbname(dbValue);
+            renderSelect(inputEl, versionList, viewEl.textContent.trim());
+        } 
+        
+        else {
+            inputEl.value = viewEl.textContent.trim();
+        }
     }
 }
+document.getElementById("hardware-os-input")?.addEventListener("change", async () => {
+    const osverInput = document.getElementById("hardware-osver-input");
+    if (!osverInput) return;
+    const os = getValue("os");
+    const versions = await get_versions_by_os(os);
+    renderSelect(osverInput, versions.data);
+});
+
+document.getElementById("hardware-db-input")?.addEventListener("change", async () => {
+    const dbverInput = document.getElementById("hardware-dbver-input");
+    if (!dbverInput) return;
+    const db = getValue("db");
+    const versions = await get_versions_by_dbname(db);
+    console.log("Versions for DB:", versions);
+    renderSelect(dbverInput, versions.data);
+});
+
+function renderSelect(selectEl, options, selectedValue = "") {
+    if (!selectEl || !Array.isArray(options)) {
+        console.error("renderSelect - options không hợp lệ", options);
+        return;
+    }
+
+    selectEl.innerHTML = options
+        .map(opt => `<option value="${opt.version}" ${opt.version === selectedValue ? "selected" : ""}>${opt.version}</option>`)
+        .join("");
+}
+
+
 const deleteBtn = document.getElementById("delete-hardware-btn");
 
 deleteBtn.addEventListener("click", () => {
@@ -226,6 +294,7 @@ function getValue(field) {
     const el = document.getElementById(`hardware-${field}-input`);
     return el ? el.value.trim() : "";
 }
+
 
 function getUnit(field) {
     const el = document.getElementById(`hardware-${field}-unit`);

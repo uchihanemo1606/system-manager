@@ -1,10 +1,10 @@
 import {
-    get_all_logs,
-    get_log_by_time
+    get_all_logs, 
 } from "../api/log";
 import { showToast } from "../component/toast";
 
 document.addEventListener("DOMContentLoaded", () => {
+    
     const usernameInput = document.getElementById("filter-username");
     const hardwareIpInput = document.getElementById("filter-hardware-ip");
     const softwareIdInput = document.getElementById("filter-software-id");
@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let allLogs = [];
     const PAGE_SIZE = 10;
+    let totalLogs = 0;
+    let last_page = 5;
     let currentPage = 1;
 
     btnFilter.addEventListener("click", applyFilters);
@@ -43,32 +45,29 @@ document.addEventListener("DOMContentLoaded", () => {
     function fuzzyIncludes(text, keywords) {
         const normalized = removeAccents(text || "");
         return keywords.every(kw => normalized.includes(kw));
-    }
-
+    } 
     function applyFilters() {
-        const filters = {
+        currentPage = 1; // reset về trang đầu tiên khi lọc
+        const filters = collectFilters();
+        showLoading(true);
+        get_all_logs(filters, currentPage)
+            .then(renderTable)
+            .catch(() => showToast("Lỗi tải dữ liệu", "error"))
+            .finally(() => showLoading(false));
+    }
+    function collectFilters() {
+        return {
             username: usernameInput.value.trim(),
             hardware_ip: hardwareIpInput.value.trim(),
             software_id: softwareIdInput.value.trim(),
             permission_name: permissionNameInput.value.trim(),
-            message: messageInput.value.trim(),
+            keyword: messageInput.value.trim(),
             link_domain: domainInput.value.trim(),
-            from_date: fromDateInput.value,
-            to_date: toDateInput.value,
-            from_time: fromTimeInput.value,
-            to_time: toTimeInput.value
+            from_date: fromDateInput.value,    
+            to_date: toDateInput.value,         
+            from_time: fromTimeInput.value,     
+            to_time: toTimeInput.value    
         };
-
-        showLoading(true);
-
-        const fetchData = (filters.from_date || filters.to_date)
-            ? get_log_by_time(formatDate(filters.from_date), formatDate(filters.to_date))
-            : get_all_logs();
-
-        fetchData
-            .then(data => filterClientSide(data, filters))
-            .catch(() => showToast("Lỗi tải dữ liệu", "error"))
-            .finally(() => showLoading(false));
     }
 
     function filterClientSide(data, filters) {
@@ -115,7 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         renderTable(filtered);
     }
-
     function clearFilters() {
         usernameInput.value = "";
         hardwareIpInput.value = "";
@@ -128,20 +126,28 @@ document.addEventListener("DOMContentLoaded", () => {
         fromTimeInput.value = "";
         toTimeInput.value = "";
     }
-
     function loadAllLogs() {
         showLoading(true);
-        get_all_logs()
+        const filters = collectFilters();
+        get_all_logs(filters, currentPage)
             .then(renderTable)
             .catch(() => showToast("Lỗi tải dữ liệu", "error"))
             .finally(() => showLoading(false));
     }
+    function renderTable(data) { 
+        if (!data || !Array.isArray(data.data)|| data.data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Không có dữ liệu</td></tr>`;
+            pagination.innerHTML = "";
+            paginationInfo.textContent = "";
+            return;
+        }
 
-    function renderTable(logs) {
-        logs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        allLogs = logs;
-        currentPage = 1;
-        renderPage();
+        allLogs = data.data || [];
+        last_page = data.last_page || 1;
+        totalLogs = data.total || 0;
+        currentPage = data.current_page || 1;
+
+        renderPage(); // render table body
     }
 
     function escapeHtml(str) {
@@ -155,18 +161,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderPage() {
         tbody.innerHTML = "";
 
-        const totalPages = Math.ceil(allLogs.length / PAGE_SIZE);
+        const totalPages = last_page;
         const start = (currentPage - 1) * PAGE_SIZE;
         const end = start + PAGE_SIZE;
-        const pageLogs = allLogs.slice(start, end);
-
-        if (!pageLogs.length) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center">Không có dữ liệu phù hợp</td></tr>`;
-            pagination.innerHTML = "";
-            paginationInfo.textContent = "";
-            return;
-        }
-
+        const pageLogs = allLogs
         pageLogs.forEach(log => {
             const tr = document.createElement("tr");
             tr.innerHTML = `
@@ -183,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         renderPagination(totalPages);
-        paginationInfo.innerHTML = `Trang ${currentPage} / ${totalPages}<br>Tổng ${allLogs.length} bản ghi`;
+        paginationInfo.innerHTML = `Trang ${currentPage} / ${totalPages}<br>Tổng ${totalLogs} bản ghi`;
 
     }
 
@@ -202,12 +200,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 li.addEventListener("click", e => {
                     e.preventDefault();
                     currentPage = page;
-                    renderPage();
+                    loadAllLogs(); // gọi lại API chứ không chỉ đổi page
                 });
             }
             ul.appendChild(li);
         };
-
         addPage(currentPage - 1, "‹", false, currentPage === 1);
 
         const maxVisiblePages = 5;
@@ -247,19 +244,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         pagination.appendChild(ul);
     }
-
-
     function formatDatetime(datetimeStr) {
         if (!datetimeStr) return "";
         const date = new Date(datetimeStr);
         return date.toLocaleString("vi-VN");
-    }
-
-    function formatDate(dateStr) {
-        if (!dateStr) return "";
-        const [year, month, day] = dateStr.split("-");
-        return `${day}/${month}/${year}`;
-    }
+    } 
 
     function showLoading(show) {
         loading.classList.toggle("d-none", !show);

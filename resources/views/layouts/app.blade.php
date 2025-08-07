@@ -59,7 +59,7 @@
     </div>
 
     @include('layouts.navbar')
-    <main class="main-content" style="min-height: 70dvh;" id="layout-main-content">
+    <main class="main-content" style="min-height: 100dvh;" id="layout-main-content">
         @include('layouts.main_modal')
         @yield('content')
     </main>

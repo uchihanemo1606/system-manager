@@ -1,5 +1,6 @@
 ﻿@extends('layouts.app')
 @hasPermission('hardware.list')
+@hasPermission('hardware.update')
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/modal/hardware_create.css') }}">
 
@@ -185,4 +186,5 @@
         }
     }
 </script>
+@endhasPermission
 @endhasPermission

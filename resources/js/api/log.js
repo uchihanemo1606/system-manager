@@ -1,13 +1,28 @@
 import { defaultHeaders } from "../config/api_config";
 
-// Lấy tất cả log
-export const get_all_logs = async () => {
-    const res = await fetch(`api/getAllLog`, {
+// // Lấy tất cả log
+// export const get_all_logs = async () => {
+//     const res = await fetch(`api/getAllLog?page=2`, {
+//         headers: defaultHeaders(),
+//     });
+//     const data = await res.json();
+//     if (res.ok) return data || [];
+//     return [];
+// };
+export const get_all_logs = async (filters = {}, page = 1) => {
+    const params = new URLSearchParams({ page });
+
+    for (const [key, value] of Object.entries(filters)) {
+        if (value !== "") params.append(key, value);
+    }
+
+    const res = await fetch(`api/getAllLog?${params.toString()}`, {
         headers: defaultHeaders(),
     });
+
     const data = await res.json();
-    if (res.ok) return data || [];
-    return [];
+    if (res.ok) return data || {};
+    return {};
 };
 
 // Lấy log theo IP phần cứng

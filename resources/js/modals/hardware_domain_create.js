@@ -4,8 +4,8 @@ import {
     remove_hardware_in_domain,
 } from "../api/domain";
 import { showToast } from "../component/toast";
-import { get_all_hardware } from "../api/hardware";
-
+import { get_all_hardware_connect_domain } from "../api/hardware";
+// getallhardwareconnectdomain
 async function initHardwareDomainCreateModal(data) {
     console.log(data)
     const selectedIPs = new Set(); // user chọn
@@ -32,7 +32,7 @@ async function initHardwareDomainCreateModal(data) {
     `;
 
     try {
-        const resAll = await get_all_hardware();
+        const resAll = await get_all_hardware_connect_domain();
         const hardwareList = resAll.data || [];
 
         table.innerHTML = `
