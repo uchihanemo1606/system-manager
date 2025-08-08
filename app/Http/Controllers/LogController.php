@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Carbon\Carbon;
 
 class LogController extends Controller
 {
@@ -101,6 +102,8 @@ class LogController extends Controller
             }
 
             $query = logModel::query();
+            $page = $request->query('page', 1);
+            $perPage = $request->query('per_page', 10);
 
             // Lọc theo từ khoá nếu có
             $keyword = $request->query('keyword');
@@ -116,6 +119,69 @@ class LogController extends Controller
                 }
             }
 
+            // Lọc theo các trường liên quan nếu có truyền param
+            $filterFields = [
+                'software_id',
+                'username',
+                'software_file_id',
+                'hardware_ip',
+                'department',
+                'permission_name',
+                'rule_id',
+                'role_id',
+                'link_domain',
+                'sw_permission_user',
+                'hw_permission_user',
+            ];
+
+            foreach ($filterFields as $field) {
+                if ($request->filled($field)) {
+                    $query->where($field, $request->input($field));
+                }
+            }
+
+            // Nếu chỉ muốn lấy log có trường nào đó khác null (ví dụ: chỉ log hardware)
+            $notNullFields = [
+                'hardware' => 'hardware_ip',
+                'software' => 'software_id',
+                'user' => 'username',
+                'softwareFile' => 'software_file_id',
+                'department' => 'department',
+                'permission' => 'permission_name',
+                'rule' => 'rule_id',
+                'role' => 'role_id',
+                'domain' => 'link_domain',
+                'softwarePermission' => 'sw_permission_user',
+                'hardwarePermission' => 'hw_permission_user',
+            ];
+            foreach ($notNullFields as $param => $column) {
+                if ($request->has($param)) {
+                    $query->whereNotNull($column);
+                }
+            }
+            // Lọc theo khoảng thời gian
+            $fromDate = $request->query('from_date');
+            $toDate = $request->query('to_date');
+            $fromTime = $request->query('from_time');
+            $toTime = $request->query('to_time');
+            if ($fromDate || $toDate || $fromTime || $toTime) { 
+                $fromDateTime = null;
+                $toDateTime = null;
+
+                if ($fromDate || $fromTime) {
+                    $fromDateTime = Carbon::parse(($fromDate ?? date('Y-m-d')) . ' ' . ($fromTime ?? '00:00:00'));
+                }
+                if ($toDate || $toTime) {
+                    $toDateTime = Carbon::parse(($toDate ?? date('Y-m-d')) . ' ' . ($toTime ?? '23:59:59'));
+                }
+
+                if ($fromDateTime) {
+                    $query->where('created_at', '>=', $fromDateTime);
+                }
+                if ($toDateTime) {
+                    $query->where('created_at', '<=', $toDateTime);
+                }
+            }
             $logs = $query->with([
                 'software',
                 'user',
@@ -128,33 +194,30 @@ class LogController extends Controller
                 'domain',
                 'softwarePermission',
                 'hardwarePermission',
-            ])->get();
+            ])->paginate($perPage, ['*'], 'page', $page);
 
-            $logsTransformed = $logs->map(function ($log) {
+            $logsTransformed = $logs->getCollection()->map(function ($log) {
                 $data = $log->toArray();
-
-                // Ghi đè các trường id bằng thông tin chi tiết
                 $data['username'] = $log->user ? $log->user->fullName : $log->username;
                 $data['software'] = $log->software ? $log->software->softwareName : $log->software_id;
                 $data['software_file'] = $log->softwareFile ? $log->softwareFile->file_name : $log->software_file_id ?? null;
                 $data['hardware'] = $log->hardware ? $log->hardware->ip : $log->hardware_ip ?? null;
                 $data['department'] = $log->department ? $log->department->name : $log->department ?? null;
                 $data['permission'] = $log->permission ? $log->permission->permissions_name : $log->permission_name ?? null;
-
-                // Nếu muốn show thêm các trường khác, thêm vào đây
-
-                unset($data['software_id']);
-                unset($data['hardware_ip']);
-                unset($data['software_file_id']);
-                unset($data['rule_id']);
-                unset($data['role_id']);
-                unset($data['permission_name']);
-
+                unset($data['software_id'], $data['hardware_ip'], $data['software_file_id'], $data['rule_id'], $data['role_id'], $data['permission_name']);
                 return $data;
             });
 
-            return response()->json($logsTransformed);
+            $logs->setCollection(collect($logsTransformed));
 
+            return response()->json([
+                'status' => 'success',
+                'total' => $logs->total(),
+                'current_page' => $logs->currentPage(),
+                'last_page' => $logs->lastPage(),
+                'per_page' => $logs->perPage(),
+                'data' => $logs->items()
+            ]);
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
@@ -165,6 +228,8 @@ class LogController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve logs. ' . $e->getMessage()], 500);
         }
     }
+
+
 
     public function getLogByType(Request $request)
     {

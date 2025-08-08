@@ -1,4 +1,5 @@
 @hasPermission('software.list')
+@hasPermission('software.update')
 @extends('layouts.app')
 @section('content')
 <div>
@@ -14,7 +15,7 @@
         <div class="card-body">
 
             <h5 class="mb-3 d-flex justify-content-between align-items-center">
-                 Bộ lọc tìm kiếm
+                Bộ lọc tìm kiếm
                 <button class="btn btn-outline-secondary btn-sm d-md-none" type="button" data-toggle="collapse"
                     data-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
                     <i class="mdi mdi-filter-outline"></i> Bộ lọc
@@ -101,4 +102,5 @@
     }
 </script>
 @vite('resources/js/pages/software_list.js')
+@endhasPermission
 @endhasPermission

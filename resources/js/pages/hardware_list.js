@@ -35,7 +35,7 @@ function renderHardware(list) {
         const active = hw.is_active;
         const deleted = hw.is_delete;
         const card = `
-        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+        <a href="/hardware_detail?id=${hw.ip}"  class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
             <div class="bg-white shadow-sm h-100 position-relative ${!active ? "bg-light text-muted border" : "border"}">
                 ${deleted ? `<div style="position:absolute;top:0;right:0;background:red;color:white;font-size:11px;padding:2px 6px;font-weight:600;border-bottom-left-radius:5px;z-index:10">ĐÃ XÓA</div>` : ""}
                 <div class="position-absolute" style="top:4px;left:4px;font-size:13px;z-index:2">
@@ -52,25 +52,18 @@ function renderHardware(list) {
                     </div>
                     <div class="d-flex justify-content-center flex-wrap gap-2">
                         <span  class="badge badge-${hw.isVirtualServer ? "secondary" : "info"} badge-custom">${hw.isVirtualServer ? "Máy ảo" : "Máy vật lý"}</span>
-                        <span class="badge badge-${active ? "success" : "secondary"} badge-custom">${active ? "Đang hoạt động" : "Không hoạt động"}</span>
+                      
                     </div>
                     <p class="text-muted one-line mb-0 medium" title="${hw.services}">
                         <i class="mdi mdi-server-network"></i> Dịch vụ: ${hw.services}
                     </p>
-                </div>
-                <div class="card-footer bg-white border-top ${!active ? "bg-light text-muted" : ""}">
-                    <div class="d-flex justify-content-around font-size-18">
-                        <a href="/hardware_detail?id=${hw.ip}&edit=true" title="Sửa" class="text-primary"><i class="bx bx-wrench"></i></a>
-                        <a href="#" title="Xem log" class="text-primary"><i class="bx bx-pie-chart-alt"></i></a>
-                        <a href="/hardware_detail?id=${hw.ip}" title="Chi tiết" class="text-primary"><i class="bx bx-user-circle"></i></a>
-                    </div>
-                </div>
+                </div> 
             </div>
-        </div>`;
+        </a>`;
         container.insertAdjacentHTML("beforeend", card);
     });
 }
-
+//  <span class="badge badge-${active ? "success" : "secondary"} badge-custom">${active ? "Đang hoạt động" : "Không hoạt động"}</span>
 async function initHardwareFilterSelects() {
     const [dbSelect, dbverSelect, osSelect, osverSelect] = [
         "filter-dbname", "filter-dbversion", "filter-os", "filter-osver"

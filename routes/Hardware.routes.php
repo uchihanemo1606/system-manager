@@ -6,7 +6,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use app\Http\Middleware\CheckPermission;
 
-Route::post('/createhardware',[HardwareController::class, 'createHardware'])
+Route::post('/createhardware', [HardwareController::class, 'createHardware'])
     ->middleware('check.permission')
     ->name('hardware.create');
 
@@ -23,6 +23,13 @@ Route::get('/gethardwarebyip', [HardwareController::class, 'getHardwareByIP'])
     ->middleware('check.permission')
     ->name('hardware.list');
 
+Route::get('/statisticalhardware', [HardwareController::class, 'statisticalHardware'])
+    ->middleware('check.permission')
+    ->name('hardware.list');
+
+Route::get('/getallhardwareconnectdomain', [HardwareController::class, 'getAllHardwareConnectDomain'])
+    ->middleware('check.permission')
+    ->name('software.edit');
 
 // ======================================================================================================================================================================================================================================================
 // HARDWARE PERMISSION CONTROLLER
@@ -46,3 +53,8 @@ Route::get('/getalluserpermissioninhardware/{hardwareIP}', [HardwarePermissionCo
 Route::delete('/removepermissionforuserinhardware/{hardware_ip}', [HardwarePermissionController::class, 'removePermissionsForUsersInHardware'])
     ->middleware('check.permission')
     ->name('hardwarepermission.delete');
+
+// ======================================================================================================================================================================================================================================================
+// HARDWARE ANALYTICS CONTROLLER
+
+Route::get('/gethardwareanalytics', [HardwareController::class, 'getHardwareAnalytics']);

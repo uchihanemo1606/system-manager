@@ -24,6 +24,7 @@ get_system_project()
         // Gán vào HTML
         document.getElementById("name_company").textContent = footerData.name_company || "Tên công ty";
         document.getElementById("name_system").textContent = footerData.name_system || "Tên hệ thống";
+        document.getElementById("name_system_footer").textContent = footerData.name_system || "Tên hệ thống";
         document.getElementById("phone").textContent = " : " + (footerData.phone || "SĐT");
 
     })

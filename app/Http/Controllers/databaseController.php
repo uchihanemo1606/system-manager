@@ -174,10 +174,26 @@ class databaseController extends Controller
             }
 
             $databases = databaseModel::get();
+            if ($databases->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No databases found.'
+                ], 404);
+            }
+
+            $page = request()->input('page', 1);
+            $perPage = request()->input('per_page', 15);
+            $databases = databaseModel::paginate($perPage, ['*'], 'page', $page);
+
             return response()->json([
                 'status' => 'success',
-                'data' => $databases
+                'total' => $databases->total(),
+                'current_page' => $databases->currentPage(),
+                'last_page' => $databases->lastPage(),
+                'per_page' => $databases->perPage(),
+                'data' => $databases->items()
             ], 200);
+
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',

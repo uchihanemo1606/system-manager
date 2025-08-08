@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\hardwareModel;
 use App\Models\hardwarePemisssionModel;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 
 
@@ -329,6 +330,253 @@ class HardwareController extends Controller
         }
     }
 
+    public function statisticalHardware(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            // Chỉ lấy hardware chưa bị xóa
+            $baseQuery = hardwareModel::where('is_delete', false);
+
+            // 1. Thống kê máy thực, máy ảo
+            $virtualStats = (clone $baseQuery)
+                ->groupBy('isVirtualServer')
+                ->selectRaw('isVirtualServer, COUNT(*) as total')
+                ->get();
+
+            // 2. Thống kê OS (Windows, Linux, ...)
+            $osStats = (clone $baseQuery)
+                ->groupBy('OS')
+                ->selectRaw('OS, COUNT(*) as total')
+                ->get();
+
+            // 3. Thống kê database (theo dbname)
+            $dbStats = (clone $baseQuery)
+                ->groupBy('dbname')
+                ->selectRaw('dbname, COUNT(*) as total')
+                ->get();
+
+            // 4. Thống kê số máy theo OS version (Windows 10, Windows 11, ...)
+            $osVerStats = (clone $baseQuery)
+                ->groupBy('OSver')
+                ->selectRaw('OSver, COUNT(*) as total')
+                ->get();
+
+            // 5. Thống kê version của database
+            $dbVerStats = (clone $baseQuery)
+                ->groupBy('dbversion')
+                ->selectRaw('dbversion, COUNT(*) as total')
+                ->get();
+
+            // 6. Thống kê dung lượng HDD
+            $hddStats = (clone $baseQuery)
+                ->groupBy('hdd')
+                ->selectRaw('hdd, COUNT(*) as total')
+                ->get();
+
+            // 7. Thống kê RAM
+            $ramStats = (clone $baseQuery)
+                ->groupBy('ram')
+                ->selectRaw('ram, COUNT(*) as total')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'virtualStats' => $virtualStats,
+                'osStats' => $osStats,
+                'dbStats' => $dbStats,
+                'osVerStats' => $osVerStats,
+                'dbVerStats' => $dbVerStats,
+                'hddStats' => $hddStats,
+                'ramStats' => $ramStats,
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not get hardware statistics. ' . $e->getMessage()], 500);
+        }
+    }
+    public function getHardwareAnalytics(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            $from = $request->query('from');
+            $to = $request->query('to');
+            $fromDate = $from ? Carbon::parse($from)->startOfSecond() : null;
+            $toDate = $to ? Carbon::parse($to)->endOfSecond() : null;
+
+            $query = hardwareModel::where('is_delete', false);
+            $deletedQuery = hardwareModel::where('is_delete', true);
+
+            if ($fromDate && $toDate) {
+                $query->whereBetween('created_at', [$fromDate, $toDate]);
+                $deletedQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            }
+
+            $hardware = $query->get();
+            $deletedHardwareCount = $deletedQuery->count();
+
+            if ($hardware->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No hardware found',
+                    'data' => [],
+                    'deletedCount' => $deletedHardwareCount
+                ], 200);
+            }
+
+            $totalHardware = $hardware->count();
+            $virtualHardware = $hardware->where('isVirtualServer', true);
+            $physicalHardware = $hardware->where('isVirtualServer', false);
+
+            $virtualCount = $virtualHardware->count();
+            $physicalCount = $physicalHardware->count();
+
+            $activeHardware = $hardware->where('is_active', true);
+            $activeCount = $activeHardware->count();
+
+            // Tổng HDD
+            $totalActiveHddBytes = $activeHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->hdd);
+            }, 0);
+
+            // Tổng HDD máy ảo
+            $virtualHddBytes = $virtualHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->hdd);
+            }, 0);
+
+            // Tổng HDD máy vật lý
+            $physicalHddBytes = $physicalHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->hdd);
+            }, 0);
+
+            // Tổng RAM (dựa trên field `ram`, giả sử cũng lưu như hdd: "8 GB", "16 MB", etc.)
+            $virtualRamBytes = $virtualHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->ram);
+            }, 0);
+
+            $physicalRamBytes = $physicalHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->ram);
+            }, 0);
+
+            $totalRamBytes = $virtualRamBytes + $physicalRamBytes;
+
+            return response()->json([
+                'status' => 'success',
+                'totalHardware' => $totalHardware,
+                'virtualCount' => $virtualCount,
+                'physicalCount' => $physicalCount,
+                'activeCount' => $activeCount,
+                'totalActiveHdd' => $this->formatBytes($totalActiveHddBytes),
+
+                'virtualHdd' => $this->formatBytes($virtualHddBytes),
+                'physicalHdd' => $this->formatBytes($physicalHddBytes),
+
+                'virtualRam' => $this->formatBytes($virtualRamBytes),
+                'physicalRam' => $this->formatBytes($physicalRamBytes),
+                'totalRam' => $this->formatBytes($totalRamBytes),
+
+                'deletedCount' => $deletedHardwareCount,
+            ]);
+
+        } catch (TokenExpiredException | TokenInvalidException | JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not get hardware analytics. ' . $e->getMessage()], 500);
+        }
+    }
+    public function getAllHardwareConnectDomain()
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                Log::warning('User not authenticated in getAllHardware');
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+
+            // Truy vấn lấy danh sách phần cứng chưa bị xóa
+            $hardwareList = hardwareModel::query()
+                ->where('is_delete', false)
+                ->select('ip', 'dbname', 'dbversion', 'OS', 'OSver','is_delete')
+                ->get();
+
+
+            if ($hardwareList->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No hardware found for your account',
+                    'total' => 0,
+                    'data' => []
+                ], 200);
+            } 
+
+            Log::info('Successfully retrieved hardware', [
+                'username' => $user->username,  
+            ]);
+
+            return response()->json([
+                'status' => 'success', 
+                'data' => $hardwareList
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            Log::critical('Exception in getAllHardware', ['error' => $e->getMessage()]);
+            return response()->json(['status' => 'error', 'message' => 'An unexpected error occurred.'], 500);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private function convertToBytes($value)
+    {
+        if (!$value)
+            return 0;
+
+        $value = trim($value);
+        if (preg_match('/^([\d.]+)\s*(KB|MB|GB|TB)$/i', $value, $matches)) {
+            $number = (float) $matches[1];
+            $unit = strtoupper($matches[2]);
+            $multipliers = ['KB' => 1024, 'MB' => 1024 ** 2, 'GB' => 1024 ** 3, 'TB' => 1024 ** 4];
+            return $number * ($multipliers[$unit] ?? 1);
+        }
+
+        return (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    }
+
+    private function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        return round($bytes / pow(1024, $pow), $precision) . ' ' . $units[$pow];
+    }
+
 
 }
-

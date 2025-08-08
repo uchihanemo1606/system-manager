@@ -8,7 +8,7 @@
     <div class="login-logo">
         <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo">
     </div>
-    <div class="d-none"  id="loading">
+    <div class="d-none" id="loading">
         <div
             style=" position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999;">
             <div class="spinner-border text-primary" role="status">
@@ -21,7 +21,7 @@
     <form id="step1" autocomplete="off">
         @csrf
         <div class="form-group">
-            <label>Email:</label>
+            <label>địa chỉ Email:</label>
             <input type="email" name="email" id="email" class="form-control" required>
         </div>
         <button type="submit" class="login-btn">Gửi mã OTP</button>
@@ -31,7 +31,9 @@
     <form id="step2" style="display:none;" autocomplete="off">
         @csrf
         <div class="form-group">
-            <label>Nhập mã OTP đã gửi về email:</label>
+            <small class="text-danger block">! nếu bạn nhập sai otp quá 5 lần otp sẽ bị vô hiệu hóa</small>
+            <div></div>
+            <label>Nhập mã OTP đã gửi về email:</label> 
             <input type="text" name="otp" id="otp" class="form-control" required>
         </div>
         <button type="submit" class="login-btn">Xác thực OTP</button>

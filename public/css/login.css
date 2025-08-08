@@ -20,6 +20,15 @@
     z-index: -1;
     /* đảm bảo nó nằm sau các thành phần khác */
 }
+#error:empty {
+    display: none;
+}
+
+#error {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
+}
 
 @keyframes fadeIn {
     from {

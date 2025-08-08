@@ -38,12 +38,12 @@ function renderUsers(users) {
     tbody.innerHTML = users
         .map((u) => {
             let actions = "";
-            // if (hasPermission("user.update")) {
-            //     actions += `<li class="list-inline-item px-2"><a href="#"><a href="#"><i class="bx bx-show"></i></a></li>`;
-            // }
-            // if (hasPermission("user.delete")) {
-            //     actions += `<li class="list-inline-item px-2"><a href="#"><i class="bx bx-trash"></i></a></li>`;
-            // }
+            if (hasPermission("user.update")) {
+                actions += `<li class="list-inline-item px-2"><a href="#"><a href="#"><i class="bx bx-show"></i></a></li>`;
+            }
+            if (hasPermission("user.delete")) {
+                actions += `<li class="list-inline-item px-2"><a href="#"><i class="bx bx-trash"></i></a></li>`;
+            }
             if (hasPermission("user.update")) {
                 actions += `
                 <li class="list-inline-item px-2"><a href="#"><i class="bx bx-wrench" 

@@ -28,6 +28,16 @@ export const get_all_hardware = async () => {
     }
     return [];
 };
+export const get_all_hardware_connect_domain = async () => {
+    const res = await fetch("api/getallhardwareconnectdomain", {
+        headers: defaultHeaders(),
+    });
+    const data = await res.json();
+    if (res.ok) {
+        return data.hardware || data;
+    }
+    return [];
+};
 export const get_hardware_by_ip = async ({ ip }) => {
     const res = await fetch(
         `/api/gethardwarebyip?ip=${encodeURIComponent(ip)}`,
@@ -117,3 +127,13 @@ export async function create_hardware_permission(data) {
     if (!res.ok) throw new Error(result.message || "Lỗi khi tạo quyền");
     return result;
 }
+export const get_hardware_analytics = async (filters = {}) => {
+    const query = new URLSearchParams(filters).toString();
+
+    const res = await fetch(`api/gethardwareanalytics?${query}`, {
+        headers: defaultHeaders(),
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch hardware analytics");
+    return await res.json();
+};

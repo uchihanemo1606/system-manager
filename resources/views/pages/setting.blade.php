@@ -1,4 +1,7 @@
+@hasPermission('system.get')
+@hasPermission('system.update')
 @extends('layouts.app')
+
 @section('content')
     <div class="">
 
@@ -58,3 +61,5 @@
 
     @vite('resources/js/pages/setting.js')
 @endsection
+@endhasPermission
+@endhasPermission
