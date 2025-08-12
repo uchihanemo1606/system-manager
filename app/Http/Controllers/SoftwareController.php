@@ -104,7 +104,6 @@ class SoftwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-
             $id = $request->query('id');
             if (!$id) {
                 return response()->json(['message' => 'Software id is required'], 400);
