@@ -3,29 +3,35 @@
     padding: 0;
     box-sizing: border-box;
 }
+
 .one-line {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .readonly-input {
     background-color: #f5f5f5;
-    color: #6c757d; /* màu chữ xám */
+    color: #6c757d;
+    /* màu chữ xám */
     cursor: not-allowed;
-    
+
 }
+
 .disabled-input {
     background-color: #e9ecef !important;
     pointer-events: none;
     opacity: 0.6;
 }
 
-.card{
+.card {
     margin: 12px;
 }
-.col-lg-7{
+
+.col-lg-7 {
     padding: 0px;
 }
+
 .card-hw:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -55,18 +61,7 @@ label.required::after {
     align-items: center;
 }
 
-.nav_image {
-    display: flex;
-    min-width: 55px;
-    justify-content: center;
-}
 
-.nav_image img {
-    height: 35px;
-    width: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-}
 
 .sidebar {
     position: fixed;
@@ -75,7 +70,7 @@ label.required::after {
     height: 100%;
     width: 270px;
     background: #fff;
-    padding: 15px 10px;
+    padding: 25px 10px;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
     transition: all 0.4s ease;
     z-index: 999;
@@ -89,13 +84,38 @@ label.required::after {
 
 .logo_items {
     gap: 8px;
+    height: 0;
+    overflow: visible;
+    transform: translateY(-100%);
+    display: flex;
+    justify-content: flex-end;
 }
-
 .logo_name {
+    text-transform: capitalize;
     font-size: 22px;
     color: #333;
-    font-weight: 500px;
-    transition: all 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav_image {
+    display: flex;
+    min-width: 55px;
+    justify-content: center;
+}
+
+.nav_image img {
+    height: 35px;
+    width: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+@media (max-width: 640px) {
+    .nav_image {
+        display: none;
+    }
 }
 
 .sidebar.close .logo_name,
@@ -123,7 +143,7 @@ label.required::after {
 .menu_container {
     display: flex;
     flex-direction: column;
-    justify-content: space-between; 
+    justify-content: space-between;
     overflow-y: auto;
     height: calc(100% - 42px);
 }
@@ -225,7 +245,7 @@ label.required::after {
     left: 270px;
     padding: 10px 20px;
     background: #fff;
-    border-bottom: rgb(199, 199, 199) solid 0.001px ;
+    border-bottom: rgb(199, 199, 199) solid 0.001px;
     transition: all 0.4s ease;
     z-index: 998;
 }
@@ -256,41 +276,48 @@ label.required::after {
     width: 40px;
 }
 
+
+
 .main-content {
-    margin-top: 60px; 
+    margin-top: 60px;
     margin-left: 270px;
     padding: 20px;
     transition: all 0.4s ease;
     width: calc(100% - 270px);
 }
 
-.sidebar.close ~ .main-content {
-    margin-left: 75px; /* 55px sidebar + 20px padding */
+.sidebar.close~.main-content {
+    margin-left: 75px;
+    /* 55px sidebar + 20px padding */
     width: calc(100% - 75px);
 }
 
 
-.sidebar.close ~ .navbar {
+.sidebar.close~.navbar {
     left: 75px;
     width: calc(100% - 75px);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+
     .navbar,
-    .sidebar.close ~ .navbar {
+    .sidebar.close~.navbar {
         left: 0;
         width: 100%;
     }
 }
+
 @media (max-width: 768px) {
+
     .main-content,
-    .sidebar.close ~ .main-content {
+    .sidebar.close~.main-content {
         margin-left: 0;
         width: 100%;
         padding: 16px 12px;
     }
 }
+
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
@@ -317,8 +344,9 @@ label.required::after {
         width: 100%;
     }
 
-    .sidebar.open ~ .main-content {
-        pointer-events: none; /* để chặn click vào nội dung khi sidebar đang mở trên mobile */
+    .sidebar.open~.main-content {
+        pointer-events: none;
+        /* để chặn click vào nội dung khi sidebar đang mở trên mobile */
     }
 }
 

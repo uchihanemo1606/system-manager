@@ -5,16 +5,12 @@
 
 <body>
     <nav class="sidebar locked">
-        <div class="logo_items flex w-full position-relative">
-            <a style="scale: 2" href="/" class="nav_image">
-                <img src="images/logo.png" alt="logo_img" />
-            </a>
-            <span class="logo_name" id="name_system">Hệ Thống</span>
-            <i></i>
-            <i class="bx bx-lock-alt" style="position: absolute;right: 0;" id="lock-icon" title="Unlock Sidebar"></i>
+        <div class="logo_items flex w-full position-relative" style="justify-content: flex-end; gap: 8px;">
+            <i class="bx bx-lock-alt" id="lock-icon" title="Unlock Sidebar"></i>
             <i class="bx bx-x" id="sidebar-close"></i>
         </div>
-        <div class="menu_container text-nowrap">
+
+        <div class="menu_container text-nowrap ">
             <div class="menu_items">
                 <ul class="menu_item">
                     @hasPermission('system.get')
@@ -110,14 +106,14 @@
 
         </div>
     </nav>
-    <nav class="navbar flex flex-row " id="main_navbar">
-        <i class="bx bx-menu" id="sidebar-open"></i>
-        <form class="app-search d-none d-lg-block  " style="padding: 0;">
-            <div class="position-relative">
-                <input type="text" class="form-control" placeholder="Search...">
-                <span class="bx bx-search-alt"></span>
-            </div>
-        </form>
+    <nav class="navbar flex flex-row flex-nowrap" id="main_navbar">
+        <i class="bx bx-menu" id="sidebar-open"></i> 
+        <div class="flex items-center justify-center overflow-auto w-20">
+            <a href="/" class="nav_image">
+                <img src="images/logo.png" alt="logo_img" />
+            </a>
+            <span class="logo_name" id="name_system"></span>
+        </div> 
         <div class="dropdown">
             <div type="button" class="" id="page-header-user-dropdown" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">

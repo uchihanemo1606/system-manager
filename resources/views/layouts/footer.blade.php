@@ -1,27 +1,22 @@
 <div class="w-100 d-flex justify-content-end">
-    <footer id="dynamic-footer" class="bg-white border-top border-4 py-4 mt-5 shadow-sm">
-        <div class="container">
-            <div class="row align-items-center justify-content-between">
-                <!-- Logo & Copyright -->
-                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <a href="{{ url('/') }}"
-                        class="d-inline-flex align-items-center mb-2 text-decoration-none text-dark">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" height="32" class="me-2">
-                        <strong id="name_system_footer">Hệ thống quản lý</strong>
-                    </a> 
-                </div>
-                <!-- Liên kết -->
-                <div class="col-md-6 text-center text-md-end">
-                    <ul class="list-inline mb-0">
-                        <div class="medium text-muted mt-1">
-                            &copy; {{ date('Y') }} Công ty : <strong id="name_company"></strong>
-                        </div>
-                        <li class="list-inline-item">
-                            <span href="#" class="text-muted text-decoration-none">Hỗ trợ<span
-                                    id="phone"></span></span>
-                        </li>
-                    </ul>
-                </div>
+    <footer id="dynamic-footer" class="bg-white border-top border-4 py-3 mt-5 shadow-sm">
+        <div  >
+            <!-- Logo & Copyright -->
+            <div class="col-md-6 text-center text-md-start mb-md-0">
+                <a href="{{ url('/') }}" class="d-inline-flex align-items-center text-decoration-none text-dark">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" height="32" class="me-2">
+                    <strong id="name_system_footer">Hệ thống quản lý</strong>
+                </a>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <ul class="list-inline mb-0">
+                    <div class="medium text-muted mt-1">
+                        Copyright &copy; {{ date('Y') }} <strong id="name_company"></strong>
+                    </div>
+                    <li class="list-inline-item">
+                        <span href="#" class="text-muted text-decoration-none">Liên hệ<span id="phone"></span></span>
+                    </li>
+                </ul>
             </div>
         </div>
     </footer>

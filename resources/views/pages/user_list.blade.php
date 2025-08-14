@@ -51,7 +51,7 @@
                                     <th scope="col" style="width: 70px;">#</th>
                                     <th scope="col">Tên đăng nhập</th>
                                     <th scope="col" class="text-center">Họ và tên</th>
-                                    <th scope="col" class="text-center">Quyền hạng</th>
+                                    <!-- <th scope="col" class="text-center">Quyền hạng</th> -->
                                     <th scope="col" class="text-center">Email</th>
                                     <th scope="col" class="text-center">Thao tác</th>
                                 </tr>
