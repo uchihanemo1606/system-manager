@@ -171,7 +171,7 @@ class softwarefileController extends Controller
             $validated = $request->validate([
                 'software_id' => 'nullable|integer|exists:software,id',
                 'file_name' => 'nullable|string|max:255',
-                'file' => 'nullable|file|max:10240', // file là optional
+                'file' => 'nullable|file|max:10240', 
                 'description' => 'nullable|string|max:10000',
             ]);
 
