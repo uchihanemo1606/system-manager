@@ -7,12 +7,63 @@ import {
     permissionTypes,
     permissionActions,
     delete_role,
+    update_role
 } from "../api/role";
 import { showToast } from "../component/toast";
 let selectedPermissionsGlobal = new Set(); // chứa normalize(permission_name)
 let allPermissionsGlobal = [];
 let rolePermissionsGlobal = [];
 // Tạo danh sách tất cả các permission nên có
+const roleNameEl = document.getElementById("role-name");
+const editBtn = document.getElementById("edit-role-btn");
+
+editBtn.addEventListener("click", () => {
+    // Lấy giá trị hiện tại
+    const currentRole = roleNameEl.textContent.trim();
+
+    // Tạo input và nút lưu/hủy
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = currentRole;
+    input.className = "form-control d-inline-block w-auto mr-2";
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn btn-sm btn-success mr-1";
+    saveBtn.textContent = "Lưu";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "btn btn-sm btn-secondary";
+    cancelBtn.textContent = "Hủy";
+
+    // Thay span + nút edit bằng input + nút
+    roleNameEl.replaceWith(input);
+    editBtn.replaceWith(saveBtn, cancelBtn);
+
+    // Lưu thay đổi
+    saveBtn.addEventListener("click", async () => {
+        const newRoleName = input.value.trim();
+        if (!newRoleName) return alert("Tên role không được rỗng");
+
+        try {
+            await update_role({ old_role_name: currentRole, new_role_name: newRoleName });
+            // Cập nhật span hiển thị
+            input.replaceWith(roleNameEl);
+            roleNameEl.textContent = newRoleName;
+            saveBtn.replaceWith(editBtn);
+            cancelBtn.remove();
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    // Hủy thay đổi
+    cancelBtn.addEventListener("click", () => {
+        input.replaceWith(roleNameEl);
+        saveBtn.replaceWith(editBtn);
+        cancelBtn.remove();
+    });
+});
+
 function generateExpectedPermissions() {
     const result = [];
 
@@ -27,26 +78,7 @@ function generateExpectedPermissions() {
     }
 
     return result;
-}
-async function deleteRole(role_name) {
-    if (!confirm("Bạn có chắc muốn xóa role này không?")) return;
-    try {
-        await delete_role(role_name);
-        showToast({
-            message: "Đã xóa role thành công!",
-            type: "success",
-            timeout: 2000,
-        });
-        window.dispatchEvent(new CustomEvent("roleListUpdated")); // Reload danh sách role
-    } catch (err) {
-        console.error("Lỗi xóa role:", err);
-        showToast({
-            message: err.message || "Lỗi khi xóa role",
-            type: "error",
-            timeout: 2000,
-        });
-    }
-}
+} 
 // Chuẩn hóa string
 const normalize = (str) =>
     (str || "").trim().toLowerCase().replace(/\s+/g, " "); // Chuẩn hoá khoảng trắng giữa các từ
@@ -388,12 +420,7 @@ async function initRoleDetailModal(data) {
         if (!confirm("Bạn có chắc chắn muốn xóa role này không?")) return;
 
         try {
-            await delete_role(data.role_name);
-            showToast({
-                message: "Đã xóa role thành công!",
-                type: "success",
-                timeout: 2000,
-            });
+            await delete_role(data.role_name); 
 
             $("#addPermissionModal").modal("hide");
             window.dispatchEvent(new CustomEvent("roleListUpdated"));
@@ -409,6 +436,7 @@ async function initRoleDetailModal(data) {
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
+
         const activeElement = document.activeElement;
         if (
             activeElement &&
@@ -425,6 +453,14 @@ async function initRoleDetailModal(data) {
         );
 
         const selectedRole = data.role_name;
+        if (selectedRole === "admin" || selectedRole === "quản lý phần cứng" || selectedRole === "quản lý phần mềm" || selectedRole === "quản lý hệ thống" || selectedRole === "người dùng cơ bản") {
+            showToast({
+                message: "CẢNH BÁO:  đây là 'Vai trò' được thiết lập sẵn ảnh hưởng đến hệ thống chúng tôi khuyến cáo nên tạo một 'Vai trò' mới thay vì sửa 'Vai trò' này :" + ` ${selectedRole}`,
+                type: "warning",
+                timeout: 4000,
+            });
+            return;
+        }
 
         try {
             for (const permission_name of removed) {
@@ -485,6 +521,7 @@ async function initRoleDetailModal(data) {
 
 document.addEventListener("DOMContentLoaded", () => {
     $("#addPermissionModal").on("hidden.bs.modal", () => {
+
         selectedPermissionsGlobal = new Set();
         rolePermissionsGlobal = [];
         allPermissionsGlobal = [];

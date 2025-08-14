@@ -431,10 +431,15 @@ class SoftwareController extends Controller
                     $deletedStorageSize += filesize($path);
                 }
             }
+            $totalSoftwareAllTime = softwareModel::where('is_delete', false)->count();
+            $deletedSoftwareAllTime = softwareModel::where('is_delete', true)->count();
 
             return response()->json([
                 'status' => 'success',
                 'data' => [
+                    'total_software_all_time' => $totalSoftwareAllTime,
+                    'deleted_software_all_time' => $deletedSoftwareAllTime,
+
                     'total_software' => $totalSoftware,
                     'deleted_software' => $deletedSoftware,
                     'storage_size_bytes' => $totalStorageSize,

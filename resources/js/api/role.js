@@ -31,36 +31,60 @@ export const create_role = async ({ role_name }) => {
 
     return data;
 };
-export const update_role = async ({ old_role_name, new_role_name }) => {
-    if (old_role_name.toLowerCase() === "admin") {
-        return showToast({
-            message: `Không thể cập nhật vai trò 'admin'`,
-            type: "success",
-            timeout: 3000,
-        });
-        // return Promise.reject(new Error("Không thể cập nhật vai trò 'admin'"));
-    }
-    const res = await fetch(`/api/updaterole`, {
-        method: "PUT",
-        headers: defaultHeaders(),
-        body: JSON.stringify({
-            old_role_name,
-            new_role_name,
-        }),
-    });
-    
-    const data = await res.json();
-    if (!res.ok) {
+export const update_role = async ({ old_role_name, new_role_name }) => { 
+    let selectedRole = old_role_name;
+    if (selectedRole === "admin" || selectedRole === "quản lý phần cứng" || selectedRole === "quản lý phần mềm" || selectedRole === "quản lý hệ thống" || selectedRole === "người dùng cơ bản") {
         showToast({
-            message: `${data.message}`,
-            type: "success",
-            timeout: 3000,
+            message: "CẢNH BÁO:  đây là 'Vai trò' được thiết lập sẵn ảnh hưởng đến hệ thống chúng tôi khuyến cáo nên tạo một 'Vai trò' mới thay vì sửa 'Vai trò' này :" + ` ${selectedRole}`,
+            type: "warning",
+            timeout: 4000,
         });
-        throw new Error(data.message || "Failed to update role");
+        return;
     }
-    
+
+    const res = await fetch(`/api/updaterole/${encodeURIComponent(old_role_name)}`, {
+        method: "PATCH",
+        headers: defaultHeaders(),
+        body: JSON.stringify({ role_name: new_role_name }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Cập nhật thất bại");
+    showToast({ message: data.message, type: "success", timeout: 3000 });
     return data;
-}
+};
+
+
+// export const update_role = async ({ old_role_name, new_role_name }) => {
+//     if (old_role_name.toLowerCase() === "admin") {
+//         return showToast({
+//             message: `Không thể cập nhật vai trò 'admin'`,
+//             type: "success",
+//             timeout: 3000,
+//         });
+//         // return Promise.reject(new Error("Không thể cập nhật vai trò 'admin'"));
+//     }
+//     const res = await fetch(`/api/updaterole`, {
+//         method: "PUT",
+//         headers: defaultHeaders(),
+//         body: JSON.stringify({
+//             old_role_name,
+//             new_role_name,
+//         }),
+//     });
+
+//     const data = await res.json();
+//     if (!res.ok) {
+//         showToast({
+//             message: `${data.message}`,
+//             type: "success",
+//             timeout: 3000,
+//         });
+//         throw new Error(data.message || "Failed to update role");
+//     }
+
+//     return data;
+// }
 export const delete_role = async (role_name) => {
     if (role_name.toLowerCase() === "admin") {
         return showToast({
@@ -77,17 +101,23 @@ export const delete_role = async (role_name) => {
             role_name,
         }),
     });
-    
+
     const data = await res.json();
     if (!res.ok) {
-        // showToast({
-        //     message: `${data.message}`,
-        //     type: "success",
-        //     timeout: 3000,
-        // });
+        showToast({
+            message: `vui lòng thu hồi vai trò của người dùng và tắc hết các permission của vai trò trước khi xóa`,
+            type: "warning",
+            timeout: 3000,
+        });
         // throw new Error(data.message || "Failed to delete role");
+    }else{
+        showToast({
+            message: `Đã xóa vai trò "${role_name}" thành công!`,
+            type: "success",
+            timeout: 3000,
+        });
     }
-    
+
     return data;
 }
 export const get_all_permission_by_role_name = async (role_name) => {

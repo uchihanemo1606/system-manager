@@ -24,7 +24,7 @@ function renderCategoryRules(filterName = "", filterDescription = "") {
     });
 
     if (filtered.length === 0) {
-        container.innerHTML = `<p class="text-muted fst-italic">Không tìm thấy loại quy chế phù hợp.</p>`;
+        container.innerHTML = `<p class="text-muted fst-italic">Không có dữ liệu.</p>`;
         return;
     }
 
@@ -61,16 +61,20 @@ function renderCategoryRules(filterName = "", filterDescription = "") {
 async function loadCategoryRules() {
     const container = document.getElementById("category-rule-list");
     container.innerHTML = `<p>Đang tải dữ liệu...</p>`;
-
-    try {
-        const { data } = await get_all_category_rule();
-        allCategoryRules = data || [];
-        const name = document.getElementById("search-name").value || "";
-        const desc = document.getElementById("search-description").value || "";
-        renderCategoryRules(name, desc);
-    } catch (error) {
+try {
+    const { data } = await get_all_category_rule();
+    allCategoryRules = data || [];
+    const name = document.getElementById("search-name").value || "";
+    const desc = document.getElementById("search-description").value || "";
+    renderCategoryRules(name, desc);
+} catch (error) {
+    if (error.response && error.response.status === 404 ||error.status === 404) {
+        container.innerHTML = `<p class="text-warning">Không có dữ liệu.</p>`;
+    } else {
         container.innerHTML = `<p class="text-danger">Lỗi tải dữ liệu: ${error.message}</p>`;
     }
+}
+
 }
 
 window.deleteCategoryRule = async function (id) {
