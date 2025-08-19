@@ -13,7 +13,10 @@
         <div class="mb-3">
             <i class="mdi mdi-shield-account text-info mr-2"></i>
             <strong>Tên Role:</strong>
-            <span id="role-name" class="font-weight-bold text-dark"></span>
+            <span id="role-name" class="font-weight-bold text-dark">Admin</span>
+
+            <!-- Nút edit -->
+            <button id="edit-role-btn" class="btn btn-sm btn-outline-primary ml-2">Thay đổi</button>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-2">

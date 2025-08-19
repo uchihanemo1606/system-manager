@@ -41,7 +41,8 @@ export async function get_all_category_rule() {
         headers: defaultHeaders(),
     });
     const result = await res.json();
-    if (!res.ok) throw new Error(result.message || "Lỗi lấy danh sách loại quy chế");
+    if (!res.ok)
+        res.status === 404;
     return result;
 }
 export async function get_category_by_id(id) {

@@ -80,12 +80,9 @@ function renderUsers(users) {
                         <span class="badge badge-secondary">Chưa có dữ liệu</span>
                     </div>`
                 }</td>
-                    <td class="text-center">${(u.roles || [])
-                    .map(
-                        (r) =>
-                            `<a href="#" class="badge badge-soft-primary font-size-11 m-1">${r}</a>`
-                    )
-                    .join("")}</td>
+
+
+
                     <td class="text-center">${u.email ?? 0}</td>
                     <td class="text-right">
                         <ul class="list-inline font-size-20 contact-links mb-0">
@@ -96,6 +93,12 @@ function renderUsers(users) {
         })
         .join("");
 }
+// <td class="text-center">${(u.roles || [])
+// .map(
+//     (r) =>
+//         `<a href="#" class="badge badge-soft-primary font-size-11 m-1">${r}</a>`
+// )
+// .join("")}</td>
 async function loadRolesForFilter() {
     if (hasLoadedRolesForFilter) return;
     hasLoadedRolesForFilter = true;

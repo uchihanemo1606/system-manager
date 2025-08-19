@@ -115,7 +115,7 @@ class HardwareController extends Controller
 
                 $allowedIps = DB::table('hardware_permissions')
                     ->where('user_name', $user->username)
-                    ->where('permissions_name', 'hardware.get')
+                    ->where('permissions_name', 'xem phần cứng')
                     ->pluck('hardware_ip');
 
                 Log::info('Found allowed IPs for user', ['username' => $user->username, 'allowedIps' => $allowedIps->toArray()]);
@@ -417,22 +417,20 @@ class HardwareController extends Controller
             $query = hardwareModel::where('is_delete', false);
             $deletedQuery = hardwareModel::where('is_delete', true);
 
-            if ($fromDate && $toDate) {
-                $query->whereBetween('created_at', [$fromDate, $toDate]);
-                $deletedQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            // Áp dụng lọc theo khoảng thời gian
+            if ($fromDate) {
+                $query->where('created_at', '>=', $fromDate);
+                $deletedQuery->where('created_at', '>=', $fromDate);
+            }
+
+            if ($toDate) {
+                $query->where('created_at', '<=', $toDate);
+                $deletedQuery->where('created_at', '<=', $toDate);
             }
 
             $hardware = $query->get();
-            $deletedHardwareCount = $deletedQuery->count();
-
-            if ($hardware->isEmpty()) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'No hardware found',
-                    'data' => [],
-                    'deletedCount' => $deletedHardwareCount
-                ], 200);
-            }
+            $deletedHardware = $deletedQuery->get();
+            $deletedHardwareCount = $deletedHardware->count();
 
             $totalHardware = $hardware->count();
             $virtualHardware = $hardware->where('isVirtualServer', true);
@@ -449,17 +447,15 @@ class HardwareController extends Controller
                 return $carry + $this->convertToBytes($item->hdd);
             }, 0);
 
-            // Tổng HDD máy ảo
             $virtualHddBytes = $virtualHardware->reduce(function ($carry, $item) {
                 return $carry + $this->convertToBytes($item->hdd);
             }, 0);
 
-            // Tổng HDD máy vật lý
             $physicalHddBytes = $physicalHardware->reduce(function ($carry, $item) {
                 return $carry + $this->convertToBytes($item->hdd);
             }, 0);
 
-            // Tổng RAM (dựa trên field `ram`, giả sử cũng lưu như hdd: "8 GB", "16 MB", etc.)
+            // Tổng RAM
             $virtualRamBytes = $virtualHardware->reduce(function ($carry, $item) {
                 return $carry + $this->convertToBytes($item->ram);
             }, 0);
@@ -470,8 +466,37 @@ class HardwareController extends Controller
 
             $totalRamBytes = $virtualRamBytes + $physicalRamBytes;
 
+            // Tính các giá trị "deleted"
+            $deletedVirtualHardware = $deletedHardware->where('isVirtualServer', true);
+            $deletedPhysicalHardware = $deletedHardware->where('isVirtualServer', false);
+
+            $virtualCountDeleted = $deletedVirtualHardware->count();
+            $physicalCountDeleted = $deletedPhysicalHardware->count();
+
+            $virtualHddDeletedBytes = $deletedVirtualHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->hdd);
+            }, 0);
+
+            $physicalHddDeletedBytes = $deletedPhysicalHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->hdd);
+            }, 0);
+
+            $virtualRamDeletedBytes = $deletedVirtualHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->ram);
+            }, 0);
+
+            $physicalRamDeletedBytes = $deletedPhysicalHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->ram);
+            }, 0);
+
+            $totalHardwareAllTime = hardwareModel::where('is_delete', false)->count();
+            $deletedHardwareAllTime = hardwareModel::where('is_delete', true)->count();
+
             return response()->json([
                 'status' => 'success',
+                'total_hardware_all_time' => $totalHardwareAllTime,
+                'deleted_hardware_all_time' => $deletedHardwareAllTime,
+
                 'totalHardware' => $totalHardware,
                 'virtualCount' => $virtualCount,
                 'physicalCount' => $physicalCount,
@@ -480,11 +505,21 @@ class HardwareController extends Controller
 
                 'virtualHdd' => $this->formatBytes($virtualHddBytes),
                 'physicalHdd' => $this->formatBytes($physicalHddBytes),
-
                 'virtualRam' => $this->formatBytes($virtualRamBytes),
                 'physicalRam' => $this->formatBytes($physicalRamBytes),
                 'totalRam' => $this->formatBytes($totalRamBytes),
 
+                // Deleted
+                'virtualCountDeleted' => $virtualCountDeleted,
+                'physicalCountDeleted' => $physicalCountDeleted,
+                'virtualHddDeleted' => $this->formatBytes($virtualHddDeletedBytes),
+                'totalActiveHddDeleted' => $this->formatBytes($virtualHddDeletedBytes + $physicalHddDeletedBytes),
+                'totalRamDeleted' => $this->formatBytes($virtualRamDeletedBytes + $physicalRamDeletedBytes),
+                'physicalHddDeleted' => $this->formatBytes($physicalHddDeletedBytes),
+                'virtualRamDeleted' => $this->formatBytes($virtualRamDeletedBytes),
+                'physicalRamDeleted' => $this->formatBytes($physicalRamDeletedBytes),
+
+                // 'hardware' => $hardware,
                 'deletedCount' => $deletedHardwareCount,
             ]);
 
@@ -494,6 +529,7 @@ class HardwareController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Could not get hardware analytics. ' . $e->getMessage()], 500);
         }
     }
+
     public function getAllHardwareConnectDomain()
     {
         try {
@@ -505,7 +541,7 @@ class HardwareController extends Controller
             // Truy vấn lấy danh sách phần cứng chưa bị xóa
             $hardwareList = hardwareModel::query()
                 ->where('is_delete', false)
-                ->select('ip', 'dbname', 'dbversion', 'OS', 'OSver','is_delete')
+                ->select('ip', 'dbname', 'dbversion', 'OS', 'OSver', 'is_delete')
                 ->get();
 
 
@@ -516,14 +552,14 @@ class HardwareController extends Controller
                     'total' => 0,
                     'data' => []
                 ], 200);
-            } 
+            }
 
             Log::info('Successfully retrieved hardware', [
-                'username' => $user->username,  
+                'username' => $user->username,
             ]);
 
             return response()->json([
-                'status' => 'success', 
+                'status' => 'success',
                 'data' => $hardwareList
             ]);
         } catch (TokenExpiredException $e) {
