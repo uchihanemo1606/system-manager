@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\logModel;
 use App\Models\softwareFileModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -380,7 +381,29 @@ class SoftwareController extends Controller
             $to = $request->query('to');
 
             $fromDate = $from ? Carbon::parse($from)->startOfSecond() : null;
-            $toDate = $to ? Carbon::parse($to)->endOfSecond() : null;
+            $toDate = $to ? Carbon::parse($to)->endOfDay() : null;
+            $keywords = [
+                'updated software',
+                'software updated',
+                'update software',
+                'software update',
+                'updatedsoftware',
+                'updatedSoftware',
+                'cập nhật phần mềm',
+                'phần mềm được cập nhật',
+            ];
+            $updateCount = logModel::where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->orWhere('message', 'like', "%{$word}%");
+                }
+            })
+                ->when($fromDate, function ($q) use ($fromDate) {
+                    $q->where('created_at', '>=', $fromDate);
+                })
+                ->when($toDate, function ($q) use ($toDate) {
+                    $q->where('created_at', '<=', $toDate);
+                })
+                ->count();
 
             // Đếm phần mềm chưa xóa (trong khoảng thời gian nếu có)
             $totalSoftwareQuery = softwareModel::where('is_delete', false);
@@ -389,10 +412,17 @@ class SoftwareController extends Controller
             }
             $totalSoftware = $totalSoftwareQuery->count();
 
+
+            $totalSoftwareCreatedQuery = softwareModel::query();
+            if ($fromDate && $toDate) {
+                $totalSoftwareCreatedQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            }
+            $totalSoftwareCreated = $totalSoftwareCreatedQuery->count();
+            $softwareCreatedIds = $totalSoftwareCreatedQuery->pluck('id');
             // Đếm phần mềm đã xóa (trong khoảng thời gian nếu có)
             $deletedSoftwareQuery = softwareModel::where('is_delete', true);
             if ($fromDate && $toDate) {
-                $deletedSoftwareQuery->whereBetween('created_at', [$fromDate, $toDate]);
+                $deletedSoftwareQuery->whereBetween('updated_at', [$fromDate, $toDate]);
             }
             $deletedSoftware = $deletedSoftwareQuery->count();
 
@@ -431,16 +461,32 @@ class SoftwareController extends Controller
                     $deletedStorageSize += filesize($path);
                 }
             }
+            // Lấy file thuộc những software vừa tạo
+            $createdSoftwareFilesQuery = softwareFileModel::query()
+                ->whereIn('software_id', $softwareCreatedIds);
+
+            $createdSoftwareFiles = $createdSoftwareFilesQuery->get();
+
+            $createdStorageSize = 0;
+            foreach ($createdSoftwareFiles as $file) {
+                $path = storage_path('app/public/' . $file->file_path);
+                if (file_exists($path)) {
+                    $createdStorageSize += filesize($path);
+                }
+            }
             $totalSoftwareAllTime = softwareModel::where('is_delete', false)->count();
             $deletedSoftwareAllTime = softwareModel::where('is_delete', true)->count();
 
             return response()->json([
                 'status' => 'success',
                 'data' => [
+                    'updateCount' => $updateCount, 
                     'total_software_all_time' => $totalSoftwareAllTime,
                     'deleted_software_all_time' => $deletedSoftwareAllTime,
-
+                    'created_storage_size_bytes' => $createdStorageSize,
+                    'created_storage_size_bytes_readable' => $this->formatBytes($createdStorageSize),
                     'total_software' => $totalSoftware,
+                    'total_software_created' => $totalSoftwareCreated,
                     'deleted_software' => $deletedSoftware,
                     'storage_size_bytes' => $totalStorageSize,
                     'storage_size_readable' => $this->formatBytes($totalStorageSize),

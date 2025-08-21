@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\logModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -415,38 +416,77 @@ class HardwareController extends Controller
             $from = $request->query('from');
             $to = $request->query('to');
             $fromDate = $from ? Carbon::parse($from)->startOfSecond() : null;
-            $toDate = $to ? Carbon::parse($to)->endOfSecond() : null;
+            $toDate = $to ? Carbon::parse($to)->endOfDay() : null;
 
             $query = hardwareModel::where('is_delete', false);
+            $queryCreated = hardwareModel::query();
+
+            $keywords = [
+                'updated hardware',
+                'hardware updated',
+                'update hardware',
+                'hardware update',
+                'updatedhardware',
+                'updatedHardware',
+                'cập nhật phần cứng',
+                'phần cứng được cập nhật',
+            ];
+            $updateCount = logModel::where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->orWhere('message', 'like', "%{$word}%");
+                }
+            })
+                ->when($fromDate, function ($q) use ($fromDate) {
+                    $q->where('created_at', '>=', $fromDate);
+                })
+                ->when($toDate, function ($q) use ($toDate) {
+                    $q->where('created_at', '<=', $toDate);
+                })
+                ->count();
+
             $deletedQuery = hardwareModel::where('is_delete', true);
 
             // Áp dụng lọc theo khoảng thời gian
             if ($fromDate) {
                 $query->where('created_at', '>=', $fromDate);
-                $deletedQuery->where('created_at', '>=', $fromDate);
+                $queryCreated->where('created_at', '>=', $fromDate);
+                $deletedQuery->where('updated_at', '>=', $fromDate);
             }
 
             if ($toDate) {
                 $query->where('created_at', '<=', $toDate);
-                $deletedQuery->where('created_at', '<=', $toDate);
+                $queryCreated->where('created_at', '<=', $toDate);
+                $deletedQuery->where('updated_at', '<=', $toDate);
             }
 
             $hardware = $query->get();
+            $hardwareCreated = $queryCreated->get();
             $deletedHardware = $deletedQuery->get();
+
+            // dd($query->toSql(), $deletedQuery->toSql(), $query->getBindings(), $deletedQuery->getBindings());
             $deletedHardwareCount = $deletedHardware->count();
 
             $totalHardware = $hardware->count();
             $virtualHardware = $hardware->where('isVirtualServer', true);
             $physicalHardware = $hardware->where('isVirtualServer', false);
 
+            $virtualCreated = $hardwareCreated->where('isVirtualServer', true);
+            $physicalCreated = $hardwareCreated->where('isVirtualServer', false);
+
             $virtualCount = $virtualHardware->count();
             $physicalCount = $physicalHardware->count();
+            $virtualCreatedCount = $virtualCreated->count();
+            $physicalCreatedCount = $physicalCreated->count();
 
             $activeHardware = $hardware->where('is_active', true);
+            $activeCreated = $hardwareCreated->where('is_active', true);
             $activeCount = $activeHardware->count();
 
             // Tổng HDD
             $totalActiveHddBytes = $activeHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->hdd);
+            }, 0);
+            $totalActiveHddCreatedBytes = $activeCreated->reduce(function ($carry, $item) {
                 return $carry + $this->convertToBytes($item->hdd);
             }, 0);
 
@@ -454,20 +494,31 @@ class HardwareController extends Controller
                 return $carry + $this->convertToBytes($item->hdd);
             }, 0);
 
-            $physicalHddBytes = $physicalHardware->reduce(function ($carry, $item) {
+            $virtualHddCreatedBytes = $virtualCreated->reduce(function ($carry, $item) {
                 return $carry + $this->convertToBytes($item->hdd);
             }, 0);
 
+            $physicalHddBytes = $physicalHardware->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->hdd);
+            }, 0);
+            $physicalHddCreatedBytes = $physicalCreated->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->hdd);
+            }, 0);
             // Tổng RAM
             $virtualRamBytes = $virtualHardware->reduce(function ($carry, $item) {
                 return $carry + $this->convertToBytes($item->ram);
             }, 0);
-
+            $virtualRamCreatedBytes = $virtualCreated->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->ram);
+            }, 0);
             $physicalRamBytes = $physicalHardware->reduce(function ($carry, $item) {
                 return $carry + $this->convertToBytes($item->ram);
             }, 0);
-
+            $physicalRamCreatedBytes = $physicalCreated->reduce(function ($carry, $item) {
+                return $carry + $this->convertToBytes($item->ram);
+            }, 0);
             $totalRamBytes = $virtualRamBytes + $physicalRamBytes;
+            $totalRamCreatedBytes = $virtualRamCreatedBytes + $physicalRamCreatedBytes;
 
             // Tính các giá trị "deleted"
             $deletedVirtualHardware = $deletedHardware->where('isVirtualServer', true);
@@ -497,21 +548,29 @@ class HardwareController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'total_hardware_all_time' => $totalHardwareAllTime,
-                'deleted_hardware_all_time' => $deletedHardwareAllTime,
+                // 'total_hardware_all_time' => $totalHardwareAllTime,
+                // 'deleted_hardware_all_time' => $deletedHardwareAllTime, 
+                // 'totalHardware' => $totalHardware, 
+                // 'activeCount' => $activeCount, 
+                'updateCount' => $updateCount,
 
-                'totalHardware' => $totalHardware,
+                'virtualCreatedCount' => $virtualCreatedCount,
+                'physicalCreatedCount' => $physicalCreatedCount,
+                'virtualHddCreated' => $this->formatBytes($virtualHddCreatedBytes),
+                'totalActiveHddCreated' => $this->formatBytes($totalActiveHddCreatedBytes),
+                'totalRamCreated' => $this->formatBytes($totalRamCreatedBytes), //sau
+                'physicalHddCreated' => $this->formatBytes($physicalHddCreatedBytes),
+                'virtualRamCreated' => $this->formatBytes($virtualRamCreatedBytes),
+                'physicalRamCreated' => $this->formatBytes($physicalRamCreatedBytes),
+
                 'virtualCount' => $virtualCount,
                 'physicalCount' => $physicalCount,
-                'activeCount' => $activeCount,
-                'totalActiveHdd' => $this->formatBytes($totalActiveHddBytes),
-
                 'virtualHdd' => $this->formatBytes($virtualHddBytes),
+                'totalActiveHdd' => $this->formatBytes($totalActiveHddBytes),
+                'totalRam' => $this->formatBytes($totalRamBytes),
                 'physicalHdd' => $this->formatBytes($physicalHddBytes),
                 'virtualRam' => $this->formatBytes($virtualRamBytes),
                 'physicalRam' => $this->formatBytes($physicalRamBytes),
-                'totalRam' => $this->formatBytes($totalRamBytes),
-
                 // Deleted
                 'virtualCountDeleted' => $virtualCountDeleted,
                 'physicalCountDeleted' => $physicalCountDeleted,
