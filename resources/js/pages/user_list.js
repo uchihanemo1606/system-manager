@@ -1,4 +1,4 @@
-import { get_all_user } from "../api/user";
+import { deleteUser, get_all_user, hideUser } from "../api/user";
 import { get_all_role } from "../api/role";
 import { renderPagination } from "../component/log/log_utils";
 let hasLoadedRolesForFilter = false;
@@ -38,12 +38,22 @@ function renderUsers(users) {
     tbody.innerHTML = users
         .map((u) => {
             let actions = "";
-            if (hasPermission("user.update")) {
-                actions += `<li class="list-inline-item px-2"><a href="#"><a href="#"><i class="bx bx-show"></i></a></li>`;
-            }
             if (hasPermission("user.delete")) {
-                actions += `<li class="list-inline-item px-2"><a href="#"><i class="bx bx-trash"></i></a></li>`;
+                actions += `<li class="list-inline-item px-2">
+                    <a href="#" onclick="handleDeleteUser('${u.username}')">
+                        <i class="bx bx-trash"></i>
+                    </a>
+                </li>`;
             }
+
+            if (hasPermission("user.update")) {
+                actions += `<li class="list-inline-item px-2">
+                    <a href="#" onclick="handleHideUser('${u.username}')">
+                        <i class="bx bx-hide"></i>
+                    </a>
+                </li>`;
+            }
+
             if (hasPermission("user.update")) {
                 actions += `
                 <li class="list-inline-item px-2"><a href="#"><i class="bx bx-wrench" 
@@ -140,6 +150,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadUsers();
     await loadRolesForFilter();
 });
+window.handleDeleteUser = async function (username) {
+    if (!confirm(`Bạn có chắc muốn xóa tài khoản ${username}?`)) return;
+    try {
+        const res = await deleteUser(username);
+        alert(res.message);
+        await loadUsers(); // reload danh sách
+    } catch (err) {
+        alert(err.message);
+    }
+};
+
+window.handleHideUser = async function (username) {
+    if (!confirm(`Bạn có chắc muốn ẩn tài khoản ${username}?`)) return;
+    try {
+        const res = await hideUser(username);
+        alert(res.message);
+        await loadUsers(); // reload danh sách
+    } catch (err) {
+        alert(err.message);
+    }
+};
 
 window.initUserCreateModal = async function () {
     const container = document.getElementById("role-checkboxes");

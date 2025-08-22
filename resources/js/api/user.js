@@ -1,4 +1,4 @@
-import { defaultHeaders, apiFetch } from "../config/api_config"; 
+import { defaultHeaders, apiFetch } from "../config/api_config";
 export const get_profile = async () => {
     const res = await apiFetch("api/getuser", {
         headers: defaultHeaders(),
@@ -79,6 +79,56 @@ export async function chane_password(data) {
 
     return result;
 }
+export async function hideUser(username) {
+    if (!username) throw new Error("Username is required to hide user");
+
+    const res = await apiFetch("/api/hideUser", {
+        method: "PATCH", // hoặc POST tùy API
+        headers: defaultHeaders(),
+        body: JSON.stringify({ username }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+        let errorMessages = result.message || "Lỗi ẩn người dùng";
+        if (result?.errors) {
+            const detailErrors = Object.entries(result.errors)
+                .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+                .join("\n");
+            errorMessages += `\n${detailErrors}`;
+        }
+        throw new Error(errorMessages);
+    }
+
+    return result;
+}
+
+export async function deleteUser(username) {
+    if (!username) throw new Error("Username is required to delete user");
+
+    const res = await apiFetch("/api/deleteUser", {
+        method: "PATCH", // API của bạn dùng PATCH hoặc POST
+        headers: defaultHeaders(),
+        body: JSON.stringify({ username }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+        let errorMessages = result.message || "Lỗi xóa người dùng";
+        if (result?.errors) {
+            const detailErrors = Object.entries(result.errors)
+                .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+                .join("\n");
+            errorMessages += `\n${detailErrors}`;
+        }
+        throw new Error(errorMessages);
+    }
+
+    return result;
+}
+
 
 export async function update_profile(data) {
     const res = await apiFetch("/api/updateuser", {

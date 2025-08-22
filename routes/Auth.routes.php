@@ -23,7 +23,7 @@ Route::patch('/changepassword', [AuthController::class, 'changePassword']);
 route::get('/getallusers', [UserController::class, 'getAllUsers'])->middleware('check.permission')->name('user.list');
 route::get('/getuserbyname', [UserController::class, 'getUserByName']);
 route::get('/getuserbyusername', [UserController::class,'getUserByUsername']);
-route::delete('/deleteuser', [AuthController::class, 'deleteUser']);
+// route::delete('/deleteuser', [AuthController::class, 'deleteUser']);
 route::get('/sendmail', [MailController::class, 'sendEmail']);
 
 Route::get('/getmypermissions', [PermissionController::class, 'getMyPermissions']);
@@ -40,6 +40,6 @@ Route::patch('/updateavataruser', [UserController::class, 'updateAvatarUser']);
 Route::patch('/deleteUser', [AuthController::class, 'deleteUser'])
     ->middleware('check.permission')
     ->name('user.delete');
-Route::patch('/hideUser', [AuthController::class, 'hideUser'])
+Route::patch('/hideUser', [AuthController::class, 'hiddenUser'])
     ->middleware('check.permission')
     ->name('user.delete');
