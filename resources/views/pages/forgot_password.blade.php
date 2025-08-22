@@ -1,5 +1,5 @@
 <head>
-    <title>Quên mật khẩu</title>
+    <title>Đổi mật khẩu</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
 </head>

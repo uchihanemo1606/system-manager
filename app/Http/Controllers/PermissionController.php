@@ -11,6 +11,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Services\PermissionService;
 
 
 
@@ -290,7 +291,7 @@ class PermissionController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'permissions_name' => 'required|string|max:255',
+                'permissions_name' => 'required|string|max:255|unique:permissions',
             ]);
 
             if ($validator->fails()) {
@@ -305,8 +306,7 @@ class PermissionController extends Controller
 
             // Map resource và action như cũ...
             $resourceMap = [
-                'phần cứng' => 'hardware',
-                'hardware' => 'hardware',
+
                 'phần mềm' => 'software',
                 'tệp tin phần mềm' => 'softwarefile',
                 'softwarefile' => 'softwarefile',
@@ -363,6 +363,8 @@ class PermissionController extends Controller
             $resource = '';
             $action = '';
 
+
+
             foreach ($resourceMap as $vi => $en) {
                 if (str_contains($input, $vi)) {
                     $resource = $en;
@@ -378,8 +380,10 @@ class PermissionController extends Controller
                 }
             }
 
-            if (!$resource) $resource = 'other';
-            if (!$action) $action = 'other';
+            if (!$resource)
+                $resource = 'other';
+            if (!$action)
+                $action = 'other';
 
             $permissions_name = $resource . '.' . $action;
 
@@ -412,7 +416,7 @@ class PermissionController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'permission_name' => $defaultPermission,
-                'message' => "user $user->fullName has been create new permission: ' . $defaultPermission",
+                'message' => "user $user->fullName đã tạo quyền mới là {$defaultPermission}",
             ]);
 
             return response()->json([
@@ -548,7 +552,7 @@ class PermissionController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'permission_name' => $name,
-                'message' => "User $user->fullName updated permission from '{$oldName}' => '{$newName}'",
+                'message' => "User $user->fullName đã cập nhật quyền {$oldName} sang {$newName}",
             ]);
 
             return response()->json([
@@ -665,7 +669,7 @@ class PermissionController extends Controller
 
             // Kiểm tra tồn tại trong permissions
             $permission = DB::table('permissions')->where('permissions_name', $permissionName)->first();
-            
+
             if (!$permission) {
                 return response()->json([
                     'status' => 'error',
@@ -682,7 +686,7 @@ class PermissionController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'permission_name' => $permissionName,
-                'message' => "User $user->fullName deleted permission: {$permissionName}",
+                'message' => "User $user->fullName đã xóa quyền {$permissionName}",
             ]);
 
             return response()->json([
@@ -1347,8 +1351,9 @@ class PermissionController extends Controller
             $to = $request->query('to');     // dạng: 05/06/2024
 
             // Hàm chuyển đổi d/m/Y sang Y-m-d
-            $convertDate = function($str) {
-                if (!$str) return null;
+            $convertDate = function ($str) {
+                if (!$str)
+                    return null;
                 $dt = \DateTime::createFromFormat('d/m/Y', $str);
                 return $dt ? $dt->format('Y-m-d') : null;
             };
@@ -1438,7 +1443,7 @@ class PermissionController extends Controller
                 'message' => 'Could not retrieve types. ' . $e->getMessage()
             ], 500);
         }
-   }
+    }
 
     public function getMyPermissions(Request $request)
     {

@@ -11,10 +11,9 @@ class softwarePermissionModel extends Model
         'software_id',
         'create_by',
         'user_name',
-        'user_createdby',
-        'assigned_at',
+        'create_by',
         'permissions_name',
-
+        'assigned_at',
     ];
     public function software()
     {
@@ -24,11 +23,14 @@ class softwarePermissionModel extends Model
     {
         return $this->belongsTo(UserModel::class, 'user_name', 'username');
     }
+    public function permission(){
+        return $this->belongsTo('App\Models\PermissionModel', 'permissions_name', 'permissions_name');
+    }
     protected function casts(): array
     {
         return [
-            'assigned_at' => 'datetime',
             'created_at' => 'datetime',
+            'assigned_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
     }

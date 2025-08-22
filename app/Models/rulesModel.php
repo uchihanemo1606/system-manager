@@ -11,7 +11,7 @@ class rulesModel extends Model
     protected $fillable = [
         'name',
         'description',
-        'category_id',
+        'category_rule_id',
         'file_url',
         'username',
     ];

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('version', 100);
             $table->string('user_createby', 100);
             $table->boolean('is_delete')->default(false);
+            $table->boolean('is_active')->default(true);
             $table->text('description')->nullable();
             $table->foreign('user_createby')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();

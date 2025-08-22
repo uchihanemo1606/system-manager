@@ -53,4 +53,40 @@ class PermissionService
 
         return $requiredPermission;
     }
+
+    /**
+     * Xóa cache của quyền người dùng
+     */
+    public function clearUserPermissionsCache($username)
+    {
+        $cacheKey = 'user_permissions_' . $username;
+        Cache::forget($cacheKey);
+    }
+
+    /**
+     * Xóa cache của route permission
+     */
+    public function clearRoutePermissionCache($routeName)
+    {
+        $cacheKey = 'route_override_permission_' . $routeName;
+        Cache::forget($cacheKey);
+    }
+
+    /**
+     * Xóa tất cả cache liên quan đến quyền
+     */
+    public function clearAllPermissionCache()
+    {
+        // Xóa cache của tất cả người dùng
+        $users = DB::table('users')->pluck('username');
+        foreach ($users as $username) {
+            $this->clearUserPermissionsCache($username);
+        }
+
+        // Xóa cache của tất cả route
+        $routes = DB::table('route_permission')->pluck('route_name');
+        foreach ($routes as $routeName) {
+            $this->clearRoutePermissionCache($routeName);
+        }
+    }
 }

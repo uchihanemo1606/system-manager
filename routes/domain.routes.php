@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\domainController;;
+use App\Http\Controllers\domainController;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use app\Http\Middleware\CheckPermission;

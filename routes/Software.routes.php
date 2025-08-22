@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Routing\Router;
@@ -17,24 +16,12 @@ Route::get('/getallsoftware',[SoftwareController::class, 'getAllSoftware'])
 Route::patch('/updatesoftware/{id}', [SoftwareController::class, 'updateSoftware'])
     ->middleware('check.permission')
     ->name('software.edit');
-// Route::delete('/deleteSoftware', [SoftwareController::class, 'deleteSoftware'])
-//     ->middleware('check.permission')
-//     ->name('software.delete');
-// Route::get('/getsoftwarebyname', [SoftwareController::class, 'getSoftwareByName'])
-//     ->middleware('check.permission') 
-//     ->name('software.get');
-Route::get('/getsoftwarebyid', [SoftwareController::class, 'getSoftwareById'])
-    ->middleware('check.permission')
-    ->name('software.detail');  
-
 Route::delete('/deleteSoftware', [SoftwareController::class,'deleteSoftware'])
     ->middleware('check.permission')
     ->name('software.delete');
 Route::get('/getsoftwarebyname', [SoftwareController::class, 'getSoftwareByName'])
     ->middleware('check.permission')
-    ->name('software.list'); 
-
-
+    ->name('software.list');
 Route::get('/getallsoftwareactive', [SoftwareController::class, 'getSoftwareActive'])
     ->middleware('check.permission')
     ->name('software.list');
@@ -63,6 +50,9 @@ Route::get('/getallsoftwarefilebysoftwareid/{getAllSoftwareFileBySoftwareId}', [
 Route::get('/getallsoftwarefile', [softwarefileController::class, 'getAllSoftwareFile'])
     ->middleware('check.permission')
     ->name('software.list');
+Route::get('/getsoftwarebyid', [SoftwareController::class, 'getSoftwareById'])
+    ->middleware('check.permission')
+    ->name('software.detail');
 
     // =======================================================================================SOFTWARE FILE ROUTE============================================================================================================================
     

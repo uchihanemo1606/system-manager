@@ -72,7 +72,6 @@ class logModel extends Model
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'is_delete' => 'boolean',
             'assigned_at' => 'datetime',
         ];
     }

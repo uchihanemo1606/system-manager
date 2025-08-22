@@ -108,7 +108,7 @@ class rolepermissionController extends Controller
                     'username' => $user->username,
                     'role_name' => $request->input('role_name'),
                     'permission_name' => $request->input('permission_name'),
-                    'message' => "User {$user->fullName} created role permission '{$request->input('role_name')}' with permission '{$request->input('permission_name')}'.",
+                    'message' => "User {$user->fullName} đã cấp quyền cho vai trò {$request->input('role_name')} với quyền {$request->input('permission_name')}.",
                     'is_delete' => false
                 ]);
 
@@ -192,7 +192,7 @@ class rolepermissionController extends Controller
                 'username' => $user->username,
                 'role_name' => $request->input('role_name'),
                 'permission_name' => $newPermission,
-                'message' => "User {$user->fullName} updated role permission '{$request->input('role_name')}': $changeString",
+                'message' => "User {$user->fullName} đã cập nhật quyền cho vai trò {$request->input('role_name')} từ {$oldPermission} sang {$newPermission}.",
                 'is_delete' => false
             ]);
 
@@ -253,7 +253,7 @@ class rolepermissionController extends Controller
                     'username' => $user->username,
                     'role_name' => $request->input('role_name'),
                     'permission_name' => $request->input('permission_name'),
-                    'message' => "User {$user->fullName} deleted role permission '{$request->input('role_name')}' with permission '{$request->input('permission_name')}'.",
+                    'message' => "User {$user->fullName} đã xóa quyền cho vai trò {$request->input('role_name')} với quyền {$request->input('permission_name')}.",
                     'is_delete' => true
                 ]);
 

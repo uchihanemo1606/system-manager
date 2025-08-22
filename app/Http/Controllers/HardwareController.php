@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\hardwareModel;
 use App\Models\hardwarePemisssionModel;
@@ -24,63 +23,61 @@ use Carbon\Carbon;
 class HardwareController extends Controller
 {
     public function createHardware(Request $request)
-    {
-
-        try {
+        {
+            try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            // Validate the request data
-            $request->validate([
-                'ip' => 'required|string|max:255',
-                'dbname' => 'required|string|max:100|exists:database,dbname',
-                'dbversion' => 'required|string|max:100|exists:database_version,version',
-                'isVirtualServer' => 'required|boolean',
-                'OS' => 'required|string|max:100|exists:os,name',
-                'OSver' => 'required|string|max:100|exists:os_version,version',
-                'hdd' => 'required|string|max:100',
-                'ram' => 'required|string|max:100',
-                'services' => 'nullable|string|max:1000',
-                'created_by' => $user->username,
+        // Validate the request data
+        $request->validate([
+            'ip' => 'required|string|max:255',
+            'dbname' => 'required|string|max:100',
+            'dbversion' => 'required|string|max:100',
+            'isVirtualServer' => 'required|boolean',
+            'OS' => 'required|string|max:100',
+            'OSver' => 'required|string|max:100',
+            'hdd' => 'required|string|max:100',
+            'ram'=> 'required|string|max:100',
+            'services' => 'nullable|string|max:1000',
+            'created_by'=> $user->username,
+        ]);
+
+        // Create a new hardware record
+        $hardware = new hardwareModel();
+        $hardware->ip = $request->input('ip');
+        $hardware->dbname = $request->input('dbname');
+        $hardware->dbversion = $request->input('dbversion');
+        $hardware->isVirtualServer = $request->input('isVirtualServer');
+        $hardware->OS = $request->input('OS');
+        $hardware->OSver = $request->input('OSver');
+        $hardware->hdd = $request->input('hdd');
+        $hardware->ram = $request->input('ram');
+        $hardware->services = $request->input('services');
+        $hardware->created_by = $user->username;
+        // Save the hardware record
+        if ($hardware->save()) {
+
+            $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xóa phần cứng','thêm người dùng quản lý phần cứng','sửa người dùng quản lý phần cứng','xóa người dùng quản lý phần cứng'];
+            foreach ($fullPermissions as $permission) {
+                hardwarePemisssionModel::create([
+                    'hardware_ip' => $hardware->ip,
+                    'user_name' => $user->username,
+                    'permissions_name' => $permission,
+                    'user_createby' => $user->username,
+                    'assigned_at' => now(),
+                ]);
+            }
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'hardware_ip' => $hardware->ip,
+                'message' => "User {$user->fullName} đã tạo phần cứng mới có IP là  {$hardware->ip}",
             ]);
 
-            // Create a new hardware record
-            $hardware = new hardwareModel();
-            $hardware->ip = $request->input('ip');
-            $hardware->dbname = $request->input('dbname');
-            $hardware->dbversion = $request->input('dbversion');
-            $hardware->isVirtualServer = $request->input('isVirtualServer');
-            $hardware->OS = $request->input('OS');
-            $hardware->OSver = $request->input('OSver');
-            $hardware->hdd = $request->input('hdd');
-            $hardware->ram = $request->input('ram');
-            $hardware->services = $request->input('services');
-            $hardware->created_by = $user->username;
-
-            // Save the hardware record
-            if ($hardware->save()) {
-
-                $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xoá phần cứng', 'xem danh sách người dùng quản lý phần cứng', 'thêm người dùng quản lý phần cứng', 'sửa người dùng quản lý phần cứng', 'xoá người dùng quản lý phần cứng'];
-                foreach ($fullPermissions as $permission) {
-                    hardwarePemisssionModel::create([
-                        'hardware_ip' => $hardware->ip,
-                        'user_name' => $user->username,
-                        'permissions_name' => $permission,
-                        'user_createby' => $user->username,
-                        'assigned_at' => now(),
-                    ]);
-                }
-                LogController::createLogAuto([
-                    'username' => $user->username,
-                    'hardware_ip' => $hardware->ip,
-                    'message' => "User {$user->fullName} Created new hardware with IP {$hardware->ip}",
-                ]);
                 return response()->json(['message' => 'Hardware created successfully', 'data' => $hardware], 201);
             } else {
                 return response()->json(['message' => 'Failed to create hardware'], 500);
             }
-
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
@@ -91,7 +88,7 @@ class HardwareController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Could not create hardware. ' . $e->getMessage()], 500);
         }
 
-    } ///áhdakjsdajkgsdjhavsd
+    }
 
     public function getAllHardware()
     {
@@ -246,7 +243,7 @@ class HardwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'hardware_ip' => $hardware->ip,
-                'message' => "User {$user->fullName} updated hardware with IP {$hardware->ip}. Changes: $changeString",
+                'message' => "User {$user->fullName} đã sửa phần cứng có IP là  {$hardware->ip}. Changes: $changeString",
             ]);
 
             return response()->json(['message' => 'Hardware updated successfully', 'data' => $hardware]);
@@ -290,7 +287,7 @@ class HardwareController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'hardware_ip' => $hardware->ip,
-                'message' => "User {$user->fullName} marked hardware with IP {$hardware->ip} as deleted",
+                'message' => "User {$user->fullName} đã đánh dấu phần cứng có IP là  {$hardware->ip} là xóa",
             ]);
 
             return response()->json(['message' => 'Hardware marked as deleted successfully']);

@@ -65,7 +65,6 @@ class AuthController extends Controller
                     ], 404);
                 }
             }
-
             $request->validate([
                 'username' => 'required|string|max:255|unique:users',
                 'password' => 'required|string|min:8',

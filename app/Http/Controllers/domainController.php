@@ -47,7 +47,7 @@ class domainController extends Controller
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'link_domain' => $domain->link,
-                    'message' => " user {$user->fullName} created domain '{$domain->name}'.",
+                    'message' => " user {$user->fullName} đã tạo domain mới là {$domain->name}.",
                     'is_delete' => false
                 ]);
                 return response()->json(['message' => 'Domain created successfully', 'data' => $domain], 201);
@@ -89,58 +89,59 @@ class domainController extends Controller
 
     public function updateDomain(Request $request)
     {
-        try {
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['message' => 'Please login to use this function'], 401);
-            }
+    try {
+        if (!$user = JWTAuth::parseToken()->authenticate()) {
+            return response()->json(['message' => 'Please login to use this function'], 401);
+        }
 
-            // Validate the request data
-            $request->validate([
-                'id' => 'required|integer|exists:domain,id',
-                'name' => 'required|string|max:255',
-                'link' => 'required|string|max:255',
-            ]);
+        // Validate the request data
+        $request->validate([
+            'id' => 'required|integer|exists:domain,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'link' => 'required|string|max:255',
+        ]);
 
-            // Find the domain record
-            $domain = DomainModel::find($request->input('id'));
-            if (!$domain) {
-                return response()->json(['message' => 'Domain not found'], 404);
-            }
+        // Find the domain record
+        $domain = DomainModel::find($request->input('id'));
+        if (!$domain) {
+            return response()->json(['message' => 'Domain not found'], 404);
+        }
 
-            // Lưu thông tin cũ
-            $oldData = $domain->only(['name', 'link']);
+        // Lưu thông tin cũ
+        $oldData = $domain->only(['name', 'link', 'description']);
 
-            // Update the domain record
-            $domain->name = $request->input('name');
-            $domain->link = $request->input('link', '');
-            $domain->updated_at = now();
+        // Update the domain record
+        $domain->name = $request->input('name');
+        $domain->link = $request->input('link', '');
+        $domain->description = $request->input('description');
+        $domain->updated_at = now();
 
-            // Save the updated domain record
-            if ($domain->save()) {
-                // Lấy thông tin mới
-                $newData = $domain->only(['name', 'link']);
+        // Save the updated domain record
+        if ($domain->save()) {
+            // Lấy thông tin mới
+            $newData = $domain->only(['name', 'link', 'description']);
 
-                // So sánh và tạo chuỗi thay đổi
-                $changes = [];
-                foreach ($oldData as $key => $oldValue) {
-                    $newValue = $newData[$key];
-                    if ($oldValue != $newValue) {
-                        $changes[] = "$key: '$oldValue' => '$newValue'";
-                    }
+            // So sánh và tạo chuỗi thay đổi
+            $changes = [];
+            foreach ($oldData as $key => $oldValue) {
+                $newValue = $newData[$key];
+                if ($oldValue != $newValue) {
+                    $changes[] = "$key: '$oldValue' => '$newValue'";
                 }
-                $changeString = $changes ? implode(', ', $changes) : 'No changes';
-
-                // Log the update of the domain
-                LogController::createLogAuto([
-                    'username' => $user->username,
-                    'domain_id' => $domain->id,
-                    'message' => "User {$user->fullName} updated domain '{$domain->name}'. Changes: $changeString",
-                    'is_delete' => false
-                ]);
-                return response()->json(['message' => 'Domain updated successfully', 'data' => $domain], 200);
-            } else {
-                return response()->json(['message' => 'Failed to update domain'], 500);
             }
+            $changeString = implode(', ', $changes);
+            // Log the update of the domain
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'domain_id' => $domain->id,
+                'message' => "User {$user->fullName} đã cập nhật domain {$domain->name} từ {$oldData['name']} sang {$newData['name']}.",
+                'is_delete' => false
+            ]);
+            return response()->json(['message' => 'Domain updated successfully', 'data' => $domain], 200);
+        } else {
+            return response()->json(['message' => 'Failed to update domain'], 500);
+        }
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
         } catch (TokenInvalidException $e) {
@@ -168,7 +169,7 @@ class domainController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'domain_id' => $domain->id,
-                'message' => "User {$user->fullName} deleted domain '{$domain->name}'.",
+                'message' => "User {$user->fullName} đã xóa domain {$domain->name}.",
                 'is_delete' => true
             ]);
             // Delete the domain
@@ -220,7 +221,7 @@ class domainController extends Controller
                 'username' => $user->username,
                 'hardware_ip' => $hardware_ip,
                 'link_domain' => $domainLink,
-                'message' => "User {$user->fullName} added hardware in {$domainLink} to hardware with IP {$hardware_ip}",
+                'message' => "User {$user->fullName} đã thêm phần cứng {$hardware_ip} vào domain {$domainLink}",
             ]);
             return response()->json([
                 'message' => 'Domain added to hardware successfully',
@@ -267,7 +268,6 @@ class domainController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve hardware. ' . $e->getMessage()], 500);
         }
     }
-
 
     public function getHardwareAndSoftwareInDomain(Request $request)
     {
@@ -448,7 +448,7 @@ class domainController extends Controller
                 'username' => $user->username,
                 'hardware_ip' => $hardwareIp,
                 'link_domain' => $domainLink,
-                'message' => "User {$user->fullName} removed hardware with IP {$hardwareIp} from domain {$domainLink}",
+                'message' => "User {$user->fullName} đã xóa phần cứng {$hardwareIp} khỏi domain {$domainLink}",
             ]);
 
             return response()->json(['message' => 'Hardware removed from domain successfully'], 200);
@@ -462,7 +462,5 @@ class domainController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Could not remove hardware from domain. ' . $e->getMessage()], 500);
         }
-
     }
-
 }
