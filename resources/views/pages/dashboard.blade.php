@@ -13,10 +13,10 @@
 
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <!-- Tiêu đề -->
-                <h5 class="mb-0 d-flex align-items-center">
+                <h4 class="mb-0 d-flex align-items-center text-primary">
                     <i class="bx bx-bar-chart-alt-2 text-primary me-2"></i>
                     Tổng quan hệ thống
-                </h5>
+                </h4>
 
                 <!-- Filter form -->
                 <div class="form-inline pull-right">
@@ -39,7 +39,7 @@
             <!-- phần mềm -->
             <div class="mb-4">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="mb-0">
+                    <h5 class="mb-0 text-info">
                         <i class="bx bx-code-alt text-primary"></i> Phần mềm
                     </h5>
                 </div>
@@ -47,7 +47,7 @@
 
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <div class="stat-box p-3 rounded border h-100">
+                        <div class="stat-box p-3 rounded border bg-light  h-100">
                             <div class="d-flex align-items-center">
                                 <i class="mdi mdi-apps text-primary fs-3 me-2 mr-2"></i>
                                 <div>
@@ -58,7 +58,7 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="stat-box p-3 rounded border h-100">
+                        <div class="stat-box p-3 rounded border bg-light  h-100">
                             <div class="d-flex align-items-center">
                                 <i class="mdi mdi-update text-danger fs-3 me-2 mr-2"></i>
 
@@ -70,7 +70,7 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="stat-box p-3 rounded border h-100">
+                        <div class="stat-box p-3 rounded border bg-light  h-100">
                             <div class="d-flex align-items-center">
                                 <i class="mdi mdi-delete-variant text-danger fs-3 me-2 mr-2"></i>
 
@@ -85,7 +85,7 @@
                 <!-- Dung lượng -->
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <div class="stat-box p-3 rounded border h-100">
+                        <div class="stat-box p-3 rounded border bg-light  h-100">
                             <p class="mb-1 text-muted">
                                 Tổng dung lượng tệp tin phần mềm đang chiếm dụng
                                 <i class="mdi mdi-help-circle-outline text-info" data-bs-toggle="tooltip"
@@ -95,7 +95,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="stat-box p-3 rounded border h-100">
+                        <div class="stat-box p-3 rounded border  bg-light h-100">
                             <p class="mb-1 text-muted">
                                 Tổng dung lượng tiếc kiệm được
                                 <i class="mdi mdi-help-circle-outline text-info" data-bs-toggle="tooltip"
@@ -110,13 +110,13 @@
             <!-- phần cứng -->
             <div class="">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">
+                    <h5 class="mb-0 text-info">
                         <i class="bx bx-chip text-success"></i> Phần cứng
                     </h5>
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-4">
-                        <div class="stat-box p-3 border  rounded h-100">
+                        <div class="stat-box p-3 border bg-light  rounded h-100">
                             <div class="d-flex align-items-center">
                                 <i class="mdi mdi-desktop-classic text-primary fs-3 me-2 mr-2"></i>
                                 <div>
@@ -132,7 +132,7 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="stat-box p-3  border rounded h-100">
+                        <div class="stat-box p-3  border  bg-light  rounded h-100">
                             <div class="d-flex align-items-center">
                                 <i class="mdi mdi-update text-danger fs-3 me-2 mr-2"></i>
                                 <div>
@@ -143,7 +143,7 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="stat-box p-3  border rounded h-100">
+                        <div class="stat-box p-3  border  bg-light  rounded h-100">
                             <div class="d-flex align-items-center">
                                 <i class="mdi mdi-delete-forever text-danger fs-3 me-2 mr-2"></i>
                                 <div>
@@ -155,10 +155,10 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="fw-bold">Thống kê phần cứng</h5>
-                    <button id="btnThuPhong" class="btn btn-sm btn-primary">
+                    <!-- <h5 class="fw-bold">Thống kê phần cứng</h5> -->
+                    <!-- <button id="btnThuPhong" class="btn btn-sm btn-primary">
                         <i class="icon-fullscreen"></i> Thu phóng
-                    </button>
+                    </button> -->
                 </div>
 
                 <div>
@@ -170,7 +170,7 @@
                         <div class="col-md-4">
                             <div class="stat-box p-3 border rounded h-100 d-flex flex-column justify-content-between">
 
-                                <p class="text-muted mb-1 fw-bold">Tổng số máy: </p>
+                                <p class="text-muted mb-1 fw-bold">Tổng số phần cứng: </p>
                                 <h4 id="totalHardwareOverviewChart" class="fw-bold text-primary">--</h4>
                                 <canvas id="totalHardwareChart" height="150"></canvas>
                             </div>
@@ -206,7 +206,7 @@
                         <div class="col-md-4">
                             <div class="stat-box p-3 border rounded h-100 d-flex flex-column justify-content-between">
 
-                                <p class="text-muted mb-1 fw-bold">Tổng số máy: </p>
+                                <p class="text-muted mb-1 fw-bold">Tổng số phần cứng: </p>
                                 <h4 id="totalHardwareDeletedOverviewChart" class="fw-bold text-primary">--</h4>
                                 <canvas id="totalHardDeletedwareChart" height="150"></canvas>
                             </div>
@@ -275,7 +275,7 @@
     <div class="card mt-3 shadow-sm">
         <div class="card-body">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h5 class="mb-0">
+                <h5 class="mb-0 text-info">
                     <i class="bx bx-code-alt text-primary"></i> Phần mềm
                 </h5>
             </div>
@@ -317,9 +317,9 @@
                 <div class="col-md-6">
                     <div class="stat-box p-3 rounded border h-100">
                         <p class="mb-1 text-muted">
-                            Tổng dung lượng tệp tin phần mềm đã tạo sẽ chiếm dụng
+                            Tổng dung lượng tệp tin của phần mềm đã tạo
                             <i class="mdi mdi-help-circle-outline text-info" data-bs-toggle="tooltip"
-                                title="Tổng dung lượng các tệp tin của phần mềm đã tạo."></i>
+                                title="Tổng dung lượng các tệp tin của phần mềm đã tạo bao gồm phần mềm bị xóa."></i>
                         </p>
                         <h5 class="fw-bold text-warning mb-0" id="storageSoftwareDetail">-- MB</h5>
                     </div>
@@ -342,7 +342,7 @@
         <div class="card-body">
             <!-- Tiêu đề -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">
+                <h5 class="mb-0 text-info">
                     <i class="bx bx-chip text-success"></i> Phần cứng
                 </h5>
             </div>
@@ -380,13 +380,13 @@
                     </div>
                 </div>
             </div>
-            <h6 class="fw-bold mb-0">Thống kê phần cứng được tạo
+            <h6 class="fw-bold mb-0">Thống kê phần cứng  đã tạo
             </h6>
             <div class="row g-3 text-center">
                 <div class="col-md-4">
                     <div class="stat-box p-3 border rounded h-100 d-flex flex-column justify-content-between">
 
-                        <p class="text-muted mb-1 fw-bold">Tổng số máy: </p>
+                        <p class="text-muted mb-1 fw-bold">Tổng số phần cứng: </p>
                         <h4 id="totalSumHardwareDetailChart" class="fw-bold text-primary">--</h4>
                         <canvas id="totalHardwareDetailChart" height="150"></canvas>
                     </div>
@@ -420,7 +420,7 @@
                 <div class="col-md-4">
                     <div class="stat-box p-3 border rounded h-100 d-flex flex-column justify-content-between">
 
-                        <p class="text-muted mb-1 fw-bold">Tổng số máy: </p>
+                        <p class="text-muted mb-1 fw-bold">Tổng số phần cứng: </p>
                         <h4 id="totalSumHardwareDeletedDetailChart" class="fw-bold text-primary">--</h4>
                         <canvas id="totalHardwareDeletedDetailChart" height="150"></canvas>
                     </div>

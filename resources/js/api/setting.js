@@ -1,7 +1,7 @@
-import { defaultHeaders } from "../config/api_config";
+import { defaultHeaders, apiFetch } from "../config/api_config"; 
 
 export async function update_system_project(data) {
-    const res = await fetch("/api/updatefootersystem", {
+    const res = await apiFetch("/api/updatefootersystem", {
         method: "POST",
         headers: {
             ...defaultHeaders(),
@@ -15,7 +15,7 @@ export async function update_system_project(data) {
     return result;
 }
 export async function get_system_project() {
-    const res = await fetch("/api/getfootersystem", {
+    const res = await apiFetch("/api/getfootersystem", {
         headers: defaultHeaders(),
     });
     const result = await res.json();
@@ -26,7 +26,7 @@ export async function update_logo(file) {
     const formData = new FormData();
     formData.append("avatar", file); // ✅ Laravel yêu cầu field này là 'avatar'
 
-    const response = await fetch("/api/updatelogo", {
+    const response = await apiFetch("/api/updatelogo", {
         method: "POST",
         headers: {
             // KHÔNG thêm Content-Type ở đây — để trình duyệt tự set
@@ -45,7 +45,7 @@ export async function update_logo(file) {
 
 
 export async function get_logo() {
-    const res = await fetch("/api/getavatarsystem", {
+    const res = await apiFetch("/api/getavatarsystem", {
         headers: defaultHeaders(),
     });
     const result = await res.json();

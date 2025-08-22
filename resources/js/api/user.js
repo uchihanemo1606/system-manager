@@ -1,6 +1,17 @@
-import { defaultHeaders } from "../config/api_config";
+import { defaultHeaders, apiFetch } from "../config/api_config"; 
+export const get_profile = async () => {
+    const res = await apiFetch("api/getuser", {
+        headers: defaultHeaders(),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.user) {
+        return data.user;
+    }
+    return [];
+};
 export const get_all_user = async () => {
-    const res = await fetch("api/getallusers", {
+    const res = await apiFetch("api/getallusers", {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -11,7 +22,7 @@ export const get_all_user = async () => {
 };
 
 export async function create_user(data) {
-    const res = await fetch("/api/createUser", {
+    const res = await apiFetch("/api/createUser", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -20,19 +31,9 @@ export async function create_user(data) {
     if (!res.ok) throw new Error(result.message || "Lỗi tạo người dùng");
     return result;
 }
-export const get_profile = async () => {
-    const res = await fetch("api/getuser", {
-        headers: defaultHeaders(),
-    });
-    const data = await res.json();
 
-    if (res.ok && data.user) {
-        return data.user;
-    }
-    return [];
-};
 export const get_user_by_username = async (username) => {
-    const res = await fetch(`api/getuserbyusername?username=${username}`, {
+    const res = await apiFetch(`api/getuserbyusername?username=${username}`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -45,7 +46,7 @@ export const get_user_by_username = async (username) => {
 // export async function update_profile(data) {
 //     alert("chức năng đang bảo trì");
 //     return;
-//     const res = await fetch("/api/updateuser", {
+//     const res = await apiFetch("/api/updateuser", {
 //         method: "POST",
 //         headers: defaultHeaders(),
 //         body: JSON.stringify(data),
@@ -55,7 +56,7 @@ export const get_user_by_username = async (username) => {
 //     return result;
 // }
 export async function chane_password(data) {
-    const res = await fetch("/api/changepassword", {
+    const res = await apiFetch("/api/changepassword", {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -80,7 +81,7 @@ export async function chane_password(data) {
 }
 
 export async function update_profile(data) {
-    const res = await fetch("/api/updateuser", {
+    const res = await apiFetch("/api/updateuser", {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),

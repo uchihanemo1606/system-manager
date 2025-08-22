@@ -1,8 +1,8 @@
-import { defaultHeaders } from "../config/api_config";
+import { defaultHeaders, apiFetch } from "../config/api_config"; 
 
 // Tạo loại quy chế
 export async function create_category_rule(data) {
-    const res = await fetch("api/createcategoryrule", {
+    const res = await apiFetch("api/createcategoryrule", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -14,7 +14,7 @@ export async function create_category_rule(data) {
 
 // Cập nhật loại quy chế
 export async function update_category_rule(data) {
-    const res = await fetch("api/updatecategoryrule", {
+    const res = await apiFetch("api/updatecategoryrule", {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -26,7 +26,7 @@ export async function update_category_rule(data) {
 
 // Xóa loại quy chế
 export async function delete_category_rule(id) {
-    const res = await fetch(`api/deletecategoryrule?id=${id}`, {
+    const res = await apiFetch(`api/deletecategoryrule?id=${id}`, {
         method: "DELETE",
         headers: defaultHeaders(),
     });
@@ -37,7 +37,7 @@ export async function delete_category_rule(id) {
 
 // Lấy tất cả loại quy chế
 export async function get_all_category_rule() {
-    const res = await fetch("api/getallcategoryrule", {
+    const res = await apiFetch("api/getallcategoryrule", {
         headers: defaultHeaders(),
     });
     const result = await res.json();
@@ -46,7 +46,7 @@ export async function get_all_category_rule() {
     return result;
 }
 export async function get_category_by_id(id) {
-    const res = await fetch(`api/getcategoryrulebyid?id=${id}`, {
+    const res = await apiFetch(`api/getcategoryrulebyid?id=${id}`, {
         headers: defaultHeaders(),
     });
     const result = await res.json();
@@ -55,7 +55,7 @@ export async function get_category_by_id(id) {
 }
 // rule software
 export async function create_rule(formData) {
-    const res = await fetch("api/createrule", {
+    const res = await apiFetch("api/createrule", {
         method: "POST",
         headers: {
             Authorization: defaultHeaders().Authorization // chỉ giữ Authorization
@@ -68,7 +68,7 @@ export async function create_rule(formData) {
     return result;
 }
 export async function create_software_rule(payload) {
-    const res = await fetch("api/createsoftwarerule", {
+    const res = await apiFetch("api/createsoftwarerule", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(payload), // Không dùng FormData
@@ -79,7 +79,7 @@ export async function create_software_rule(payload) {
     return result;
 }
 export async function get_all_software_rule(software_id) {
-    const res = await fetch(`api/get_software_rules?software_id=${software_id}`, {
+    const res = await apiFetch(`api/get_software_rules?software_id=${software_id}`, {
         headers: defaultHeaders(),
     });
     const result = await res.json();
@@ -87,7 +87,7 @@ export async function get_all_software_rule(software_id) {
     return result;
 }
 export async function delete_software_rule_by_id(id) {
-    const res = await fetch(`/api/deletesoftwarerule?id=${id}`, {
+    const res = await apiFetch(`/api/deletesoftwarerule?id=${id}`, {
         method: "DELETE",
         headers: defaultHeaders(),
     });
@@ -108,7 +108,7 @@ export async function update_software_rule_by_id(payload) {
         formData.append("file", file);
     }
 
-    const res = await fetch(`/api/updaterule`, {
+    const res = await apiFetch(`/api/updaterule`, {
         method: "POST",
         headers: {
             Authorization: defaultHeaders().Authorization,

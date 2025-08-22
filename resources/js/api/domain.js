@@ -1,7 +1,7 @@
 import { showToast } from "../component/toast";
-import { defaultHeaders } from "../config/api_config";
+import { defaultHeaders, apiFetch } from "../config/api_config"; 
 export async function get_all_domain() {
-    const res = await fetch(
+    const res = await apiFetch(
         `/api/getalldomain`,
         {
             headers: defaultHeaders(),
@@ -14,7 +14,7 @@ export async function get_all_domain() {
     return [];
 }
 export async function update_domain_by_name(data) {
-    const res = await fetch(`/api/updatedomain`, {
+    const res = await apiFetch(`/api/updatedomain`, {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -34,7 +34,7 @@ export async function update_domain_by_name(data) {
     return result;
 }
 export async function create_domain(data) {
-    const res = await fetch("/api/createdomain", {
+    const res = await apiFetch("/api/createdomain", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -44,7 +44,7 @@ export async function create_domain(data) {
     return result;
 }
 export async function delete_domain_by_name(link) {
-    const res = await fetch(`/api/deletedomain?link=${encodeURIComponent(link)}`, {
+    const res = await apiFetch(`/api/deletedomain?link=${encodeURIComponent(link)}`, {
         method: "DELETE",
         headers: defaultHeaders(),
     });
@@ -54,7 +54,7 @@ export async function delete_domain_by_name(link) {
 }
 
 export const get_domain_software = async (id) => {
-    const res = await fetch("/api/getalldomain", {
+    const res = await apiFetch("/api/getalldomain", {
         headers: defaultHeaders(),
     });
 
@@ -70,7 +70,7 @@ export const get_domain_software = async (id) => {
     return filteredDomains;
 };
 export async function get_hardware_software_by_domain({ link, name }) {
-    const res = await fetch(
+    const res = await apiFetch(
         `/api/gethardwaresoftwareindomain?link=${link}&name=${name}`,
         {
             headers: defaultHeaders(),
@@ -83,7 +83,7 @@ export async function get_hardware_software_by_domain({ link, name }) {
     return [];
 }
 export async function get_domain_by_hardware({ ip }) {
-    const res = await fetch(
+    const res = await apiFetch(
         `/api/getdomainsbyhardware?ip=${ip}`,
         {
             headers: defaultHeaders(),
@@ -96,7 +96,7 @@ export async function get_domain_by_hardware({ ip }) {
     return [];
 }
 export async function create_domain_hardware(data) {
-    const res = await fetch("/api/createhardwaredomain", {
+    const res = await apiFetch("/api/createhardwaredomain", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -107,7 +107,7 @@ export async function create_domain_hardware(data) {
 }
 // domain.js
 export async function remove_hardware_in_domain(hardwareIp, domainId) {
-    const res = await fetch(`/api/removehardwareindomain/${encodeURIComponent(hardwareIp)}/${encodeURIComponent(domainId)}`, {
+    const res = await apiFetch(`/api/removehardwareindomain/${encodeURIComponent(hardwareIp)}/${encodeURIComponent(domainId)}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"

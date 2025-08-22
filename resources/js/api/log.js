@@ -1,8 +1,8 @@
-import { defaultHeaders } from "../config/api_config";
+import { defaultHeaders, apiFetch } from "../config/api_config"; 
 
 // // Lấy tất cả log
 // export const get_all_logs = async () => {
-//     const res = await fetch(`api/getAllLog?page=2`, {
+//     const res = await apiFetch(`api/getAllLog?page=2`, {
 //         headers: defaultHeaders(),
 //     });
 //     const data = await res.json();
@@ -16,7 +16,7 @@ export const get_all_logs = async (filters = {}, page = 1) => {
         if (value !== "") params.append(key, value);
     }
 
-    const res = await fetch(`api/getAllLog?${params.toString()}`, {
+    const res = await apiFetch(`api/getAllLog?${params.toString()}`, {
         headers: defaultHeaders(),
     });
 
@@ -27,7 +27,7 @@ export const get_all_logs = async (filters = {}, page = 1) => {
 
 // Lấy log theo IP phần cứng
 export const get_log_by_hardware = async (ip) => {
-    const res = await fetch(`api/getloginhardware/${ip}`, {
+    const res = await apiFetch(`api/getloginhardware/${ip}`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -37,7 +37,7 @@ export const get_log_by_hardware = async (ip) => {
 
 // Lấy log theo ID phần mềm
 export const get_log_by_software = async (id) => {
-    const res = await fetch(`api/getloginsoftware/${id}`, {
+    const res = await apiFetch(`api/getloginsoftware/${id}`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -47,7 +47,7 @@ export const get_log_by_software = async (id) => {
 
 // Lấy log theo username
 export const get_log_by_user = async (username) => {
-    const res = await fetch(`api/getlogcreatebyuser/${username}`, {
+    const res = await apiFetch(`api/getlogcreatebyuser/${username}`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -61,7 +61,7 @@ export const get_log_by_time = async (from, to) => {
     if (from) url.searchParams.append("from", from);
     if (to) url.searchParams.append("to", to);
 
-    const res = await fetch(url, {
+    const res = await apiFetch(url, {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -71,7 +71,7 @@ export const get_log_by_time = async (from, to) => {
 
 // Lấy chi tiết log theo ID
 export const get_log_by_id = async (id) => {
-    const res = await fetch(`api/getlogbyid/${id}`, {
+    const res = await apiFetch(`api/getlogbyid/${id}`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();

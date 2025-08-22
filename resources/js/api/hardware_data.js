@@ -1,16 +1,15 @@
-import { defaultHeaders } from "../config/api_config";
-
+import { defaultHeaders, apiFetch } from "../config/api_config"; 
 // ----------- OS Data -----------
 
 export async function get_all_hardware_os() {
-    const res = await fetch("/api/getallos", { headers: defaultHeaders() });
+    const res = await apiFetch("/api/getallos", { headers: defaultHeaders() });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Không thể lấy danh sách OS.");
     return result;
 }
 
 export async function get_versions_by_os(osName) {
-    const res = await fetch(`/api/getallversionofos/${osName}`, {
+    const res = await apiFetch(`/api/getallversionofos/${osName}`, {
         headers: defaultHeaders(),
     });
     const result = await res.json();
@@ -19,7 +18,7 @@ export async function get_versions_by_os(osName) {
 }
 
 export async function create_hardware_os(data) {
-    const res = await fetch("/api/createos", {
+    const res = await apiFetch("/api/createos", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -29,7 +28,7 @@ export async function create_hardware_os(data) {
     return result;
 }
 export async function create_hardware_os_version(data) {
-    const res = await fetch("/api/createosversion", {
+    const res = await apiFetch("/api/createosversion", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -41,7 +40,7 @@ export async function create_hardware_os_version(data) {
 
 
 export async function update_hardware_os_data(id, data) {
-    const res = await fetch(`/api/hardwareOsData/${id}`, {
+    const res = await apiFetch(`/api/hardwareOsData/${id}`, {
         method: "PUT",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -52,7 +51,7 @@ export async function update_hardware_os_data(id, data) {
 }
 
 export async function delete_hardware_os_data(id) {
-    const res = await fetch(`/api/hardwareOsData/${id}`, {
+    const res = await apiFetch(`/api/hardwareOsData/${id}`, {
         method: "DELETE",
         headers: defaultHeaders(),
     });
@@ -64,20 +63,20 @@ export async function delete_hardware_os_data(id) {
 // ----------- Database Data -----------
 
 export async function get_all_hardware_database() {
-    const res = await fetch("/api/getalldatabases", { headers: defaultHeaders() });
+    const res = await apiFetch("/api/getalldatabases", { headers: defaultHeaders() });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Không thể lấy danh sách Database.");
     return result;
 }
 export async function get_all_hardware_database_version() {
-    const res = await fetch("/api/getalldatabaseversions", { headers: defaultHeaders() });
+    const res = await apiFetch("/api/getalldatabaseversions", { headers: defaultHeaders() });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Không thể lấy danh sách Database version.");
     return result;
 }
 
 export async function get_versions_by_dbname(dbname) {
-    const res = await fetch(`/api/getdatabaseversionbyname/${encodeURIComponent(dbname)}`, {
+    const res = await apiFetch(`/api/getdatabaseversionbyname/${encodeURIComponent(dbname)}`, {
         headers: defaultHeaders(),
     });
     const result = await res.json();
@@ -86,7 +85,7 @@ export async function get_versions_by_dbname(dbname) {
 }
 
 export async function create_hardware_database(data) {
-    const res = await fetch("/api/createdatabase", {
+    const res = await apiFetch("/api/createdatabase", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -96,7 +95,7 @@ export async function create_hardware_database(data) {
     return result;
 }
 export async function create_hardware_database_version(data) {
-    const res = await fetch("/api/createdatabaseversion", {
+    const res = await apiFetch("/api/createdatabaseversion", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -107,7 +106,7 @@ export async function create_hardware_database_version(data) {
 }
 
 export async function update_hardware_database(id, data) {
-    const res = await fetch(`/api/hardwareDatabase/${id}`, {
+    const res = await apiFetch(`/api/hardwareDatabase/${id}`, {
         method: "PUT",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -118,7 +117,7 @@ export async function update_hardware_database(id, data) {
 }
 
 export async function delete_hardware_database(id) {
-    const res = await fetch(`/api/hardwareDatabase/${id}`, {
+    const res = await apiFetch(`/api/hardwareDatabase/${id}`, {
         method: "DELETE",
         headers: defaultHeaders(),
     });

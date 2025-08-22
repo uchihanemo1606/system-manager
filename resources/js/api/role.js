@@ -1,21 +1,21 @@
 import { showToast } from "../component/toast";
-import { defaultHeaders } from "../config/api_config";
+import { defaultHeaders, apiFetch } from "../config/api_config"; 
 export const get_all_role = async () => {
-    const res = await fetch("/api/getallroles", {
+    const res = await apiFetch("/api/getallroles", {
         headers: defaultHeaders(),
     });
     const data = await res.json();
     return data || [];
 };
 export const get_all_user_role = async () => {
-    const res = await fetch("/api/getalluserrole", {
+    const res = await apiFetch("/api/getalluserrole", {
         headers: defaultHeaders(),
     });
     const data = await res.json();
     return data || [];
 };
 export const create_role = async ({ role_name }) => {
-    const res = await fetch(`/api/createrole`, {
+    const res = await apiFetch(`/api/createrole`, {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify({
@@ -42,7 +42,7 @@ export const update_role = async ({ old_role_name, new_role_name }) => {
         return;
     }
 
-    const res = await fetch(`/api/updaterole/${encodeURIComponent(old_role_name)}`, {
+    const res = await apiFetch(`/api/updaterole/${encodeURIComponent(old_role_name)}`, {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify({ role_name: new_role_name }),
@@ -64,7 +64,7 @@ export const update_role = async ({ old_role_name, new_role_name }) => {
 //         });
 //         // return Promise.reject(new Error("Không thể cập nhật vai trò 'admin'"));
 //     }
-//     const res = await fetch(`/api/updaterole`, {
+//     const res = await apiFetch(`/api/updaterole`, {
 //         method: "PUT",
 //         headers: defaultHeaders(),
 //         body: JSON.stringify({
@@ -94,7 +94,7 @@ export const delete_role = async (role_name) => {
         });
         // return Promise.reject(new Error("Không thể xóa vai trò 'admin'"));
     }
-    const res = await fetch(`/api/deleterole`, {
+    const res = await apiFetch(`/api/deleterole`, {
         method: "DELETE",
         headers: defaultHeaders(),
         body: JSON.stringify({
@@ -121,7 +121,7 @@ export const delete_role = async (role_name) => {
     return data;
 }
 export const get_all_permission_by_role_name = async (role_name) => {
-    const res = await fetch(
+    const res = await apiFetch(
         `/api/getRolePermissionByName?role_name=${role_name}`,
         {
             headers: defaultHeaders(),
@@ -136,7 +136,7 @@ export const get_all_permission_by_role_name = async (role_name) => {
 };
 
 export const get_all_permission = async () => {
-    const res = await fetch(`/api/getallpermission`, {
+    const res = await apiFetch(`/api/getallpermission`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -173,7 +173,7 @@ export const delete_role_permission = async ({
         //     new Error("Không thể xóa quyền 'quyền hạn' của 'admin'")
         // );
     }
-    const res = await fetch(`/api/deleteRolePermission`, {
+    const res = await apiFetch(`/api/deleteRolePermission`, {
         method: "DELETE",
         headers: defaultHeaders(),
         body: JSON.stringify({
@@ -200,7 +200,7 @@ export const create_role_permission = async ({
     role_name,
     permission_name,
 }) => {
-    const res = await fetch(`/api/createrolepermission`, {
+    const res = await apiFetch(`/api/createrolepermission`, {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify({
@@ -223,7 +223,7 @@ export const create_role_permission = async ({
     return data;
 };
 export const create_permission = async ({ permissions_name }) => {
-    const res = await fetch(`/api/createPermission`, {
+    const res = await apiFetch(`/api/createPermission`, {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify({
@@ -246,7 +246,7 @@ export const create_permission = async ({ permissions_name }) => {
 };
 export const create_user_role = async ({ username, role_name }) => {
     try {
-        const res = await fetch(`/api/createuserrole`, {
+        const res = await apiFetch(`/api/createuserrole`, {
             method: "POST",
             headers: defaultHeaders(),
             body: JSON.stringify({
@@ -283,7 +283,7 @@ export const create_user_role = async ({ username, role_name }) => {
 };
 export const delete_user_role = async ({ username, role_name }) => {
     try {
-        const res = await fetch(`/api/deleteuserrole`, {
+        const res = await apiFetch(`/api/deleteuserrole`, {
             method: "DELETE",
             headers: defaultHeaders(),
             body: JSON.stringify({

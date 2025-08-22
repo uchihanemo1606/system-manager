@@ -1,6 +1,6 @@
-import { defaultHeaders } from "../config/api_config";
+import { defaultHeaders, apiFetch } from "../config/api_config"; 
 export async function create_software(data) {
-    const res = await fetch("/api/createsoftware", {
+    const res = await apiFetch("/api/createsoftware", {
         method: "POST",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -10,7 +10,7 @@ export async function create_software(data) {
     return result;
 }
 export const get_all_software = async () => {
-    const res = await fetch("api/getallsoftware", {
+    const res = await apiFetch("api/getallsoftware", {
         headers: defaultHeaders(),
     });
     const data = await res.json();
@@ -21,7 +21,7 @@ export const get_all_software = async () => {
 };
 // export const update_software_file_by_id = async (id, data) => {
 //     try {
-//         const res = await fetch(`/api/updatesoftwarefile/${id}`, {
+//         const res = await apiFetch(`/api/updatesoftwarefile/${id}`, {
 //             method: "PATCH",
 //             headers: defaultHeaders(),
 //             body: JSON.stringify(data),
@@ -46,7 +46,7 @@ export async function update_software_file_by_id(id, { software_id, file_name, f
     if (file) formData.append("file", file); // Chỉ gửi nếu có file mới
     if (description) formData.append("description", description);
 
-    const res = await fetch(`/api/updatesoftwarefile/${id}`, {
+    const res = await apiFetch(`/api/updatesoftwarefile/${id}`, {
         method: "POST", // Laravel không hỗ trợ PATCH với multipart/form-data trực tiếp
         headers: {
             Authorization: defaultHeaders().Authorization, // hoặc bỏ nếu Laravel không cần
@@ -65,7 +65,7 @@ export async function update_software_file_by_id(id, { software_id, file_name, f
 
 
 export async function delete_software_file_by_id(id) {
-    const res = await fetch(`/api/deletesoftwarefile/${id}`, {
+    const res = await apiFetch(`/api/deletesoftwarefile/${id}`, {
         method: "DELETE",
         headers: defaultHeaders(), // đảm bảo có Authorization + Content-Type: application/json
     });
@@ -76,7 +76,7 @@ export async function delete_software_file_by_id(id) {
 }
 
 export const get_all_software_file_by_id = async (id) => {
-    const res = await fetch(
+    const res = await apiFetch(
         `/api/getallsoftwarefilebysoftwareid/${encodeURIComponent(id)}`,
         {
             headers: defaultHeaders(),
@@ -90,7 +90,7 @@ export const get_all_software_file_by_id = async (id) => {
 };
 
 export const get_software_by_id = async ({ id }) => {
-    const res = await fetch(
+    const res = await apiFetch(
         `/api/getsoftwarebyid?id=${encodeURIComponent(id)}`,
         {
             headers: defaultHeaders(),
@@ -103,7 +103,7 @@ export const get_software_by_id = async ({ id }) => {
     return [];
 };
 export async function delete_software({ id }) {
-    const res = await fetch(`/api/deleteSoftware?id=${id}`, {
+    const res = await apiFetch(`/api/deleteSoftware?id=${id}`, {
         method: "DELETE",
         headers: defaultHeaders(), // đảm bảo có Authorization + Content-Type: application/json
     });
@@ -114,7 +114,7 @@ export async function delete_software({ id }) {
 }
 
 export async function update_software({ id, ...data }) {
-    const res = await fetch(`/api/updatesoftware/${id}?id=${id}`, {
+    const res = await apiFetch(`/api/updatesoftware/${id}?id=${id}`, {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
@@ -139,7 +139,7 @@ export async function update_software({ id, ...data }) {
 }
 export const get_all_user_permission_software = async (softwareID) => {
     try {
-        const res = await fetch(`/api/getalluserinsoftware/${softwareID}`, {
+        const res = await apiFetch(`/api/getalluserinsoftware/${softwareID}`, {
             headers: defaultHeaders(),
         });
         const data = await res.json();
@@ -158,7 +158,7 @@ export async function create_software_permission({ software_id, user_name, permi
     }
 
     for (const perm of permissions) {
-        const res = await fetch("/api/createsoftwarepermission", {
+        const res = await apiFetch("/api/createsoftwarepermission", {
             method: "POST",
             headers: defaultHeaders(),
             body: JSON.stringify({
@@ -175,7 +175,7 @@ export async function create_software_permission({ software_id, user_name, permi
     }
 }
 export async function remove_user_permission_in_software({ username, softwareId }) {
-    const res = await fetch(`/api/deletesoftwarepermission?user_name=${encodeURIComponent(username)}&software_id=${encodeURIComponent(softwareId)}`, {
+    const res = await apiFetch(`/api/deletesoftwarepermission?user_name=${encodeURIComponent(username)}&software_id=${encodeURIComponent(softwareId)}`, {
         method: "DELETE",
         headers: defaultHeaders(),
     });
@@ -184,7 +184,7 @@ export async function remove_user_permission_in_software({ username, softwareId 
     return result;
 }
 export async function get_all_permission_software_by_user({ username, softwareId }) {
-    const res = await fetch(`/api/getdetailuserpermissioninsoftware?user_name=${encodeURIComponent(username)}&software_id=${encodeURIComponent(softwareId)}`, {
+    const res = await apiFetch(`/api/getdetailuserpermissioninsoftware?user_name=${encodeURIComponent(username)}&software_id=${encodeURIComponent(softwareId)}`, {
         headers: defaultHeaders(),
     });
 
@@ -199,7 +199,7 @@ export async function create_software_file({ software_id, file_name, file, descr
     formData.append("file", file); // Truyền file thực
     if (description) formData.append("description", description);
 
-    const res = await fetch("/api/createsoftwarefile", {
+    const res = await apiFetch("/api/createsoftwarefile", {
         method: "POST",
         headers: {
             Authorization: defaultHeaders().Authorization,
@@ -214,7 +214,7 @@ export async function create_software_file({ software_id, file_name, file, descr
 export const get_software_analytics = async (filters = {}) => {
     const query = new URLSearchParams(filters).toString();
 
-    const res = await fetch(`api/getsoftwareanalytics?${query}`, {
+    const res = await apiFetch(`api/getsoftwareanalytics?${query}`, {
         headers: defaultHeaders(),
     });
 

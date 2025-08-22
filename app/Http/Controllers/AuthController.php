@@ -146,6 +146,43 @@ class AuthController extends Controller
      * }
      * @return \Illuminate\Http\JsonResponse
      */
+    // public function login(Request $request)
+    // {
+    //     $credentials = $request->only('username', 'password');
+
+    //     try {
+    //         if (!$token = JWTAuth::attempt($credentials)) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'username or password is incorrect',
+    //             ], 401);
+    //         }
+    //     } catch (JWTException $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Could not create token',
+    //         ], 500);
+    //     }
+    //     $user = JWTAuth::setToken($token)->authenticate();
+    //     //thêm kiểm tra tk bị khoá, xoá
+
+    //     if ($user->is_delete || $user->hidden) {
+    //     return response()->json([
+    //         'status' => 'error',
+    //         'message' => 'Tài khoản đã bị khóa hoặc bị ẩn, vui lòng liên hệ quản trị viên.',
+    //     ], 403);
+    // }
+
+    //     LogController::createLogAuto([
+    //         'username' => $request->username,
+    //         'message' => "{$user->fullName} đã đăng nhập vào hệ thống.",
+    //     ]);
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'token' => $token,
+    //     ])->withCookie(cookie('auth_token', $token, 60, '/', null, false, false));
+    // }
     public function login(Request $request)
     {
         $credentials = $request->only('username', 'password');
@@ -163,15 +200,18 @@ class AuthController extends Controller
                 'message' => 'Could not create token',
             ], 500);
         }
+
         $user = JWTAuth::setToken($token)->authenticate();
-        //thêm kiểm tra tk bị khoá, xoá
 
         if ($user->is_delete || $user->hidden) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Tài khoản đã bị khóa hoặc bị ẩn, vui lòng liên hệ quản trị viên.',
-        ], 403);
-    }
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tài khoản đã bị khóa hoặc bị ẩn, vui lòng liên hệ quản trị viên.',
+            ], 403);
+        }
+
+        // tạo refresh token (có thể lưu DB hoặc ký JWT khác với TTL dài hơn)
+        $refreshToken = JWTAuth::fromUser($user, ['type' => 'refresh']);
 
         LogController::createLogAuto([
             'username' => $request->username,
@@ -181,34 +221,37 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'token' => $token,
+            'refresh_token' => $refreshToken,
         ])->withCookie(cookie('auth_token', $token, 60, '/', null, false, false));
     }
-    public function refresh(Request $request)
-    {
-        try {
-            $token = JWTAuth::getToken();
 
-            if (!$token) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Token không tồn tại',
-                ], 401);
-            }
+public function refresh(Request $request)
+{
+    try {
+        $refreshToken = $request->input('refresh_token');
 
-            $newToken = JWTAuth::refresh($token);
-            $user = JWTAuth::setToken($newToken)->authenticate();
-
-            return response()->json([
-                'status' => 'success',
-                'token' => $newToken,
-            ])->withCookie(cookie('auth_token', $newToken, 60, '/', null, false, false));
-        } catch (JWTException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Token không hợp lệ hoặc đã hết hạn',
-            ], 401);
+        if (!$refreshToken) {
+            return response()->json(['status' => 'error', 'message' => 'Missing refresh token'], 400);
         }
+
+        $user = JWTAuth::setToken($refreshToken)->authenticate();
+
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid refresh token'], 401);
+        }
+
+        // cấp lại access token mới
+        $newAccessToken = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'status' => 'success',
+            'token' => $newAccessToken,
+        ])->withCookie(cookie('auth_token', $newAccessToken, 60, '/', null, false, false));
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 401);
     }
+}
+
     /**
      * Log out the authenticated user.
      *
@@ -487,7 +530,7 @@ class AuthController extends Controller
             $lastOtp = passwordResetModel::where('email', $email)->first();
             if ($lastOtp && $lastOtp->created_at) {
                 $createdAtAdjusted = $lastOtp->created_at->setTimezone('Asia/Ho_Chi_Minh');
-                $timeDiff =  $lastOtp->created_at->diffInSeconds(now());
+                $timeDiff = $lastOtp->created_at->diffInSeconds(now());
                 Log::info('Time difference check', [
                     'now' => now()->toDateTimeString(),
                     'created_at_original' => $lastOtp->created_at->toDateTimeString(),
@@ -691,7 +734,7 @@ class AuthController extends Controller
                 'message' => 'Could not delete user. ' . $e->getMessage()
             ], 500);
         }
-    }   
+    }
 
     public function hiddenUser(Request $request)
     {
