@@ -87,13 +87,12 @@ function initLoginForm() {
                 localStorage.setItem("jwt_token", data.token);
 
                 // Tính thời gian sống cookie = 60 phút
-                const maxAge = 60 * 60; // 60 phút (giây)
+                const maxAge = 60 * 60 * 60; // 60 phút (giây)
                 const isSecure = location.protocol === "https:";
 
                 // Set cookie token
-                document.cookie = `token=${data.token}; path=/; Max-Age=${maxAge}; SameSite=Lax${
-                    isSecure ? "; Secure" : ""
-                }`;
+                document.cookie = `auth_token=${data.token}; path=/; Max-Age=${maxAge}; SameSite=Lax${isSecure ? "; Secure" : ""
+                    }`;
 
                 // Redirect sau khi login
                 window.location.href = data.redirect || "/";

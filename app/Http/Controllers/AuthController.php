@@ -225,32 +225,32 @@ class AuthController extends Controller
         ])->withCookie(cookie('auth_token', $token, 60, '/', null, false, false));
     }
 
-public function refresh(Request $request)
-{
-    try {
-        $refreshToken = $request->input('refresh_token');
+    public function refresh(Request $request)
+    {
+        try {
+            $refreshToken = $request->input('refresh_token');
 
-        if (!$refreshToken) {
-            return response()->json(['status' => 'error', 'message' => 'Missing refresh token'], 400);
+            if (!$refreshToken) {
+                return response()->json(['status' => 'error', 'message' => 'Missing refresh token'], 400);
+            }
+
+            $user = JWTAuth::setToken($refreshToken)->authenticate();
+
+            if (!$user) {
+                return response()->json(['status' => 'error', 'message' => 'Invalid refresh token'], 401);
+            }
+
+            // cấp lại access token mới
+            $newAccessToken = JWTAuth::fromUser($user);
+
+            return response()->json([
+                'status' => 'success',
+                'token' => $newAccessToken,
+            ])->withCookie(cookie('auth_token', $newAccessToken, 60, '/', null, false, false));
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 401);
         }
-
-        $user = JWTAuth::setToken($refreshToken)->authenticate();
-
-        if (!$user) {
-            return response()->json(['status' => 'error', 'message' => 'Invalid refresh token'], 401);
-        }
-
-        // cấp lại access token mới
-        $newAccessToken = JWTAuth::fromUser($user);
-
-        return response()->json([
-            'status' => 'success',
-            'token' => $newAccessToken,
-        ])->withCookie(cookie('auth_token', $newAccessToken, 60, '/', null, false, false));
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 401);
     }
-}
 
     /**
      * Log out the authenticated user.
