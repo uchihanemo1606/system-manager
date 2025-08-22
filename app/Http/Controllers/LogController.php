@@ -164,7 +164,7 @@ class LogController extends Controller
             $toDate = $request->query('to_date');
             $fromTime = $request->query('from_time');
             $toTime = $request->query('to_time');
-            if ($fromDate || $toDate || $fromTime || $toTime) { 
+            if ($fromDate || $toDate || $fromTime || $toTime) {
                 $fromDateTime = null;
                 $toDateTime = null;
 
@@ -194,7 +194,8 @@ class LogController extends Controller
                 'domain',
                 'softwarePermission',
                 'hardwarePermission',
-            ])->paginate($perPage, ['*'], 'page', $page);
+            ])->orderBy('created_at', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
 
             $logsTransformed = $logs->getCollection()->map(function ($log) {
                 $data = $log->toArray();

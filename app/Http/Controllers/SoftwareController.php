@@ -63,7 +63,7 @@ class SoftwareController extends Controller
                         'permissions_name' => $permission,
                         'create_by' => $user->username,
                         'assigned_at' => now(),
-                    ]); 
+                    ]);
                 }
 
                 LogController::createLogAuto([
@@ -391,6 +391,8 @@ class SoftwareController extends Controller
                 'updatedSoftware',
                 'cập nhật phần mềm',
                 'phần mềm được cập nhật',
+                'sửa phần mềm',
+                'phần mềm đã được sửa'
             ];
             $updateCount = logModel::where(function ($q) use ($keywords) {
                 foreach ($keywords as $word) {
@@ -480,7 +482,7 @@ class SoftwareController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => [
-                    'updateCount' => $updateCount, 
+                    'updateCount' => $updateCount,
                     'total_software_all_time' => $totalSoftwareAllTime,
                     'deleted_software_all_time' => $deletedSoftwareAllTime,
                     'created_storage_size_bytes' => $createdStorageSize,

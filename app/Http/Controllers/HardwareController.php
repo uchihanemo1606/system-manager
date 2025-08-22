@@ -450,6 +450,8 @@ class HardwareController extends Controller
                 'updatedHardware',
                 'cập nhật phần cứng',
                 'phần cứng được cập nhật',
+                'sửa phần cứng',
+                'phần cứng đã được sửa'
             ];
             $updateCount = logModel::where(function ($q) use ($keywords) {
                 foreach ($keywords as $word)
