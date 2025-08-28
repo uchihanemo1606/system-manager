@@ -1,9 +1,16 @@
 <?php
 
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\View; 
 
+Route::get('/rules_files/{filename}', function ($filename) {
+    $path = storage_path('/app/public/rules_files/' . $filename);
+    if (!file_exists($path)) {
+        abort(code: 404);
+    }
+    return response()->download($path);
+});
 Route::get('/login', fn() => view('pages/login'));
 Route::get('/forgot_password', fn() => view('pages/forgot_password'));
 Route::get('/apis', fn() => view('scribe/index'));

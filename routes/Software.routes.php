@@ -7,16 +7,16 @@ use App\Http\Controllers\SoftwareController;
 use App\Http\Controllers\softwarefileController;
 
 
-Route::post('/createsoftware',[SoftwareController::class, 'createSoftware'])
+Route::post('/createsoftware', [SoftwareController::class, 'createSoftware'])
     ->middleware('check.permission')
     ->name('software.create');
-Route::get('/getallsoftware',[SoftwareController::class, 'getAllSoftware'])
+Route::get('/getallsoftware', [SoftwareController::class, 'getAllSoftware'])
     ->middleware('check.permission')
     ->name('software.list');
 Route::patch('/updatesoftware/{id}', [SoftwareController::class, 'updateSoftware'])
     ->middleware('check.permission')
     ->name('software.edit');
-Route::delete('/deleteSoftware', [SoftwareController::class,'deleteSoftware'])
+Route::delete('/deleteSoftware', [SoftwareController::class, 'deleteSoftware'])
     ->middleware('check.permission')
     ->name('software.delete');
 Route::get('/getsoftwarebyname', [SoftwareController::class, 'getSoftwareByName'])
@@ -54,6 +54,8 @@ Route::get('/getsoftwarebyid', [SoftwareController::class, 'getSoftwareById'])
     ->middleware('check.permission')
     ->name('software.detail');
 
-    // =======================================================================================SOFTWARE FILE ROUTE============================================================================================================================
-    
+// =======================================================================================SOFTWARE FILE ROUTE============================================================================================================================
+Route::get('/getMySoftwarePermissionBySoftware/{softwareId}', [SoftwareController::class, 'getMySoftware']);
 Route::get('/getsoftwareanalytics', [SoftwareController::class, 'getSoftwareAnalytics']);
+
+Route::get('/software_files/{filename}/{softwareid}', [softwarefileController::class, 'downloadSoftwareFile']);

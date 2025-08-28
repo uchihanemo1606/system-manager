@@ -1,5 +1,5 @@
 import { create_user } from "../api/user";
-import { get_all_role } from "../api/role";
+import { create_user_role, get_all_role } from "../api/role";
 import { showToast } from "../component/toast";
 import { validateUserData } from "../component/requiredFields/user_required";
 
@@ -65,7 +65,12 @@ function initUserCreateModal() {
                 email: data.email.trim(),
                 roles,
             });
-
+            roles.forEach(async (role) => {
+                await create_user_role({
+                    username: data.username.trim(),
+                    role_name: role,
+                });
+            });
             showToast({
                 message: "Tạo người dùng thành công!",
                 type: "success",

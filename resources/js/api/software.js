@@ -90,18 +90,23 @@ export const get_all_software_file_by_id = async (id) => {
 };
 
 export const get_software_by_id = async ({ id }) => {
-    const res = await apiFetch(
-        `/api/getsoftwarebyid?id=${encodeURIComponent(id)}`,
-        {
-            headers: defaultHeaders(),
-        }
-    );
+    const res = await apiFetch(`/api/getsoftwarebyid?id=${encodeURIComponent(id)}`, {
+        headers: defaultHeaders(),
+    });
+
     const data = await res.json();
+
     if (res.ok) {
-        return data.software || data;
+        // backend trả về {status: "success", data: software}
+        return data.software || data;  
+    } else {
+        // Tạo object lỗi có status để bên catch kiểm tra
+        const error = new Error(data.message || "Lỗi lấy dữ liệu phần mềm");
+        error.status = res.status;
+        throw error;
     }
-    return [];
 };
+
 export async function delete_software({ id }) {
     const res = await apiFetch(`/api/deleteSoftware?id=${id}`, {
         method: "DELETE",
@@ -221,3 +226,13 @@ export const get_software_analytics = async (filters = {}) => {
     if (!res.ok) throw new Error("Failed to fetch hardware analytics");
     return await res.json();
 };
+export const get_my_software_permission_by_software = async (softwareId) => {
+    const res = await apiFetch(`/api/getMySoftwarePermissionBySoftware/${encodeURIComponent(softwareId)}`, {
+        headers: defaultHeaders(),
+    });
+    const data = await res.json();
+    if (res.ok) {
+        return data || [];
+    }
+    return [];
+}

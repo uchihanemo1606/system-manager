@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\logModel;
 use App\Models\softwareFileModel;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\SoftwareModel;
@@ -166,9 +167,14 @@ class SoftwareController extends Controller
             $isManager = $user->can('viewAny', SoftwareModel::class);
 
             $softwareQuery = SoftwareModel::query();
+            $isSystemViewer = DB::table('user_role')
+                ->join('role_permissions', 'user_role.role_name', '=', 'role_permissions.role_name')
+                ->where('user_role.username', $user->username)
+                ->where('role_permissions.permission_name', 'xem chi tiết hệ thống')
+                ->exists();
 
             // Nếu không phải quản lý, chỉ lấy những phần mềm user được phép xem
-            if (!$isManager) {
+            if (!$isManager && !$isSystemViewer) {
                 $allowedIds = softwarePermissionModel::where('user_name', $user->username)
                     ->where('permissions_name', 'xem phần mềm')
                     ->pluck('software_id');
@@ -361,9 +367,21 @@ class SoftwareController extends Controller
             if (!$id) {
                 return response()->json(['message' => 'Software id is required'], 400);
             }
+            $actived = softwarePermissionModel::where('user_name', $user->username) // hoặc 'user_name' nếu đúng
+                ->where('software_id', $id)
+                ->where('permissions_name', 'xem phần mềm')
+                ->first();
+            $isSystemViewer = DB::table('user_role')
+                ->join('role_permissions', 'user_role.role_name', '=', 'role_permissions.role_name')
+                ->where('user_role.username', $user->username)
+                ->where('role_permissions.permission_name', 'xem chi tiết hệ thống')
+                ->exists();
             $software = SoftwareModel::where('id', 'like', '%' . $id . '%')->get();
             if ($software->isEmpty()) {
                 return response()->json(['message' => 'No software found with that id'], 404);
+            }
+            if (!$actived && !$isSystemViewer) {
+                return response()->json(['message' => 'bạn không có quyền xem phần mềm này.'], 403);
             }
             return response()->json([
                 'status' => 'success',
@@ -506,7 +524,30 @@ class SoftwareController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Could not retrieve software analytics. ' . $e->getMessage()], 500);
         }
     }
+    public function getMySoftware(Request $request, $softwareId)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
 
+            $permissions = softwarePermissionModel::where('user_name', $user->username)
+                ->where('software_id', $softwareId)
+                ->get(); 
+            return response()->json([
+                'status' => 'success',
+                'data' => $permissions
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is invalid.'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Token is absent or could not be parsed.'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Could not retrieve permissions. ' . $e->getMessage()], 500);
+        }
+    }
     private function formatBytes($bytes, $precision = 2)
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];

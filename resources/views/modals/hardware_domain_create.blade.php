@@ -13,13 +13,17 @@
         <div class="col">
             <input type="text" id="filter-db" class="form-control" placeholder="Lọc theo Database">
         </div>
-        <div class="col">
+        <div class="col d-none">
             <select id="filter-deleted" class="form-select">
                 <option value="false" selected>Chưa xóa</option>
                 <option value="true">Đã xóa</option>
                 <option value="all">Tất cả</option>
             </select>
         </div>
+        <div class="text-end mb-3">
+            <button class="btn btn-outline-primary" id="search-hardware-btn">Tìm kiếm</button>
+        </div>
+
     </div>
 
 

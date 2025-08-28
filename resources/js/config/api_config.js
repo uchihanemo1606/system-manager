@@ -44,9 +44,13 @@ const refreshToken = async () => {
 export const apiFetch = async (url, options = {}) => {
     let headers = { ...defaultHeaders(), ...(options.headers || {}) };
 
+    // Nếu body là FormData thì loại bỏ Content-Type để trình duyệt tự set
+    if (options.body instanceof FormData) {
+        delete headers['Content-Type'];
+    }
+
     let response = await fetch(url, { ...options, headers });
 
-    // Nếu token hết hạn → refresh và gọi lại
     if (response.status === 401) {
         try {
             const newToken = await refreshToken();
@@ -55,6 +59,10 @@ export const apiFetch = async (url, options = {}) => {
                 ...(options.headers || {}),
                 Authorization: `Bearer ${newToken}`,
             };
+
+            if (options.body instanceof FormData) {
+                delete headers['Content-Type'];
+            }
 
             response = await fetch(url, { ...options, headers });
         } catch (err) {

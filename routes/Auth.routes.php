@@ -18,6 +18,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/getuser', [AuthController::class, 'getAuthenticatedUser']);
 Route::patch('/updateuser', [AuthController::class, 'updateUser']);
+Route::patch('/updateuserbyadmin', [AuthController::class, 'updateUserByAdmin'])
+    ->middleware('check.permission')
+    ->name('user.edit');
 Route::patch('/changepassword', [AuthController::class, 'changePassword']);
 // Route::get('/getuserbyid/{id}', [UserController::class, 'getUserById']);
 route::get('/getallusers', [UserController::class, 'getAllUsers'])->middleware('check.permission')->name('user.list');

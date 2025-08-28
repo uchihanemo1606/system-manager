@@ -789,5 +789,72 @@ class AuthController extends Controller
             ], 500);
         }
     }
+    public function updateUserByAdmin(Request $request)
+    {
+        try {
+            if (!$admin = JWTAuth::parseToken()->authenticate()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Admin user not found.'
+                ], 404);
+            }
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not authenticate admin user. ' . $e->getMessage()
+            ], 500);
+        }
+
+        $request->validate([
+            'username' => 'required|string|exists:users,username',
+            'fullName' => 'sometimes|string|max:100',
+            'email' => [
+                'sometimes',
+                'string',
+                'email',
+                'max:100',
+                Rule::unique('users')->ignore($request->username, 'username'),
+            ],
+            'hidden' => 'sometimes|boolean',
+            'is_delete' => 'sometimes|boolean',
+        ]);
+
+        $user = UserModel::where('username', $request->username)->first();
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        try {
+            $user->update($request->only(['fullName', 'email', 'hidden', 'is_delete']));
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update user. ' . $e->getMessage(),
+            ], 500);
+        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'cập nhật thành công.',
+            'user' => $user->fresh(),
+        ]);
+    }
 
 }

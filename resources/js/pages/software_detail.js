@@ -59,7 +59,7 @@ function loadDomainList(softwareId) {
 function loadSoftware(softwareId) {
     get_software_by_id({ id: softwareId })
         .then(({ data }) => {
-            if (!data) return showToast({ message: "Không tìm thấy phần mềm.", type: "error" });
+            console.log(data); 
             if (data.is_delete) {
                 document.getElementById("software-deleted-warning").classList.remove("d-none");
                 detailBlock.style.display = "none";
@@ -79,7 +79,23 @@ function loadSoftware(softwareId) {
             }
             updateToggleBtn();
         })
-    // .catch(() => showToast({ message: "Lỗi lấy dữ liệu phần mềm.", type: "error" }));
+        .catch((err) => {
+            console.log("Full error:", err);
+
+            let message = "Lỗi lấy dữ liệu phần mềm.";
+
+            if (err?.response?.status === 403) {
+                message = "Bạn không có quyền xem phần mềm này.";
+            } else if (err?.response?.status) {
+                message = "Phần mềm không tồn tại.";
+            } else if (err?.message) {
+                message = err.message;
+            }
+
+            showToast({ message, type: "error" });
+        });
+
+
 }
 
 function renderSoftwareInfo(software) {

@@ -4,9 +4,11 @@
             <h4 class="card-title mb-0">Quy chế</h4>
 
             <!-- Nút mở modal -->
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRuleModal">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRuleModal"
+                id="create-rule-button">
                 <i class="mdi mdi-plus"></i> Tạo Quy Chế
             </button>
+
         </div>
 
         <!-- Bộ lọc -->

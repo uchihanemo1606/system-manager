@@ -1,6 +1,7 @@
-import { deleteUser, get_all_user, hideUser } from "../api/user";
+import { deleteUser, get_all_user, hideUser, updateuserbyadmin } from "../api/user";
 import { get_all_role } from "../api/role";
 import { renderPagination } from "../component/log/log_utils";
+import { showToast } from "../component/toast";
 let hasLoadedRolesForFilter = false;
 let allUsers = [];
 let currentPage = 1;
@@ -13,7 +14,9 @@ async function loadUsers() {
 
     try {
         allUsers = await get_all_user();
-        filteredUsers = allUsers;
+        // filteredUsers = allUsers;
+        filteredUsers = allUsers.filter(u => u.is_delete != true);
+
         renderUsersPage(1); // render trang đầu tiên
     } catch (err) {
         console.error("Lỗi khi tải danh sách người dùng:", err);
@@ -48,8 +51,8 @@ function renderUsers(users) {
 
             if (hasPermission("user.update")) {
                 actions += `<li class="list-inline-item px-2">
-                    <a href="#" onclick="handleHideUser('${u.username}')">
-                        <i class="bx bx-hide"></i>
+                    <a href="#" onclick="handleHideUser('${u.username}', ${u.hidden})" title="${u.hidden ? 'Hiện' : 'Ẩn'} người dùng">
+                        <i class="bx ${u.hidden ? 'bx-hide' : 'bx-show'}"></i>
                     </a>
                 </li>`;
             }
@@ -57,7 +60,7 @@ function renderUsers(users) {
             if (hasPermission("user.update")) {
                 actions += `
                 <li class="list-inline-item px-2"><a href="#"><i class="bx bx-wrench" 
-                    onclick="loadModal('user_edit', { username: '${u.username}' })" title="Chỉnh sửa người dùng"
+                    onclick="loadModal('update_user', { username: '${u.username}' })" title="Chỉnh sửa người dùng"
                 >
                     </i></a>
                 </li>`;
@@ -81,9 +84,10 @@ function renderUsers(users) {
                         </div>
                     </td>
                     <td>
-                        <h5 class="font-size-14 mb-1">
-                            <a href="#" class="text-dark">${u.username}</a>
-                        </h5>
+                    <h5 class="font-size-14 mb-1">
+                        <a href="#" class="text-dark">${u.username}</a>
+                        ${u.is_delete ? '<span class="badge badge-danger ml-1">Đã xóa</span>' : ''}
+                    </h5> 
                     </td>
                     <td class="text-center">${u.fullName ||
                 `  <div class="team">
@@ -103,12 +107,6 @@ function renderUsers(users) {
         })
         .join("");
 }
-// <td class="text-center">${(u.roles || [])
-// .map(
-//     (r) =>
-//         `<a href="#" class="badge badge-soft-primary font-size-11 m-1">${r}</a>`
-// )
-// .join("")}</td>
 async function loadRolesForFilter() {
     if (hasLoadedRolesForFilter) return;
     hasLoadedRolesForFilter = true;
@@ -132,6 +130,26 @@ async function loadRolesForFilter() {
 }
 document.addEventListener("DOMContentLoaded", async () => {
     const filterForm = document.getElementById("filter-form");
+    // filterForm?.addEventListener("submit", (e) => {
+    //     e.preventDefault();
+    //     const params = Object.fromEntries(new FormData(filterForm).entries());
+
+    //     const filtered = allUsers.filter((u) =>
+    //         (!params.username || u.username?.toLowerCase().includes(params.username.toLowerCase())) &&
+    //         (!params.email || u.email?.toLowerCase().includes(params.email.toLowerCase())) &&
+    //         (!params.fullName || u.fullName?.toLowerCase().includes(params.fullName.toLowerCase())) &&
+    //         (!params.role || (u.roles || []).includes(params.role)) &&
+    //         (
+    //             // ✅ lọc theo trạng thái xóa
+    //             (params.deletedStatus === "deleted" && u.is_delete === true) ||
+    //             (params.deletedStatus === "all") ||
+    //             (!params.deletedStatus && u.is_delete !== true) // mặc định: chỉ hiện user chưa bị xóa
+    //         )
+    //     );
+
+    //     filteredUsers = filtered;
+    //     renderUsersPage(1);
+    // });
     filterForm?.addEventListener("submit", (e) => {
         e.preventDefault();
         const params = Object.fromEntries(new FormData(filterForm).entries());
@@ -140,7 +158,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             (!params.username || u.username?.toLowerCase().includes(params.username.toLowerCase())) &&
             (!params.email || u.email?.toLowerCase().includes(params.email.toLowerCase())) &&
             (!params.fullName || u.fullName?.toLowerCase().includes(params.fullName.toLowerCase())) &&
-            (!params.role || (u.roles || []).includes(params.role))
+            (!params.role || (u.roles || []).includes(params.role)) &&
+            (
+                // ✅ Lọc trạng thái xóa
+                (params.deletedStatus === "deleted" && u.is_delete == true) ||
+                (params.deletedStatus === "all") ||
+                (!params.deletedStatus && u.is_delete != true) // ✅ mặc định
+            )
         );
 
         filteredUsers = filtered;
@@ -153,20 +177,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 window.handleDeleteUser = async function (username) {
     if (!confirm(`Bạn có chắc muốn xóa tài khoản ${username}?`)) return;
     try {
-        const res = await deleteUser(username);
-        alert(res.message);
+        const res = await updateuserbyadmin({ username, is_delete: true });
+        showToast(
+            { type: "success", title: "Thành công", message: 'xóa người dùng thành công' },
+        )
         await loadUsers(); // reload danh sách
     } catch (err) {
         alert(err.message);
     }
 };
 
-window.handleHideUser = async function (username) {
+window.handleHideUser = async function (username, status) {
     if (!confirm(`Bạn có chắc muốn ẩn tài khoản ${username}?`)) return;
     try {
-        const res = await hideUser(username);
-        alert(res.message);
+        const res = await updateuserbyadmin({ username, hidden: status ? false : true });
+        showToast(
+            { type: "success", title: "Thành công", message: status ? 'hiện người dùng thành công' : 'ẩn người dùng thành công' },
+        )
         await loadUsers(); // reload danh sách
+
     } catch (err) {
         alert(err.message);
     }
@@ -205,5 +234,8 @@ window.initUserCreateModal = async function () {
     }
 };
 window.addEventListener("userCreated", () => {
+    loadUsers();
+});
+window.addEventListener("userUpdated", () => {
     loadUsers();
 });

@@ -1,4 +1,4 @@
-import { defaultHeaders, apiFetch } from "../config/api_config"; 
+import { defaultHeaders, apiFetch } from "../config/api_config";
 export async function create_hardware(data) {
     const res = await apiFetch("/api/createhardware", {
         method: "POST",
@@ -28,16 +28,14 @@ export const get_all_hardware = async () => {
     }
     return [];
 };
-export const get_all_hardware_connect_domain = async () => {
-    const res = await apiFetch("api/getallhardwareconnectdomain", {
+export const get_all_hardware_connect_domain = async (query = "") => {
+    const res = await apiFetch(`api/getallhardwareconnectdomain?${query}`, {
         headers: defaultHeaders(),
     });
     const data = await res.json();
-    if (res.ok) {
-        return data.hardware || data;
-    }
-    return [];
+    return res.ok ? (data.hardware || data) : [];
 };
+
 export const get_hardware_by_ip = async ({ ip }) => {
     const res = await apiFetch(
         `/api/gethardwarebyip?ip=${encodeURIComponent(ip)}`,
@@ -48,16 +46,20 @@ export const get_hardware_by_ip = async ({ ip }) => {
     const data = await res.json();
     if (res.ok) {
         return data.hardware || data;
+    } else {
+        // Tạo object lỗi có status để bên catch kiểm tra
+        const error = new Error(data.message || "Lỗi lấy dữ liệu phần cứng");
+        error.status = res.status;
+        throw error;
     }
-    return [];
 };
 
-export async function update_hardware(data,oldIp) {
+export async function update_hardware(data, oldIp) {
     const res = await apiFetch(`/api/updatehardware/${oldIp}`, {
         method: "PATCH",
         headers: defaultHeaders(),
         body: JSON.stringify(data),
-    }); 
+    });
     let result;
     try {
         result = await res.json();

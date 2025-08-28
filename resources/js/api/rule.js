@@ -67,6 +67,7 @@ export async function create_rule(formData) {
     if (!res.ok) throw result; // giữ nguyên lỗi để hiển thị errors từ server
     return result;
 }
+
 export async function create_software_rule(payload) {
     const res = await apiFetch("api/createsoftwarerule", {
         method: "POST",

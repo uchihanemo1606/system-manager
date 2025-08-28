@@ -22,14 +22,20 @@ class HardwarePolicy
      * @return bool
      */
     public function viewAny(UserModel $user): bool
-{
-    // Chỉ cho phép nếu user có quyền xem ít nhất 1 phần cứng
-    return DB::table('hardware_permissions')
-        ->where('user_name', $user->username)
-        ->where('permissions_name', 'hardware.list')
-        ->exists();
-}
-
+    {
+        // Chỉ cho phép nếu user có quyền xem ít nhất 1 phần cứng
+        return DB::table('hardware_permissions')
+            ->where('user_name', $user->username)
+            ->where('permissions_name', 'hardware.list')
+            ->exists();
+    }
+    public function isManager(UserModel $user): bool
+    {
+        return DB::table('user_roles')
+            ->where('user_name', $user->username)
+            ->where('role_permission', 'xem chi tiết hệ thống')
+            ->exists();
+    }
     public function view(UserModel $user, hardwareModel $hardware): bool
     {
         return $this->checkHardwarePermission($user, $hardware, 'hardware.list');

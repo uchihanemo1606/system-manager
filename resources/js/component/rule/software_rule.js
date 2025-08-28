@@ -6,10 +6,11 @@ import {
     delete_software_rule_by_id,
     update_software_rule_by_id
 } from "../../api/rule";
-
+import { get_my_software_permission_by_software } from "../../api/software";
 import { showToast } from "../../component/toast";
 
 document.addEventListener("DOMContentLoaded", async function () {
+
     const form = document.getElementById("create-rule-form");
     const tableBody = document.getElementById("software-rule-table-body");
 
@@ -19,6 +20,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!softwareId) {
         tableBody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">Không tìm thấy ID phần mềm trên URL</td></tr>`;
         return;
+    }
+    let canEditRule = false; // mặc định: không có quyền
+
+    const permissionsRes = await get_my_software_permission_by_software(softwareId);
+    const permissionNames = permissionsRes.data.map(p => p.permissions_name);
+    canEditRule = permissionNames.includes("sửa phần mềm") || permissionNames.includes("quản lý quy chế");
+    if (!canEditRule) {
+        const createBtn = document.getElementById("create-rule-button");
+        if (createBtn) createBtn.style.display = "none";
     }
 
     async function loadSoftwareRules() {
@@ -55,19 +65,25 @@ document.addEventListener("DOMContentLoaded", async function () {
                                                     <i class="mdi mdi-file-remove-outline"></i>
                                                 </button>`
                     }
-                                        <button class="btn btn-outline-warning btn-sm btn-edit-rule" 
-                                            data-id="${item.rule_id}" 
-                                            data-name="${item.rule_name}"
-                                            data-description="${item.rule_description || ''}"
-                                            data-category="${item.category_rule_id}"
-                                            data-file="${item.file_url || ''}"
-                                            title="Sửa">
-                                            <i class="mdi mdi-pencil-outline"></i>
-                                        </button>
+                                        ${canEditRule
+                                        ? `<button class="btn btn-outline-warning btn-sm btn-edit-rule" 
+                                                data-id="${item.rule_id}" 
+                                                data-name="${item.rule_name}"
+                                                data-description="${item.rule_description || ''}"
+                                                data-category="${item.category_rule_id}"
+                                                data-file="${item.file_url || ''}"
+                                                title="Sửa">
+                                                <i class="mdi mdi-pencil-outline"></i>
+                                            </button>
 
-                                        <button class="btn btn-outline-danger btn-sm btn-delete-rule" data-id="${item.software_rule_id}" title="Xóa">
-                                            <i class="mdi mdi-delete-outline"></i>
-                                        </button>
+                                            <button class="btn btn-outline-danger btn-sm btn-delete-rule" 
+                                                data-id="${item.software_rule_id}" 
+                                                title="Xóa">
+                                                <i class="mdi mdi-delete-outline"></i>
+                                            </button>`
+                                        : ""
+                                        }
+
                                     </div>
                                 </td>
                             `;

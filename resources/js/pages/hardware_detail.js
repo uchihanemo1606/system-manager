@@ -56,8 +56,19 @@ if (ip) {
             }
         })
         .catch((err) => {
-            console.error("Lỗi lấy dữ liệu phần cứng:", err);
-            showToast({ message: "Lỗi khi lấy thông tin phần cứng. Vui lòng thử lại sau.", type: "error" });
+            console.log("Full error:", err);
+
+            let message = "Lỗi lấy dữ liệu phần cứng.";
+
+            if (err?.response?.status === 403) {
+                message = "Bạn không có quyền xem phần cứng này.";
+            } else if (err?.response?.status) {
+                message = "Phần cứng không tồn tại.";
+            } else if (err?.message) {
+                message = err.message;
+            }
+
+            showToast({ message, type: "error" });
         });
 }
 
@@ -126,30 +137,30 @@ async function showField(field) {
                 .map(e => `<option value="${e.name}" ${e.name === viewEl.textContent.trim() ? "selected" : ""}>${e.name}</option>`)
                 .join("");
             inputEl.dispatchEvent(new Event("change")); // <-- Thêm dòng này để trigger load OS version
-        } 
-        
+        }
+
         else if (field === "osver") {
             const osValue = getValue("os");
             if (!osValue) return;
             const versionList = await get_versions_by_os(osValue);
             renderSelect(inputEl, versionList, viewEl.textContent.trim());
-        } 
-        
+        }
+
         else if (field === "db") {
             const dbList = await get_all_hardware_database();
             inputEl.innerHTML = dbList.data
                 .map(e => `<option value="${e.dbname}" ${e.dbname === viewEl.textContent.trim() ? "selected" : ""}>${e.dbname}</option>`)
                 .join("");
             inputEl.dispatchEvent(new Event("change")); // <-- Thêm dòng này để trigger load DB version
-        } 
-        
+        }
+
         else if (field === "dbver") {
             const dbValue = getValue("db");
             if (!dbValue) return;
             const versionList = await get_versions_by_dbname(dbValue);
             renderSelect(inputEl, versionList, viewEl.textContent.trim());
-        } 
-        
+        }
+
         else {
             inputEl.value = viewEl.textContent.trim();
         }

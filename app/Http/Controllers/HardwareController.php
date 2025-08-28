@@ -23,56 +23,56 @@ use Carbon\Carbon;
 class HardwareController extends Controller
 {
     public function createHardware(Request $request)
-        {
-            try {
+    {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-        // Validate the request data
-        $request->validate([
-            'ip' => 'required|string|max:255',
-            'dbname' => 'required|string|max:100',
-            'dbversion' => 'required|string|max:100',
-            'isVirtualServer' => 'required|boolean',
-            'OS' => 'required|string|max:100',
-            'OSver' => 'required|string|max:100',
-            'hdd' => 'required|string|max:100',
-            'ram'=> 'required|string|max:100',
-            'services' => 'nullable|string|max:1000',
-            'created_by'=> $user->username,
-        ]);
-
-        // Create a new hardware record
-        $hardware = new hardwareModel();
-        $hardware->ip = $request->input('ip');
-        $hardware->dbname = $request->input('dbname');
-        $hardware->dbversion = $request->input('dbversion');
-        $hardware->isVirtualServer = $request->input('isVirtualServer');
-        $hardware->OS = $request->input('OS');
-        $hardware->OSver = $request->input('OSver');
-        $hardware->hdd = $request->input('hdd');
-        $hardware->ram = $request->input('ram');
-        $hardware->services = $request->input('services');
-        $hardware->created_by = $user->username;
-        // Save the hardware record
-        if ($hardware->save()) {
-
-            $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xóa phần cứng','thêm người dùng quản lý phần cứng','sửa người dùng quản lý phần cứng','xóa người dùng quản lý phần cứng'];
-            foreach ($fullPermissions as $permission) {
-                hardwarePemisssionModel::create([
-                    'hardware_ip' => $hardware->ip,
-                    'user_name' => $user->username,
-                    'permissions_name' => $permission,
-                    'user_createby' => $user->username,
-                    'assigned_at' => now(),
-                ]);
-            }
-            LogController::createLogAuto([
-                'username' => $user->username,
-                'hardware_ip' => $hardware->ip,
-                'message' => "User {$user->fullName} đã tạo phần cứng mới có IP là  {$hardware->ip}",
+            // Validate the request data
+            $request->validate([
+                'ip' => 'required|string|max:255',
+                'dbname' => 'required|string|max:100',
+                'dbversion' => 'required|string|max:100',
+                'isVirtualServer' => 'required|boolean',
+                'OS' => 'required|string|max:100',
+                'OSver' => 'required|string|max:100',
+                'hdd' => 'required|string|max:100',
+                'ram' => 'required|string|max:100',
+                'services' => 'nullable|string|max:1000',
+                'created_by' => $user->username,
             ]);
+
+            // Create a new hardware record
+            $hardware = new hardwareModel();
+            $hardware->ip = $request->input('ip');
+            $hardware->dbname = $request->input('dbname');
+            $hardware->dbversion = $request->input('dbversion');
+            $hardware->isVirtualServer = $request->input('isVirtualServer');
+            $hardware->OS = $request->input('OS');
+            $hardware->OSver = $request->input('OSver');
+            $hardware->hdd = $request->input('hdd');
+            $hardware->ram = $request->input('ram');
+            $hardware->services = $request->input('services');
+            $hardware->created_by = $user->username;
+            // Save the hardware record
+            if ($hardware->save()) {
+
+                $fullPermissions = ['xem phần cứng', 'sửa phần cứng', 'xóa phần cứng', 'thêm người dùng quản lý phần cứng', 'sửa người dùng quản lý phần cứng', 'xóa người dùng quản lý phần cứng'];
+                foreach ($fullPermissions as $permission) {
+                    hardwarePemisssionModel::create([
+                        'hardware_ip' => $hardware->ip,
+                        'user_name' => $user->username,
+                        'permissions_name' => $permission,
+                        'user_createby' => $user->username,
+                        'assigned_at' => now(),
+                    ]);
+                }
+                LogController::createLogAuto([
+                    'username' => $user->username,
+                    'hardware_ip' => $hardware->ip,
+                    'message' => "User {$user->fullName} đã tạo phần cứng mới có IP là  {$hardware->ip}",
+                ]);
 
                 return response()->json(['message' => 'Hardware created successfully', 'data' => $hardware], 201);
             } else {
@@ -109,22 +109,32 @@ class HardwareController extends Controller
             ]);
 
             $hardwareQuery = hardwareModel::query();
+            $isSystemViewer = DB::table('user_role')
+                ->join('role_permissions', 'user_role.role_name', '=', 'role_permissions.role_name')
+                ->where('user_role.username', $user->username)
+                ->where('role_permissions.permission_name', 'xem chi tiết hệ thống')
+                ->exists();
 
-            // Nếu người dùng không phải là quản lý, chỉ lấy những hardware họ được phép xem
-            if (!$isManager) {
-                Log::info('User is not a manager, applying specific permissions.', ['username' => $user->username]);
+            if (
+                !$isSystemViewer
+            ) {
+                // Nếu người dùng không phải là quản lý, chỉ lấy những hardware họ được phép xem 
+                if (!$isManager) {
+                    Log::info('User is not a manager, applying specific permissions.', ['username' => $user->username]);
 
-                $allowedIps = DB::table('hardware_permissions')
-                    ->where('user_name', $user->username)
-                    ->where('permissions_name', 'xem phần cứng')
-                    ->pluck('hardware_ip');
+                    $allowedIps = DB::table('hardware_permissions')
+                        ->where('user_name', $user->username)
+                        ->where('permissions_name', 'xem phần cứng')
+                        ->pluck('hardware_ip');
 
-                Log::info('Found allowed IPs for user', ['username' => $user->username, 'allowedIps' => $allowedIps->toArray()]);
+                    Log::info('Found allowed IPs for user', ['username' => $user->username, 'allowedIps' => $allowedIps->toArray()]);
 
-                $hardwareQuery->whereIn('ip', $allowedIps);
-            } else {
-                Log::info('User is a manager, will fetch all hardware.', ['username' => $user->username]);
+                    $hardwareQuery->whereIn('ip', $allowedIps);
+                } else {
+                    Log::info('User is a manager, will fetch all hardware.', ['username' => $user->username]);
+                }
             }
+
 
             // Thực thi query và lấy kết quả
             $hardware = $hardwareQuery->get();
@@ -308,17 +318,26 @@ class HardwareController extends Controller
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-
             $ip = $request->query('ip');
             if (!$ip) {
                 return response()->json(['status' => 'error', 'message' => 'IP is required'], 400);
             }
-
+            $actived = hardwarePemisssionModel::where('user_name', $user->username) // hoặc 'user_name' nếu đúng
+                ->where('hardware_ip', $ip)
+                ->where('permissions_name', 'xem phần cứng')
+                ->first();
+            $isSystemViewer = DB::table('user_role')
+                ->join('role_permissions', 'user_role.role_name', '=', 'role_permissions.role_name')
+                ->where('user_role.username', $user->username)
+                ->where('role_permissions.permission_name', 'xem chi tiết hệ thống')
+                ->exists();
             $hardware = hardwareModel::where('ip', $ip)->first();
             if (!$hardware) {
                 return response()->json(['status' => 'error', 'message' => 'No hardware found'], 404);
             }
-
+            if (!$actived && !$isSystemViewer) {
+                return response()->json(['message' => 'bạn không có quyền xem phần cứng này.'], 403);
+            }
             return response()->json($hardware);
         } catch (TokenExpiredException $e) {
             return response()->json(['status' => 'error', 'message' => 'Token has expired.'], 401);
@@ -712,7 +731,7 @@ class HardwareController extends Controller
     //     }
     // }
 
-    public function getAllHardwareConnectDomain()
+    public function getAllHardwareConnectDomain(Request $request)
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
@@ -720,11 +739,33 @@ class HardwareController extends Controller
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
-            // Truy vấn lấy danh sách phần cứng chưa bị xóa
-            $hardwareList = hardwareModel::query()
-                ->where('is_delete', false)
-                ->select('ip', 'dbname', 'dbversion', 'OS', 'OSver', 'is_delete')
-                ->get();
+            // Bắt đầu truy vấn
+            $query = hardwareModel::query()->where('is_delete', false);
+
+            // Lọc theo từng trường nếu có
+            if ($request->filled('ip')) {
+                $query->where('ip', 'like', '%' . $request->query('ip') . '%');
+            }
+
+            if ($request->filled('dbname')) {
+                $query->where('dbname', 'like', '%' . $request->query('dbname') . '%');
+            }
+
+            if ($request->filled('dbversion')) {
+                $query->where('dbversion', 'like', '%' . $request->query('dbversion') . '%');
+            }
+
+            if ($request->filled('OS')) {
+                $query->where('OS', 'like', '%' . $request->query('OS') . '%');
+            }
+
+            if ($request->filled('OSver')) {
+                $query->where('OSver', 'like', '%' . $request->query('OSver') . '%');
+            }
+
+            // Truy vấn kết quả
+            $hardwareList = $query->select('ip', 'dbname', 'dbversion', 'OS', 'OSver', 'is_delete')->get();
+
 
 
             if ($hardwareList->isEmpty()) {

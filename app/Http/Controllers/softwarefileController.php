@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\softwarePermissionModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -18,10 +19,10 @@ class softwarefileController extends Controller
 
     public function createSoftwarefile(Request $request)
     {
-    try {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-            return response()->json(['message' => 'Please login to use this function'], 401);
-        }
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
 
             $validated = $request->validate([
                 'software_id' => 'required|string|exists:software,id|max:25',
@@ -56,10 +57,10 @@ class softwarefileController extends Controller
             ]);
 
             LogController::createLogAuto([
-                    'username' => $user->username,
-                    'software_file_id' => $softwareFile->id,
-                    'message' => "$user->fullName đã thêm một file phần mềm mới: $softwareFile->file_name",
-                ]);
+                'username' => $user->username,
+                'software_file_id' => $softwareFile->id,
+                'message' => "$user->fullName đã thêm một file phần mềm mới: $softwareFile->file_name",
+            ]);
 
             return response()->json([
                 'message' => 'Software file uploaded and created successfully.',
@@ -152,8 +153,8 @@ class softwarefileController extends Controller
 
     // }
 
-    
-    
+
+
     public function updateSoftwareFile(Request $request, $softwareFileid)
     {
         try {
@@ -171,7 +172,7 @@ class softwarefileController extends Controller
             $validated = $request->validate([
                 'software_id' => 'nullable|integer|exists:software,id',
                 'file_name' => 'nullable|string|max:255',
-                'file' => 'nullable|file|max:10240', 
+                'file' => 'nullable|file|max:10240',
                 'description' => 'nullable|string|max:10000',
             ]);
 
@@ -189,10 +190,10 @@ class softwarefileController extends Controller
             $softwareFile->save();
 
             LogController::createLogAuto([
-                    'username' => $user->username,
-                    'software_file_id' => $softwareFile->id,
-                    'message' => "$user->fullName đã sửa file phần mềm: $softwareFile->file_name",
-                ]);
+                'username' => $user->username,
+                'software_file_id' => $softwareFile->id,
+                'message' => "$user->fullName đã sửa file phần mềm: $softwareFile->file_name",
+            ]);
 
             return response()->json([
                 'message' => 'Software file updated successfully.',
@@ -344,7 +345,7 @@ class softwarefileController extends Controller
                     'status' => 'error',
                     'message' => 'No software files found for this software.'
                 ], 404);
-            }  
+            }
             LogController::createLogAuto([
                 'username' => $user->username,
                 'message' => "$user->fullName đã xem danh sách file phần mềm của phần mềm ID: $softwareId",
@@ -376,5 +377,42 @@ class softwarefileController extends Controller
             ], 500);
         }
     }
+public function downloadSoftwareFile(Request $request, $filename, $softwareid)
+{
+    try {
+        // Lấy token từ URL ?token=...
+        $token = $request->query('token');
+        if (!$token) {
+            return response()->json(['message' => 'Token is missing.'], 401);
+        }
+
+        // Xác thực người dùng từ token
+        $user = JWTAuth::setToken($token)->authenticate();
+
+        // Kiểm tra quyền truy cập phần mềm
+        $actived = softwarePermissionModel::where('user_name', $user->username) // hoặc 'user_name' nếu đúng
+            ->where('software_id', $softwareid)
+            ->where('permissions_name', 'xem phần mềm')
+            ->first();
+
+        if (!$actived) {
+            return response()->json(['message' => 'not accecpt dowload.'], 403);
+        }
+
+        // Đường dẫn file
+        $path = storage_path('app/public/software_files/' . $filename);
+        if (!file_exists($path)) {
+            return response()->json(['message' => 'File không tồn tại.'], 404);
+        }
+
+        // Trả file về trình duyệt
+        return response()->download($path);
+
+    } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+        return response()->json(['message' => 'Token không hợp lệ hoặc đã hết hạn.'], 401);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Lỗi không xác định: ' . $e->getMessage()], 500);
+    }
+}
 
 }

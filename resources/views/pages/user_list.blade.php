@@ -19,25 +19,48 @@
     </h5>
     <div class="collapse d-md-block" id="filterCollapse">
         <div class="row px-3">
-            <form id="filter-form" class="mb-3 row g-3">
+            <form id="filter-form" class="row g-3 align-items-end mb-4">
+                <!-- Tên đăng nhập -->
                 <div class="col-md-3">
+                    <label class="form-label">Tên đăng nhập</label>
                     <input type="text" name="username" class="form-control" placeholder="Tìm theo tên đăng nhập">
                 </div>
+
+                <!-- Email -->
                 <div class="col-md-3">
+                    <label class="form-label">Email</label>
                     <input type="text" name="email" class="form-control" placeholder="Tìm theo email">
                 </div>
+
+                <!-- Họ và tên -->
                 <div class="col-md-3">
+                    <label class="form-label">Họ và tên</label>
                     <input type="text" name="fullName" class="form-control" placeholder="Tìm theo họ và tên">
                 </div>
+
+                <!-- Trạng thái xóa -->
                 <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="deletedStatus" class="form-control">
+                        <option value="">Chưa bị xóa</option>
+                        <option value="deleted">Đã bị xóa</option>
+                        <option value="all">Tất cả</option>
+                    </select>
+                </div>
+
+                <!-- Quyền (ẩn, nhưng có thể bật lại nếu muốn) -->
+                <div class="col-md-3 d-none">
+                    <label class="form-label">Quyền</label>
                     <select name="role" class="form-control" id="filter-role">
                         <option value="">Tất cả quyền</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary mt-2">Lọc</button>
+
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Lọc</button>
                 </div>
             </form>
+
         </div>
     </div>
     <div class="row" aria-hidden="true">

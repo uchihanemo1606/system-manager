@@ -79,6 +79,31 @@ export async function chane_password(data) {
 
     return result;
 }
+export async function updateuserbyadmin(params) {
+    const res = await apiFetch("/api/updateuserbyadmin", {
+        method: "PATCH",
+        headers: defaultHeaders(),
+        body: JSON.stringify(params),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+        let errorMessages = result.message || "Lỗi cập nhật người dùng";
+
+        if (result?.errors) {
+            const detailErrors = Object.entries(result.errors)
+                .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+                .join("\n");
+            errorMessages += `\n${detailErrors}`;
+        }
+
+        throw new Error(errorMessages);
+    }
+
+    return result;
+    
+}
 export async function hideUser(username) {
     if (!username) throw new Error("Username is required to hide user");
 

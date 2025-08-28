@@ -35,8 +35,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <label>Quyền</label>
-                    <p class="text-primary1">Chức năng thêm quyền cho tài khoản tạo đang bảo trì chưa thể thêm quyền</p>
+                    <label>Quyền</label> 
                     <div id="role-checkboxes"></div>
                 </div>
             </div>
