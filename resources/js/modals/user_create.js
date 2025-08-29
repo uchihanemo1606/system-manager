@@ -1,6 +1,7 @@
 import { create_user } from "../api/user";
-import { get_all_role } from "../api/role";
+import { create_user_role, get_all_role } from "../api/role";
 import { showToast } from "../component/toast";
+import { validateUserData } from "../component/requiredFields/user_required";
 
 function initUserCreateModal() {
     const createUserForm = document.getElementById("create-user-form");
@@ -10,7 +11,6 @@ function initUserCreateModal() {
         console.error("Không tìm thấy form tạo user");
         return;
     }
-
     if (createUserForm.dataset.initialized) return;
     createUserForm.dataset.initialized = "true";
 
@@ -19,58 +19,39 @@ function initUserCreateModal() {
         try {
             const roles = await get_all_role();
             renderRoles(roles.data);
-        } catch (err) { 
+        } catch (err) {
             showToast({
                 message: err.message || "Không thể tải danh sách quyền!",
                 type: "error",
                 timeout: 2000,
-            })
+            });
         }
     }
 
     function renderRoles(roles) {
-        roleContainer.innerHTML = ""; // Clear cũ trước khi render
-
+        roleContainer.innerHTML = "";
         roles.forEach((role) => {
-            const div = document.createElement("div");
-            div.className = "form-check";
-
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.className = "form-check-input";
-            checkbox.id = `role-${role.role_name}`;
-            checkbox.value = role.role_name;
-
-            const label = document.createElement("label");
-            label.className = "form-check-label";
-            label.htmlFor = `role-${role.role_name}`;
-            label.innerText = role.role_name;
-
-            div.appendChild(checkbox);
-            div.appendChild(label);
-
-            roleContainer.appendChild(div);
+            roleContainer.insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="role-${role.role_name}" value="${role.role_name}">
+                    <label class="form-check-label" for="role-${role.role_name}">${role.role_name}</label>
+                </div>
+                `
+            );
         });
     }
 
-    // Gọi API load roles khi khởi tạo
     fetchRoles();
 
-    // Xử lý submit tạo user
     createUserForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const formData = new FormData(createUserForm);
         const data = Object.fromEntries(formData.entries());
 
-        if (data.password !== data.verifyPassword) {
-            showToast({
-                message: "Mật khẩu và xác nhận mật khẩu không khớp!",
-                type: "error",
-                timeout: 2000,
-            })
-            return;
-        }
+        if (!validateUserData(data)) return;
 
         const roles = [
             ...document.querySelectorAll("#role-checkboxes input:checked"),
@@ -78,13 +59,20 @@ function initUserCreateModal() {
 
         try {
             await create_user({
-                username: data.username,
+                username: data.username.trim(),
                 password: data.password,
-                roles: roles,
+                fullName: data.fullName.trim(),
+                email: data.email.trim(),
+                roles,
             });
-
+            roles.forEach(async (role) => {
+                await create_user_role({
+                    username: data.username.trim(),
+                    role_name: role,
+                });
+            });
             showToast({
-                message: "Tạo user thành công!",
+                message: "Tạo người dùng thành công!",
                 type: "success",
                 timeout: 2000,
             });
@@ -92,7 +80,7 @@ function initUserCreateModal() {
             window.dispatchEvent(new CustomEvent("userCreated"));
         } catch (err) {
             showToast({
-                message: err.message || "Có lỗi xảy ra khi tạo user!",
+                message: err.message || "Đã xảy ra lỗi khi tạo người dùng!",
                 type: "error",
                 timeout: 2000,
             });
@@ -100,5 +88,4 @@ function initUserCreateModal() {
     });
 }
 
-// Đưa hàm lên global
 window.initUserCreateModal = initUserCreateModal;

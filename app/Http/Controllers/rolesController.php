@@ -43,7 +43,7 @@ class rolesController extends Controller
             LogController::createLogAuto([
                 'username' => $user->username,
                 'role_name' => $request->role_name,
-                'message' => " user {$user->fullName} created role '{$request->role_name}'.",
+                'message' => " user {$user->fullName} đã tạo vai trò mới là {$request->role_name}.",
                 'is_delete' => false
             ]);
 
@@ -102,11 +102,11 @@ class rolesController extends Controller
             }
 
             DB::table('roles')->where('role_name', $request->role_name)->delete();
-            
+
             LogController::createLogAuto([
                 'username' => $user->username,
                 'role_name' => $request->role_name,
-                'message' => " user {$user->fullName} deleted role '{$request->role_name}'.",
+                'message' => " user {$user->fullName} đã xóa vai trò {$request->role_name}.",
                 'is_delete' => false
             ]);
 
@@ -142,64 +142,39 @@ class rolesController extends Controller
         }
     }
 
-    public function updateRole(Request $request, string $rolename)
-    {
-        try {
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['message' => 'Please login to use this function'], 401);
-            }
+public function updateRole(Request $request, string $rolename)
+{
+    try {
+        $user = JWTAuth::parseToken()->authenticate();
+        if (!$user) return response()->json(['status'=>'error','message'=>'Please login'],401);
 
-            $validator = Validator::make($request->all(), [
-                'role_name' => 'required|string|max:255',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()
-                ], 422);
-            }
-
-            $role = DB::table('roles')->where('role_name', $rolename)->first();
-            if (!$role) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Role not found.'
-                ], 404);
-            }
-
-            DB::table('roles')->where('role_name', $rolename)->update([
-                'role_name' => $request->role_name,
-                'assigned_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Role updated successfully.',
-            ]);
-        } catch (TokenExpiredException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Token has expired.'
-            ], 401);
-        } catch (TokenInvalidException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Token is invalid.'
-            ], 401);
-        } catch (JWTException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Token is absent or could not be parsed.'
-            ], 401);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Could not update role. ' . $e->getMessage()
-            ], 500);
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'role_name' => 'required|string|max:255',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status'=>'error','message'=>$validator->errors()],422);
         }
+
+        // Check role cũ
+        $role = DB::table('roles')->where('role_name', $rolename)->first();
+        if (!$role) return response()->json(['status'=>'error','message'=>'Role not found'],404);
+
+        if (strtolower($rolename) === 'admin') {
+            return response()->json(['status'=>'error','message'=>"Không thể cập nhật vai trò 'admin'"],403);
+        }
+
+        DB::table('roles')->where('role_name', $rolename)->update([
+            'role_name' => $request->input('role_name'),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['status'=>'success','message'=>'Role updated successfully.']);
+
+    } catch (\Exception $e) {
+        return response()->json(['status'=>'error','message'=>'Could not update role. '.$e->getMessage()],500);
     }
+}
 
     public function getRoleByName(Request $request)
     {

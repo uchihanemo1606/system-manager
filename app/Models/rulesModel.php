@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class rulesModel extends Model
 {
+    protected $table = 'rules';
+
     protected $fillable = [
         'name',
         'description',
-        'category_id',
+        'category_rule_id',
         'file_url',
         'username',
     ];

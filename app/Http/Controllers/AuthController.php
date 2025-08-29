@@ -65,7 +65,6 @@ class AuthController extends Controller
                     ], 404);
                 }
             }
-
             $request->validate([
                 'username' => 'required|string|max:255|unique:users',
                 'password' => 'required|string|min:8',
@@ -84,11 +83,17 @@ class AuthController extends Controller
             $usercreate = UserModel::create([
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
+                'fullName' => $request->fullName,
+                'email' => $request->email,
+                'phone_number' => $request->phone_number,
+                'department' => $request->department,
             ]);
-
+            // Nếu là user đầu tiên thì $user sẽ không tồn tại
             LogController::createLogAuto([
-                'username' => $user->username,
-                'message' => "{$user->fullName} đã tạo tài khoản có username là '{$usercreate->username}'",
+                'username' => $userCount > 0 ? $user->username : $usercreate->username,
+                'message' => ($userCount > 0
+                    ? "{$user->fullName} đã tạo tài khoản có username là '{$usercreate->username}'"
+                    : "Tài khoản đầu tiên '{$usercreate->username}' đã được tạo"),
             ]);
 
             return response()->json([
@@ -140,6 +145,43 @@ class AuthController extends Controller
      * }
      * @return \Illuminate\Http\JsonResponse
      */
+    // public function login(Request $request)
+    // {
+    //     $credentials = $request->only('username', 'password');
+
+    //     try {
+    //         if (!$token = JWTAuth::attempt($credentials)) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'username or password is incorrect',
+    //             ], 401);
+    //         }
+    //     } catch (JWTException $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Could not create token',
+    //         ], 500);
+    //     }
+    //     $user = JWTAuth::setToken($token)->authenticate();
+    //     //thêm kiểm tra tk bị khoá, xoá
+
+    //     if ($user->is_delete || $user->hidden) {
+    //     return response()->json([
+    //         'status' => 'error',
+    //         'message' => 'Tài khoản đã bị khóa hoặc bị ẩn, vui lòng liên hệ quản trị viên.',
+    //     ], 403);
+    // }
+
+    //     LogController::createLogAuto([
+    //         'username' => $request->username,
+    //         'message' => "{$user->fullName} đã đăng nhập vào hệ thống.",
+    //     ]);
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'token' => $token,
+    //     ])->withCookie(cookie('auth_token', $token, 60, '/', null, false, false));
+    // }
     public function login(Request $request)
     {
         $credentials = $request->only('username', 'password');
@@ -157,18 +199,56 @@ class AuthController extends Controller
                 'message' => 'Could not create token',
             ], 500);
         }
+
         $user = JWTAuth::setToken($token)->authenticate();
-        //thêm kiểm tra tk bị khoá, xoá
+
+        if ($user->is_delete || $user->hidden) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tài khoản đã bị khóa hoặc bị ẩn, vui lòng liên hệ quản trị viên.',
+            ], 403);
+        }
+
+        // tạo refresh token (có thể lưu DB hoặc ký JWT khác với TTL dài hơn)
+        $refreshToken = JWTAuth::fromUser($user, ['type' => 'refresh']);
 
         LogController::createLogAuto([
-            'username' => $request->username, 
+            'username' => $request->username,
             'message' => "{$user->fullName} đã đăng nhập vào hệ thống.",
         ]);
 
         return response()->json([
             'status' => 'success',
             'token' => $token,
+            'refresh_token' => $refreshToken,
         ])->withCookie(cookie('auth_token', $token, 60, '/', null, false, false));
+    }
+
+    public function refresh(Request $request)
+    {
+        try {
+            $refreshToken = $request->input('refresh_token');
+
+            if (!$refreshToken) {
+                return response()->json(['status' => 'error', 'message' => 'Missing refresh token'], 400);
+            }
+
+            $user = JWTAuth::setToken($refreshToken)->authenticate();
+
+            if (!$user) {
+                return response()->json(['status' => 'error', 'message' => 'Invalid refresh token'], 401);
+            }
+
+            // cấp lại access token mới
+            $newAccessToken = JWTAuth::fromUser($user);
+
+            return response()->json([
+                'status' => 'success',
+                'token' => $newAccessToken,
+            ])->withCookie(cookie('auth_token', $newAccessToken, 60, '/', null, false, false));
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 401);
+        }
     }
 
     /**
@@ -190,7 +270,7 @@ class AuthController extends Controller
             $token = $request->cookie('auth_token') ?? $request->bearerToken();
             if ($token) {
                 JWTAuth::setToken($token)->invalidate(); // Hủy token
-            } 
+            }
             $cookie = cookie()->forget('auth_token');
 
             return response()->json([
@@ -441,38 +521,38 @@ class AuthController extends Controller
 
             $request->validate(['email' => 'required|email']);
             $email = $request->input('email');
-            //check email có bé nào đang sử dụng hông
             $user = UserModel::where('email', $email)->first();
             if (!$user) {
                 return response()->json(['success' => false, 'message' => 'Email không tồn tại!'], 404);
             }
 
-            // check sem chú có smap otp hông
             $lastOtp = passwordResetModel::where('email', $email)->first();
-            if ($lastOtp && $lastOtp->created_at && now()->diffInSeconds($lastOtp->created_at) < 60) {
-                $wait = 60 - now()->diffInSeconds($lastOtp->created_at);
-                return response()->json([
-                    'success' => false,
-                    'message' => "Bạn vừa yêu cầu OTP, vui lòng đợi {$wait} giây nữa để gửi lại."
-                ], 429);
+            if ($lastOtp && $lastOtp->created_at) {
+                $createdAtAdjusted = $lastOtp->created_at->setTimezone('Asia/Ho_Chi_Minh');
+                $timeDiff = $lastOtp->created_at->diffInSeconds(now());
+                Log::info('Time difference check', [
+                    'now' => now()->toDateTimeString(),
+                    'created_at_original' => $lastOtp->created_at->toDateTimeString(),
+                    'created_at_adjusted' => $createdAtAdjusted->toDateTimeString(),
+                    'timeDiff' => $timeDiff
+                ]);
+                if ($timeDiff < 0) {
+                    $timeDiff = 0;
+                }
+                if ($timeDiff < 60) {
+                    $wait = 60 - $timeDiff;
+                    Log::info('Wait time applied', ['wait' => $wait]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Bạn vừa yêu cầu OTP, vui lòng đợi {$wait} giây nữa để gửi lại.",
+                        'time' => $wait,
+                    ], 429);
+                }
             }
 
-            // create otp random
             $otp = random_int(100000, 999999);
-
-            // hash otp
             $hashedOtp = bcrypt($otp);
 
-            passwordResetModel::updateOrInsert(
-                ['email' => $email],
-                [
-                    'otp' => $hashedOtp,
-                    'created_at' => now(),
-                    'otp_expiration' => now()->addMinutes(2),
-                    'otp_attempts' => 0,
-                    'isVerified' => false
-                ]
-            );
             $subject = 'OTP đặt lại mật khẩu';
             $message = "
                 <div style='max-width:400px;margin:0 auto;padding:24px 18px 18px 18px;border:1px solid #eee;border-radius:8px;font-family:sans-serif;'>
@@ -488,9 +568,28 @@ class AuthController extends Controller
             $result = $mailController->sendEmailTo($email, $subject, $message);
 
             if ($result === true) {
+                if ($lastOtp) {
+                    $lastOtp->update([
+                        'otp' => $hashedOtp,
+                        'otp_expiration' => now()->addMinutes(2),
+                        'otp_attempts' => 0,
+                        'isVerified' => false,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                } else {
+                    passwordResetModel::create([
+                        'email' => $email,
+                        'otp' => $hashedOtp,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                        'otp_expiration' => now()->addMinutes(2),
+                        'otp_attempts' => 0,
+                        'isVerified' => false
+                    ]);
+                }
                 return response()->json(['success' => true, 'message' => 'OTP đã được gửi về email!']);
             } else {
-                // Log lỗi chi tiết
                 Log::error('Gửi email thất bại: ' . $result);
                 return response()->json(['success' => false, 'message' => 'Gửi email thất bại! Lý do: ' . $result], 500);
             }
@@ -545,30 +644,217 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6|confirmed'
-        ]);
+                'email' => 'required|email',
+                'password' => 'required|min:6|confirmed'
+            ]);
 
-        $record = passwordResetModel::where('email', $request->email)->first();
+            $record = passwordResetModel::where('email', $request->email)->first();
 
-        if (!$record || empty($record->isVerified)) {
-            return response()->json(['success' => false, 'message' => 'Bạn chưa xác thực OTP hoặc OTP không hợp lệ!'], 400);
-        }
+            if (!$record || empty($record->isVerified)) {
+                return response()->json(['success' => false, 'message' => 'Bạn chưa xác thực OTP hoặc OTP không hợp lệ!'], 400);
+            }
 
-        // Đổi mật khẩu
-        $user = UserModel::where('email', $request->email)->first();
-        $user->password = bcrypt($request->password);
-        $user->save();
+            // Đổi mật khẩu
+            $user = UserModel::where('email', $request->email)->first();
+            $user->password = bcrypt($request->password);
+            $user->save();
 
-        // Xóa dòng reset để bảo mật
-       passwordResetModel::where('email', $request->email)->delete();
+            // Xóa dòng reset để bảo mật
+            passwordResetModel::where('email', $request->email)->delete();
 
-        return response()->json(['success' => true, 'message' => 'Đổi mật khẩu thành công!']);
-    } catch (\Exception $e) {
+            return response()->json(['success' => true, 'message' => 'Đổi mật khẩu thành công!']);
+        } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi tạo lại mật khẩu: ' . $e->getMessage()], 500);
         }
     }
 
+    public function deleteUser(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.'
+                ], 404);
+            }
+
+            $username = $request->input('username');
+            if (!$username) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Username is required.'
+                ], 400);
+            }
+
+            if ($user->username !== $username) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You can only delete your own account.'
+                ], 403);
+            }
+
+            $user = UserModel::where('username', $username)->first();
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.'
+                ], 404);
+            }
+
+            $user->is_delete = true;
+            $user->save();
+            LogController::createLogAuto([
+                'username' => $user->username,
+                'message' => "{$user->fullName} đã xóa tài khoản.",
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User deleted successfully.',
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not delete user. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function hiddenUser(Request $request)
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.'
+                ], 404);
+            }
+
+            $username = $request->input('username');
+            if (!$username) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Username is required.'
+                ], 400);
+            }
+
+            if ($user->username !== $username) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You can only hide your own account.'
+                ], 403);
+            }
+
+            $user->hidden = true;
+            $user->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User hidden successfully.'
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not hide user. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    public function updateUserByAdmin(Request $request)
+    {
+        try {
+            if (!$admin = JWTAuth::parseToken()->authenticate()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Admin user not found.'
+                ], 404);
+            }
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not authenticate admin user. ' . $e->getMessage()
+            ], 500);
+        }
+
+        $request->validate([
+            'username' => 'required|string|exists:users,username',
+            'fullName' => 'sometimes|string|max:100',
+            'email' => [
+                'sometimes',
+                'string',
+                'email',
+                'max:100',
+                Rule::unique('users')->ignore($request->username, 'username'),
+            ],
+            'hidden' => 'sometimes|boolean',
+            'is_delete' => 'sometimes|boolean',
+        ]);
+
+        $user = UserModel::where('username', $request->username)->first();
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        try {
+            $user->update($request->only(['fullName', 'email', 'hidden', 'is_delete']));
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update user. ' . $e->getMessage(),
+            ], 500);
+        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'cập nhật thành công.',
+            'user' => $user->fresh(),
+        ]);
+    }
 
 }
-

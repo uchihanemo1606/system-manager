@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name', 200);
             $table->string('file_url',250);
-            $table->unsignedBigInteger('category_id');
+            $table->unsignedBigInteger('category_rule_id');
             $table->string('username', 100);
             $table->string('description',100);
             $table->boolean('is_delete')->default(false);
             $table->dateTime('date_release');
-            $table->foreign('category_id')->references('id')->on('category_rule')->onUpdate('cascade');
+            $table->foreign('category_rule_id')->references('id')->on('category_rule')->onUpdate('cascade');
             $table->foreign('username')->references('username')->on('users')->onUpdate('cascade');
             $table->timestamps();
         });

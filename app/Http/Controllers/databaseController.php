@@ -18,33 +18,38 @@ class databaseController extends Controller
 {
     public function createDatabase(Request $request)
     {
-        try
-        {
-        if (!$user = JWTAuth::parseToken()->authenticate()) {
-        return response()->json(['message' => 'Please login to use this function'], 401);
-        }
-        $data = $request->validate([
-            'dbname' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'created_by' =>  $user->username,
-        ]);
-
-        $database = databaseModel::create($data);
-        
-        if($database ->save()) {
-            LogController::createLogAuto([
-                'username' => $user->username,
-                'database_name' => $database->dbname,
-                'message' => "$user->fullName đã thêm một cơ sở dữ liệu mới: $database->dbname",
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+            // $data = $request->validate([
+            //     'dbname' => 'required|string|max:255',
+            //     'description' => 'nullable|string|max:1000',
+            //     'created_by' =>  $user->username,
+            // ]);
+            $data = $request->validate([
+                'dbname' => 'required|string|max:255',
+                'description' => 'nullable|string|max:1000',
             ]);
-            return response()->json([
-                'status' => 'success',
+
+            // Thêm created_by vào sau khi validate
+            $data['created_by'] = $user->username;
+            $database = databaseModel::create($data);
+
+            if ($database->save()) {
+                LogController::createLogAuto([
+                    'username' => $user->username,
+                    'database_name' => $database->dbname,
+                    'message' => "$user->fullName đã thêm một cơ sở dữ liệu mới: $database->dbname",
+                ]);
+                return response()->json([
+                    'status' => 'success',
                     'message' => 'Operating System created successfully.',
                     'data' => $database
-                ], 201); 
-        }
+                ], 201);
+            }
 
-        }catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'
@@ -70,8 +75,7 @@ class databaseController extends Controller
 
     public function updateDatabase(Request $request, $id)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
@@ -82,7 +86,7 @@ class databaseController extends Controller
                 'description' => 'nullable|string|max:1000',
             ]);
 
-            if($database->update($data)) {
+            if ($database->update($data)) {
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'database_name' => $database->dbname,
@@ -120,16 +124,15 @@ class databaseController extends Controller
 
     public function deleteDatabase($id)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
             $database = databaseModel::findOrFail($id);
             $database->is_delete = true;
-            
-            if($database->save()) {
+
+            if ($database->save()) {
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'database_name' => $database->dbname,
@@ -140,8 +143,7 @@ class databaseController extends Controller
                     'message' => 'Database deleted successfully.',
                 ], 200);
             }
-        }
-         catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'
@@ -166,17 +168,32 @@ class databaseController extends Controller
 
     public function getAllDatabases()
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
 
             $databases = databaseModel::get();
-           return response()->json([
-               'status' => 'success',
-               'data' => $databases
-           ], 200);
+            if ($databases->isEmpty()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'No databases found.'
+                ], 404);
+            }
+
+            $page = request()->input('page', 1);
+            $perPage = request()->input('per_page', 15);
+            $databases = databaseModel::paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'status' => 'success',
+                'total' => $databases->total(),
+                'current_page' => $databases->currentPage(),
+                'last_page' => $databases->lastPage(),
+                'per_page' => $databases->perPage(),
+                'data' => $databases->items()
+            ], 200);
+
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
@@ -203,8 +220,7 @@ class databaseController extends Controller
 
     public function getDatabaseActive()
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
@@ -239,8 +255,7 @@ class databaseController extends Controller
 
     public function getAllDatabaseDetele()
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
@@ -275,12 +290,11 @@ class databaseController extends Controller
 
     public function getDatabaseById($id)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            
+
             $database = databaseModel::findOrFail($id);
 
             // Lấy toàn bộ phiên bản của database này
@@ -296,7 +310,7 @@ class databaseController extends Controller
                 ]
             ], 200);
 
-        }catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'
@@ -321,21 +335,30 @@ class databaseController extends Controller
 
     public function createDatabaseVersion(Request $request)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            
+
+            // $data = $request->validate([
+            //     'dbname' => 'required|string|exits:database,dbname',
+            //     'version' => 'required|string|max:100',
+            //     'decription' => 'nullable|string|max:1000',
+            //     'created_by' => $user->username,
+            // ]);
+            // $databaseVersion = databaseVersionModel::create($data);
+
             $data = $request->validate([
-                'dbname' => 'required|string|exits:database,dbname',
+                'dbname' => 'required|string|exists:database,dbname',
                 'version' => 'required|string|max:100',
-                'decription' => 'nullable|string|max:1000',
-                'created_by' =>  $user->username,
+                'description' => 'nullable|string|max:1000',
             ]);
+
+            // Thêm created_by sau khi validate
+            $data['created_by'] = $user->username;
+
             $databaseVersion = databaseVersionModel::create($data);
-            
-            if($databaseVersion->save()) {
+            if ($databaseVersion->save()) {
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'database_name' => $databaseVersion->dbname,
@@ -347,7 +370,7 @@ class databaseController extends Controller
                     'data' => $databaseVersion
                 ], 201);
             }
-        }catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'
@@ -372,12 +395,11 @@ class databaseController extends Controller
 
     public function updateDatabaseVersion(Request $request, $id)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            
+
             $databaseVersion = databaseVersionModel::findOrFail($id);
             $data = $request->validate([
                 'version' => 'required|string|max:100',
@@ -422,16 +444,15 @@ class databaseController extends Controller
 
     public function deleteDatabaseVersion($id)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            
+
             $databaseVersion = databaseVersionModel::findOrFail($id);
             $databaseVersion->is_delete = true;
-            
-            if($databaseVersion->save()) {
+
+            if ($databaseVersion->save()) {
                 LogController::createLogAuto([
                     'username' => $user->username,
                     'database_name' => $databaseVersion->dbname,
@@ -447,14 +468,12 @@ class databaseController extends Controller
                 'status' => 'error',
                 'message' => 'Token has expired.'
             ], 401);
-        }
-        catch (TokenInvalidException $e) {
+        } catch (TokenInvalidException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token is invalid.'
             ], 401);
-        }
-        catch (JWTException $e) {
+        } catch (JWTException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token is absent or could not be parsed.'
@@ -469,31 +488,27 @@ class databaseController extends Controller
 
     public function getAllDatabaseVersions()
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            
+
             $databaseVersions = databaseVersionModel::get();
             return response()->json([
                 'status' => 'success',
                 'data' => $databaseVersions
             ], 200);
-        }
-        catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'
             ], 401);
-        }
-        catch (TokenInvalidException $e) {
+        } catch (TokenInvalidException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token is invalid.'
             ], 401);
-        }
-        catch (JWTException $e) {
+        } catch (JWTException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token is absent or could not be parsed.'
@@ -508,19 +523,17 @@ class databaseController extends Controller
 
     public function getDatabaseVersionById($id)
     {
-        try
-        {
+        try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['message' => 'Please login to use this function'], 401);
             }
-            
+
             $databaseVersion = databaseVersionModel::findOrFail($id);
             return response()->json([
                 'status' => 'success',
                 'data' => $databaseVersion
             ], 200);
-        }
-        catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token has expired.'
@@ -541,6 +554,42 @@ class databaseController extends Controller
                 'message' => 'Could not retrieve database version. ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getAllDatabaseVersionsByDatabaseName($dbname)
+    {
+        try
+        {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Please login to use this function'], 401);
+            }
+            
+            $databaseVersions = databaseVersionModel::where('dbname', $dbname)->get();
+            return response()->json([
+                'status' => 'success',
+                'data' => $databaseVersions
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token has expired.'
+            ], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is invalid.'
+            ], 401);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is absent or could not be parsed.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Could not retrieve database versions by name. ' . $e->getMessage()
+            ], 500);
+        }   
     }
 
 }

@@ -13,6 +13,12 @@ return [
         'hardware.edit' => 'hardware.edit',
         'hardware.list' => 'hardware.list',
         
+        //software
+        'software.create' => 'software.create',
+        'software.delete' => 'software.delete',
+        'software.edit' => 'software.edit',
+        'software.list' => 'software.list',
+        
         //role
         'role.create' => 'role.create',
         'role.delete' => 'role.delete',

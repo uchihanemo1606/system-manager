@@ -12,9 +12,6 @@ class softwareModel extends Model
         'language',
         'version',
         'user_createby',
-        'createdAt',
-        'updatedAt',
-        'is_delete',
         'description',
     ];
     protected function casts(): array
@@ -23,6 +20,7 @@ class softwareModel extends Model
             'createdAt' => 'datetime',
             'updatedAt' => 'datetime',
             'is_delete' => 'boolean',
+            'is_active' => 'boolean',
             'assigned_at' => 'datetime',
         ];
     }

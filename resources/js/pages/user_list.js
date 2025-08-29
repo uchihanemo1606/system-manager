@@ -1,18 +1,36 @@
-import { get_all_user } from "../api/user";
+import { deleteUser, get_all_user, hideUser, updateuserbyadmin } from "../api/user";
 import { get_all_role } from "../api/role";
+import { renderPagination } from "../component/log/log_utils";
+import { showToast } from "../component/toast";
 let hasLoadedRolesForFilter = false;
 let allUsers = [];
+let currentPage = 1;
+const ITEMS_PER_PAGE = 10; // hoặc số khác tùy ý
+let filteredUsers = [];
+
 async function loadUsers() {
     const tbody = document.getElementById("user-table-body");
     if (!tbody) return;
 
     try {
         allUsers = await get_all_user();
-        renderUsers(allUsers);
+        // filteredUsers = allUsers;
+        filteredUsers = allUsers.filter(u => u.is_delete != true);
+
+        renderUsersPage(1); // render trang đầu tiên
     } catch (err) {
         console.error("Lỗi khi tải danh sách người dùng:", err);
     }
 }
+function renderUsersPage(page = 1) {
+    currentPage = page;
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    const usersToShow = filteredUsers.slice(start, end);
+    renderUsers(usersToShow);
+    renderPagination(filteredUsers.length, ITEMS_PER_PAGE, currentPage, renderUsersPage);
+}
+
 function hasPermission(code) {
     return window.userPermissionCodes?.includes(code);
 }
@@ -23,16 +41,26 @@ function renderUsers(users) {
     tbody.innerHTML = users
         .map((u) => {
             let actions = "";
-            if (hasPermission("user.update")) {
-                actions += `<li class="list-inline-item px-2"><a href="#"><a href="#"><i class="bx bx-show"></i></a></li>`;
-            }
             if (hasPermission("user.delete")) {
-                actions += `<li class="list-inline-item px-2"><a href="#"><i class="bx bx-trash"></i></a></li>`;
+                actions += `<li class="list-inline-item px-2">
+                    <a href="#" onclick="handleDeleteUser('${u.username}')">
+                        <i class="bx bx-trash"></i>
+                    </a>
+                </li>`;
             }
+
+            if (hasPermission("user.update")) {
+                actions += `<li class="list-inline-item px-2">
+                    <a href="#" onclick="handleHideUser('${u.username}', ${u.hidden})" title="${u.hidden ? 'Hiện' : 'Ẩn'} người dùng">
+                        <i class="bx ${u.hidden ? 'bx-hide' : 'bx-show'}"></i>
+                    </a>
+                </li>`;
+            }
+
             if (hasPermission("user.update")) {
                 actions += `
                 <li class="list-inline-item px-2"><a href="#"><i class="bx bx-wrench" 
-                    onclick="loadModal('user_edit', { username: '${u.username}' })" title="Chỉnh sửa người dùng"
+                    onclick="loadModal('update_user', { username: '${u.username}' })" title="Chỉnh sửa người dùng"
                 >
                     </i></a>
                 </li>`;
@@ -56,22 +84,19 @@ function renderUsers(users) {
                         </div>
                     </td>
                     <td>
-                        <h5 class="font-size-14 mb-1">
-                            <a href="#" class="text-dark">${u.username}</a>
-                        </h5>
+                    <h5 class="font-size-14 mb-1">
+                        <a href="#" class="text-dark">${u.username}</a>
+                        ${u.is_delete ? '<span class="badge badge-danger ml-1">Đã xóa</span>' : ''}
+                    </h5> 
                     </td>
-                    <td class="text-center">${
-                        u.fullName ||
-                        `  <div class="team">
+                    <td class="text-center">${u.fullName ||
+                `  <div class="team">
                         <span class="badge badge-secondary">Chưa có dữ liệu</span>
                     </div>`
-                    }</td>
-                    <td class="text-center">${(u.roles || [])
-                        .map(
-                            (r) =>
-                                `<a href="#" class="badge badge-soft-primary font-size-11 m-1">${r}</a>`
-                        )
-                        .join("")}</td>
+                }</td>
+
+
+
                     <td class="text-center">${u.email ?? 0}</td>
                     <td class="text-right">
                         <ul class="list-inline font-size-20 contact-links mb-0">
@@ -105,23 +130,76 @@ async function loadRolesForFilter() {
 }
 document.addEventListener("DOMContentLoaded", async () => {
     const filterForm = document.getElementById("filter-form");
+    // filterForm?.addEventListener("submit", (e) => {
+    //     e.preventDefault();
+    //     const params = Object.fromEntries(new FormData(filterForm).entries());
+
+    //     const filtered = allUsers.filter((u) =>
+    //         (!params.username || u.username?.toLowerCase().includes(params.username.toLowerCase())) &&
+    //         (!params.email || u.email?.toLowerCase().includes(params.email.toLowerCase())) &&
+    //         (!params.fullName || u.fullName?.toLowerCase().includes(params.fullName.toLowerCase())) &&
+    //         (!params.role || (u.roles || []).includes(params.role)) &&
+    //         (
+    //             // ✅ lọc theo trạng thái xóa
+    //             (params.deletedStatus === "deleted" && u.is_delete === true) ||
+    //             (params.deletedStatus === "all") ||
+    //             (!params.deletedStatus && u.is_delete !== true) // mặc định: chỉ hiện user chưa bị xóa
+    //         )
+    //     );
+
+    //     filteredUsers = filtered;
+    //     renderUsersPage(1);
+    // });
     filterForm?.addEventListener("submit", (e) => {
         e.preventDefault();
         const params = Object.fromEntries(new FormData(filterForm).entries());
-        
+
         const filtered = allUsers.filter((u) =>
             (!params.username || u.username?.toLowerCase().includes(params.username.toLowerCase())) &&
             (!params.email || u.email?.toLowerCase().includes(params.email.toLowerCase())) &&
             (!params.fullName || u.fullName?.toLowerCase().includes(params.fullName.toLowerCase())) &&
-            (!params.role || (u.roles || []).includes(params.role))
+            (!params.role || (u.roles || []).includes(params.role)) &&
+            (
+                // ✅ Lọc trạng thái xóa
+                (params.deletedStatus === "deleted" && u.is_delete == true) ||
+                (params.deletedStatus === "all") ||
+                (!params.deletedStatus && u.is_delete != true) // ✅ mặc định
+            )
         );
 
-        renderUsers(filtered);
+        filteredUsers = filtered;
+        renderUsersPage(1);
     });
 
     await loadUsers();
     await loadRolesForFilter();
 });
+window.handleDeleteUser = async function (username) {
+    if (!confirm(`Bạn có chắc muốn xóa tài khoản ${username}?`)) return;
+    try {
+        const res = await updateuserbyadmin({ username, is_delete: true });
+        showToast(
+            { type: "success", title: "Thành công", message: 'xóa người dùng thành công' },
+        )
+        await loadUsers(); // reload danh sách
+    } catch (err) {
+        alert(err.message);
+    }
+};
+
+window.handleHideUser = async function (username, status) {
+    if (!confirm(`Bạn có chắc muốn ẩn tài khoản ${username}?`)) return;
+    try {
+        const res = await updateuserbyadmin({ username, hidden: status ? false : true });
+        showToast(
+            { type: "success", title: "Thành công", message: status ? 'hiện người dùng thành công' : 'ẩn người dùng thành công' },
+        )
+        await loadUsers(); // reload danh sách
+
+    } catch (err) {
+        alert(err.message);
+    }
+};
 
 window.initUserCreateModal = async function () {
     const container = document.getElementById("role-checkboxes");
@@ -140,14 +218,12 @@ window.initUserCreateModal = async function () {
             .map(
                 (r) => `
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="roles[]" id="role_${
-                        r.role_name
+                    <input class="form-check-input" type="checkbox" name="roles[]" id="role_${r.role_name
                     }" value="${r.role_name}">
                     <label class="form-check-label" for="role_${r.role_name}">
-                        ${
-                            r.role_name.charAt(0).toUpperCase() +
-                            r.role_name.slice(1)
-                        }
+                        ${r.role_name.charAt(0).toUpperCase() +
+                    r.role_name.slice(1)
+                    }
                     </label>
                 </div>`
             )
@@ -157,6 +233,9 @@ window.initUserCreateModal = async function () {
         container.innerHTML = "<p class='text-danger'>Không thể tải quyền</p>";
     }
 };
-window.addEventListener("userCreated", () => { 
+window.addEventListener("userCreated", () => {
+    loadUsers();
+});
+window.addEventListener("userUpdated", () => {
     loadUsers();
 });

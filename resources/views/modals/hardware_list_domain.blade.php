@@ -1,10 +1,10 @@
- <div class="modal-body">
+ <div class="">
      <div class="table-responsive">
          <table class="table table-centered mb-0" id="domain_list">
              <thead>
                  <tr>
                      <th></th>
-                     <th>Danh sách tên miền</th>
+                     <th>Danh sách tên miền đã liên kết</th>
                      <th class="text-center text-nowrap">Tác vụ</th>
                  </tr>
              </thead>
@@ -16,3 +16,8 @@
          </table>
      </div>
  </div>
+<script>
+    window.permissions = {
+        canCreateHardwareDomain: @json(auth()->user()?->can('hardwaredomain.create'))
+    };
+</script>

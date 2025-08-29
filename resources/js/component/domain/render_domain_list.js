@@ -1,8 +1,9 @@
-export function renderDomainList(domains) {
+
+export function renderDomainList(domains, is_Delete_Hardware_Domain = false, is_connect = true) {
     const tbody = document.querySelector("#domain_list tbody");
     if (!tbody) return;
 
-    tbody.innerHTML = ""; // Xóa dữ liệu cũ
+    tbody.innerHTML = "";
 
     if (domains.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Chưa có tên miền nào.</td></tr>`;
@@ -12,6 +13,29 @@ export function renderDomainList(domains) {
     domains.forEach((domain) => {
         const tr = document.createElement("tr");
 
+        let connectButton = "";
+        if (is_connect) {
+            connectButton = `
+                <button class="btn btn-sm btn-outline-primary me-2"
+                    data-name="${domain.name}"
+                    data-link="${domain.link}"
+                    data-id="${domain.id}"
+                    onclick="loadModal('hardware_domain_create', {
+                        name: this.dataset.name,
+                        link: this.dataset.link,
+                        id: this.dataset.id
+                    })"
+                >Kết nối</button>
+            `;
+        }
+
+        const deleteButton = is_Delete_Hardware_Domain
+            ? `<button class="btn btn-sm btn-outline-danger"
+                onclick="deleteDomain('${domain.id}')">
+            Xoá
+       </button>`
+            : "";
+
         tr.innerHTML = `
             <td style="width: 10px;"> 
                 <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-16">
@@ -19,19 +43,18 @@ export function renderDomainList(domains) {
                 </span> 
             </td>
             <td>
-                <h5 class="font-size-14 mb-1">
-                    <a href="${domain.link}" target="_blank" class="text-dark">${domain.name}</a> 
-                    | <a href="${domain.link}" target="_blank" class="text-primary">${domain.link}</a>
-                </h5>
-                <small>Ngày tạo: ${formatDate(domain.created_at)}</small>
+                <h5 class="font-size-14 mb-1"> 
+                    <a href="${domain.link}" target="_blank" class="text-primary">${domain.link}</a>
+                </h5> 
             </td> 
-            <td style="width: 40px;" class="text-center">
-                <button class="btn btn-link p-0 dropdown-toggle"
-                    type="button"
+            <td class="text-right text-nowrap">
+                <button class="btn btn-sm btn-light me-2"
                     data-domain='${JSON.stringify(domain)}'
                     onclick="loadModal('domain_detail', JSON.parse(this.dataset.domain))">
-                    <i class="mdi mdi-dots-horizontal font-size-18"></i>
+                    Chi tiết
                 </button>
+                ${connectButton}
+                ${deleteButton} 
             </td>
         `;
 
@@ -44,3 +67,4 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN");
 }
+

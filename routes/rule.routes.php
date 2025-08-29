@@ -8,31 +8,31 @@ use app\Http\Middleware\CheckPermission;
 
 // CATEGORY RULES ROUTES
 //tạo 1 lọi rule 
-Route::post('/createcateogryrule', [RuleController::class, 'createCategoryRule'])
+Route::post('/createcategoryrule', [RuleController::class, 'createCategoryRule'])
     ->middleware('check.permission')
-    ->name('legal.create');
+    ->name('category.create');
 //só 1 lội rule
 Route::delete('/deletecategoryrule', [RuleController::class, 'deleteCategoryRule'])
     ->middleware('check.permission')
-    ->name('legal.delete');
+    ->name('category.delete');
 //cập nhật 1 lội rule
 Route::patch('/updatecategoryrule', [RuleController::class, 'updateCategoryRule'])
     ->middleware('check.permission')
-    ->name('legal.edit');
+    ->name('category.edit');
 
 //get full category rule
 Route::get('/getallcategoryrule', [RuleController::class, 'getAllCategoryRules'])
     ->middleware('check.permission')
-    ->name('legal.list');
+    ->name('category.list');
 
 Route::get('/getcategoryrulebyid', [RuleController::class, 'getCategoryRuleById'])
     ->middleware('check.permission')
-    ->name('legal.list');
+    ->name('category.detail');
 
 //get category rule by name
 Route::get('/getcategoryrulebyname',[RuleController::class, 'getCategoryRuleByName'])
     ->middleware('check.permission')
-    ->name('legal.list');
+    ->name('category.detail');
 
 
 //==============================================================================================================================================================
@@ -77,7 +77,7 @@ Route::get('/getrulebyname', [RuleController::class, 'getRuleByName'])
 // SOFTWARE RULES ROUTES
 
 //thim 1 rule dào phằng mìm
-Route::post('/createsoftware', [RuleController::class, 'createSoftwareRule'])
+Route::post('/createsoftwarerule', [RuleController::class, 'createSoftwareRule'])
     ->middleware('check.permission')
     ->name('software.create');
 
@@ -91,3 +91,6 @@ Route::patch('/updatesoftwarerule', [RuleController::class, 'updateSoftwareRule'
     ->middleware('check.permission')
     ->name('software.edit');
 
+Route::get('/get_software_rules', [RuleController::class,'getRulesBySoftware'])
+    ->middleware('check.permission')
+    ->name('legal.create');

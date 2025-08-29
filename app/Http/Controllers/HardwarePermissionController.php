@@ -79,7 +79,7 @@ class HardwarePermissionController extends Controller
         LogController::createLogAuto([
             'username' => $user->username,
             'hardware_ip' => $validated['hardware_ip'],
-            'message' => "User {$user->fullName} created hardware permissions for " . count($created) . " users.",
+            'message' => "User {$user->fullName} đã cấp quyền cho phần cứng với quyền " . count($created) . " người dùng.",
         ]);
 
 
@@ -167,7 +167,7 @@ class HardwarePermissionController extends Controller
 
         // Kiểm tra user và hardware tồn tại
         $userExists = DB::table('users')->where('username', $username)->exists();
-        $hardwareExists = DB::table('hardwares')->where('ip', $hardwareIp)->exists();
+        $hardwareExists = DB::table('hardware')->where('ip', $hardwareIp)->exists();
         if (!$userExists || !$hardwareExists) {
             return response()->json([
                 'status' => 'error',
@@ -370,7 +370,17 @@ class HardwarePermissionController extends Controller
                     'message' => 'user_name and hardware_ip are required.'
                 ], 400);
             }
-
+ 
+        // Kiểm tra user và hardware tồn tại 
+        // note: gộp nhánh 
+        // $userExists = DB::table('users')->where('username', $username)->exists();
+        // $hardwareExists = DB::table('hardware')->where('ip', $hardwareIp)->exists();
+        // if (!$userExists || !$hardwareExists) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'User or hardware not found.'
+        //     ], 404);
+        // } 
             // Lấy chủ phần cứng
             $hardware = hardwareModel::find($hardwareIp);
             if (!$hardware) {

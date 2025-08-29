@@ -41,47 +41,47 @@ class rolepermissionController extends Controller
             }
             $permissionType = $permission->type;
 
-            // Kiểm tra role có phù hợp với permission type không
-            $roleName = mb_strtolower($request->input('role_name'), 'UTF-8');
-            $roleType = null;
-            if (str_contains($roleName, 'phần cứng') || str_contains($roleName, 'hardware')) {
-                $roleType = 'hardware';
-            } elseif (str_contains($roleName, 'phần mềm') || str_contains($roleName, 'software')) {
-                $roleType = 'software';
+            // // Kiểm tra role có phù hợp với permission type không
+            // $roleName = mb_strtolower($request->input('role_name'), 'UTF-8');
+            // $roleType = null;
+            // if (str_contains($roleName, 'phần cứng') || str_contains($roleName, 'hardware')) {
+            //     $roleType = 'hardware';
+            // } elseif (str_contains($roleName, 'phần mềm') || str_contains($roleName, 'software')) {
+            //     $roleType = 'software';
 
-            } elseif (str_contains($roleName, 'quản lý hệ thống') || str_contains($roleName, 'system')) {
-                $roleType = 'system';
-            }
-            if ($roleType && $roleType !== $permissionType) {
+            // } elseif (str_contains($roleName, 'quản lý hệ thống') || str_contains($roleName, 'system')) {
+            //     $roleType = 'system';
+            // }
+            // if ($roleType && $roleType !== $permissionType && $permissionType !=="softwarefile") {
 
-                if (
-                    in_array($roleType, ['admin', 'quản trị', 'quản trị viên'])
-                    && in_array($permissionType, ['user', 'role', 'userrole'])
-                ) {
+            //     if (
+            //         in_array($roleType, ['admin', 'quản trị', 'quản trị viên'])
+            //         && in_array($permissionType, ['user', 'role', 'userrole'])
+            //     ) {
 
-                }
-                // Cho phép system nhận permission type domain và hardwaredomain
-                elseif (
-                    $roleType === 'system'
-                    && in_array($permissionType, ['domain', 'hardwaredomain'])
-                ) {
+            //     }
+            //     // Cho phép system nhận permission type domain và hardwaredomain
+            //     elseif (
+            //         $roleType === 'system'
+            //         && in_array($permissionType, ['domain', 'hardwaredomain'])
+            //     ) {
    
-                }
+            //     }
 
-                elseif (
-                    $roleType === 'hardware'
-                    && in_array($permissionType, ['hardware', 'hardwarepermission'])
-                ) {
+            //     elseif (
+            //         $roleType === 'hardware'
+            //         && in_array($permissionType, ['hardware', 'hardwarepermission'])
+            //     ) {
    
-                }
+            //     }
 
-                else {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => "Role '{$request->input('role_name')}' is not allowed to add permission of type '{$permissionType}'."
-                    ], 422);
-                }
-            }
+            //     else {
+            //         return response()->json([
+            //             'status' => 'error',
+            //             'message' => "Role '{$request->input('role_name')}' is not allowed to add permission of type '{$permissionType}'."
+            //         ], 422);
+            //     }
+            // }
             
 
             // Kiểm tra trùng lặp
@@ -108,7 +108,7 @@ class rolepermissionController extends Controller
                     'username' => $user->username,
                     'role_name' => $request->input('role_name'),
                     'permission_name' => $request->input('permission_name'),
-                    'message' => "User {$user->fullName} created role permission '{$request->input('role_name')}' with permission '{$request->input('permission_name')}'.",
+                    'message' => "User {$user->fullName} đã cấp quyền cho vai trò {$request->input('role_name')} với quyền {$request->input('permission_name')}.",
                     'is_delete' => false
                 ]);
 
@@ -192,7 +192,7 @@ class rolepermissionController extends Controller
                 'username' => $user->username,
                 'role_name' => $request->input('role_name'),
                 'permission_name' => $newPermission,
-                'message' => "User {$user->fullName} updated role permission '{$request->input('role_name')}': $changeString",
+                'message' => "User {$user->fullName} đã cập nhật quyền cho vai trò {$request->input('role_name')} từ {$oldPermission} sang {$newPermission}.",
                 'is_delete' => false
             ]);
 
@@ -253,7 +253,7 @@ class rolepermissionController extends Controller
                     'username' => $user->username,
                     'role_name' => $request->input('role_name'),
                     'permission_name' => $request->input('permission_name'),
-                    'message' => "User {$user->fullName} deleted role permission '{$request->input('role_name')}' with permission '{$request->input('permission_name')}'.",
+                    'message' => "User {$user->fullName} đã xóa quyền cho vai trò {$request->input('role_name')} với quyền {$request->input('permission_name')}.",
                     'is_delete' => true
                 ]);
 

@@ -22,10 +22,11 @@ async function initDomainCreateModal(datasoftware) {
             window.dispatchEvent(new CustomEvent("domainCreated")); 
         } catch (err) {
             showToast({
-                message: err?.message || "Có lỗi xảy ra!",
+                message:  "Có lỗi xảy ra! tên miền đã tồn tại", 
                 type: "error",
                 timeout: 2000,
             });
+            // err?.message ||
         }
     });
 }

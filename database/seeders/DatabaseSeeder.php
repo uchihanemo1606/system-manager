@@ -25,7 +25,10 @@ class DatabaseSeeder extends Seeder
             'username' => 'uchihanemo',
             'password' => 'uchihanemo',
         ]);
-
+        user::factory()->create([
+            'username'=> 'ono',
+            'password'=> 'onoonoono',
+        ]);
         PermissionModel::factory()->create([
             'permissions_name' => 'thêm quyền hạn',
             'type' => 'permission',
@@ -183,10 +186,27 @@ class DatabaseSeeder extends Seeder
             'role_name' => 'Quản trị viên',
             'assigned_at' => now(),
         ]);
-        
         role_permissionModel::factory()->create([
             'id' => 8,
             'permission_name' => 'danh sách quyền người dùng',
+            'role_name' => 'Quản trị viên',
+            'assigned_at' => now(),
+        ]);
+        role_permissionModel::factory()->create([
+            'id' => 9,
+            'permission_name' => 'tạo người dùng',
+            'role_name' => 'Quản trị viên',
+            'assigned_at' => now(),
+        ]);
+        role_permissionModel::factory()->create([
+            'id'=> 10,
+            'permission_name' => 'tạo phần cứng',
+            'role_name' => 'Quản trị viên',
+            'assigned_at' => now(),
+        ]);
+        role_permissionModel::factory()->create([
+            'id'=> 11,
+            'permission_name' => 'tạo phần mềm',
             'role_name' => 'Quản trị viên',
             'assigned_at' => now(),
         ]);

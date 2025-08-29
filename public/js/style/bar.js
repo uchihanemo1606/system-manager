@@ -7,14 +7,17 @@ const routes = {
     hardware: "/hardware_list",
     software: "/software_list",
     software_file: "/software_detail",
+    department: "/department_list",
     rule: "/rules",
     roles: "/roles",
+    log: "/log_list",
     noticeBoard: "#",
     award: "#",
     setting: "#",
     profile: "#",
     lock: "#",
     logout: "#",
+    setting: "/setting",
 };
 
 const sidebar = document.querySelector(".sidebar");

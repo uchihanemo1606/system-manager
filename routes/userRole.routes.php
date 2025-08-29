@@ -9,7 +9,7 @@ route::post('createuserrole', [userRoleController::class, 'createUserRole'])
     ->name('userrole.create');
 
 route::patch('/updateuserrole', [userRoleController::class, 'updateUserRoles'])
-    ->middleware('check.permission')
+    ->middleware(middleware: 'check.permission')
     ->name('userrole.edit');
 
 route::delete('/deleteuserrole', [userRoleController::class, 'removeUserRole'])

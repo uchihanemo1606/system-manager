@@ -6,12 +6,64 @@ import {
     create_permission,
     permissionTypes,
     permissionActions,
+    delete_role,
+    update_role
 } from "../api/role";
 import { showToast } from "../component/toast";
 let selectedPermissionsGlobal = new Set(); // chứa normalize(permission_name)
 let allPermissionsGlobal = [];
 let rolePermissionsGlobal = [];
 // Tạo danh sách tất cả các permission nên có
+const roleNameEl = document.getElementById("role-name");
+const editBtn = document.getElementById("edit-role-btn");
+
+editBtn.addEventListener("click", () => {
+    // Lấy giá trị hiện tại
+    const currentRole = roleNameEl.textContent.trim();
+
+    // Tạo input và nút lưu/hủy
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = currentRole;
+    input.className = "form-control d-inline-block w-auto mr-2";
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn btn-sm btn-success mr-1";
+    saveBtn.textContent = "Lưu";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "btn btn-sm btn-secondary";
+    cancelBtn.textContent = "Hủy";
+
+    // Thay span + nút edit bằng input + nút
+    roleNameEl.replaceWith(input);
+    editBtn.replaceWith(saveBtn, cancelBtn);
+
+    // Lưu thay đổi
+    saveBtn.addEventListener("click", async () => {
+        const newRoleName = input.value.trim();
+        if (!newRoleName) return alert("Tên role không được rỗng");
+
+        try {
+            await update_role({ old_role_name: currentRole, new_role_name: newRoleName });
+            // Cập nhật span hiển thị
+            input.replaceWith(roleNameEl);
+            roleNameEl.textContent = newRoleName;
+            saveBtn.replaceWith(editBtn);
+            cancelBtn.remove();
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    // Hủy thay đổi
+    cancelBtn.addEventListener("click", () => {
+        input.replaceWith(roleNameEl);
+        saveBtn.replaceWith(editBtn);
+        cancelBtn.remove();
+    });
+});
+
 function generateExpectedPermissions() {
     const result = [];
 
@@ -26,7 +78,7 @@ function generateExpectedPermissions() {
     }
 
     return result;
-}
+} 
 // Chuẩn hóa string
 const normalize = (str) =>
     (str || "").trim().toLowerCase().replace(/\s+/g, " "); // Chuẩn hoá khoảng trắng giữa các từ
@@ -51,7 +103,7 @@ async function get_all_permission() {
 }
 
 // Cập nhật quyền cho role
-function update_role_permission(roleId, permissionIds) { 
+function update_role_permission(roleId, permissionIds) {
     return Promise.resolve(true);
 }
 function renderTypeOptions(selected = "") {
@@ -96,9 +148,8 @@ function renderTableRow(p, isChecked, isMissing = false, roleName) {
                     </span>
                 </td>
                 <td>
-                    <span class="badge badge-secondary">${
-                        p.type || "Không xác định"
-                    }</span>
+                    <span class="badge badge-secondary">${p.type || "Không xác định"
+            }</span>
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-success create-missing-permission-btn shadow-sm"
@@ -135,16 +186,14 @@ function renderTableRow(p, isChecked, isMissing = false, roleName) {
                     </span>
                 </td>
                 <td>
-                    <span class="badge badge-info">${
-                        p.type || "Không xác định"
-                    }</span>
+                    <span class="badge badge-info">${p.type || "Không xác định"
+        }</span>
                 </td>
                 <td>
-                    ${
-                        p.description
-                            ? `<span class="text-muted">${p.description}</span>`
-                            : '<span class="text-muted fst-italic">Không có mô tả</span>'
-                    }
+                    ${p.description
+            ? `<span class="text-muted">${p.description}</span>`
+            : '<span class="text-muted fst-italic">Không có mô tả</span>'
+        }
                 </td>
             </tr>
 
@@ -232,7 +281,7 @@ function renderPermissionTable(permissions, selectedNames, roleName = "") {
                         permissions_name: permissionName,
                         type: permissionType,
                         description: permissionDescription,
-                    }); 
+                    });
                     showToast({
                         message: `Đã tạo permission "${permissionName}"`,
                         type: "success",
@@ -266,66 +315,18 @@ function renderPermissionTable(permissions, selectedNames, roleName = "") {
             });
         });
 }
-
-// function renderPermissionTable(permissions, selectedNames) {
-//     const container = document.getElementById("permission-checkboxes");
-//     container.innerHTML = "";
-
-//     // Nhóm theo type
-//     const grouped = {};
-//     for (const p of permissions) {
-//         const type = p.type || "Không xác định";
-//         if (!grouped[type]) grouped[type] = [];
-//         grouped[type].push(p);
-//     }
-
-//     // Tạo table cho từng nhóm
-//     const groupTables = Object.entries(grouped)
-//         .map(([type, groupPermissions]) => {
-//             const rows = groupPermissions.map((p) =>
-//                 renderTableRow(p, selectedNames.includes(normalize(p.permissions_name)))
-//             );
-
-//             return `
-//                 <div class="mb-4">
-//                     <h5 class="text-primary mb-2 border-bottom pb-1">${type}</h5>
-//                     <table class="table table-hover table-bordered align-middle text-center">
-//                         <thead class="table-light">
-//                             <tr>
-//                                 <th>Chọn</th>
-//                                 <th>Tên Permission</th>
-//                                 <th>Loại</th>
-//                                 <th>Mô tả</th>
-//                             </tr>
-//                         </thead>
-//                         <tbody>
-//                             ${rows.join("")}
-//                         </tbody>
-//                     </table>
-//                 </div>
-//             `;
-//         })
-//         .join("");
-
-//     container.innerHTML = groupTables;
-// }
-
-// Render danh sách permission đã có
 function renderPermissionList(permissions) {
     const list = document.getElementById("permission-list");
     list.innerHTML = permissions.length
         ? permissions
-              .map(
-                  (p) => `
+            .map(
+                (p) => `
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>${p.permission_name}</span>
-                <span class="badge badge-info">${
-                    p.description || "Không có mô tả"
-                }</span>
             </li>
         `
-              )
-              .join("")
+            )
+            .join("")
         : "<li>Chưa có permission nào</li>";
 }
 
@@ -346,8 +347,8 @@ function applyFilters() {
             selectedFilter === "selected"
                 ? isSelected
                 : selectedFilter === "unselected"
-                ? !isSelected
-                : true;
+                    ? !isSelected
+                    : true;
 
         return matchName && matchType && matchSelected;
     });
@@ -415,13 +416,31 @@ async function initRoleDetailModal(data) {
         });
         return;
     }
+    document.getElementById("delete-role-btn")?.addEventListener("click", async () => {
+        if (!confirm("Bạn có chắc chắn muốn xóa role này không?")) return;
+
+        try {
+            await delete_role(data.role_name); 
+
+            $("#addPermissionModal").modal("hide");
+            window.dispatchEvent(new CustomEvent("roleListUpdated"));
+        } catch (err) {
+            console.error("Lỗi khi xóa role:", err);
+            showToast({
+                message: "Không thể xóa role này",
+                type: "error",
+                timeout: 2000,
+            });
+        }
+    });
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
+
         const activeElement = document.activeElement;
         if (
             activeElement &&
-            activeElement.classList.contains("create-role-permission-btn")
+            activeElement.classList.contains("create-missing-permission-btn")
         ) {
             return;
         }
@@ -434,6 +453,14 @@ async function initRoleDetailModal(data) {
         );
 
         const selectedRole = data.role_name;
+        if (selectedRole === "admin" || selectedRole === "quản lý phần cứng" || selectedRole === "quản lý phần mềm" || selectedRole === "quản lý hệ thống" || selectedRole === "người dùng cơ bản") {
+            showToast({
+                message: "CẢNH BÁO:  đây là 'Vai trò' được thiết lập sẵn ảnh hưởng đến hệ thống chúng tôi khuyến cáo nên tạo một 'Vai trò' mới thay vì sửa 'Vai trò' này :" + ` ${selectedRole}`,
+                type: "warning",
+                timeout: 4000,
+            });
+            return;
+        }
 
         try {
             for (const permission_name of removed) {
@@ -494,6 +521,7 @@ async function initRoleDetailModal(data) {
 
 document.addEventListener("DOMContentLoaded", () => {
     $("#addPermissionModal").on("hidden.bs.modal", () => {
+
         selectedPermissionsGlobal = new Set();
         rolePermissionsGlobal = [];
         allPermissionsGlobal = [];

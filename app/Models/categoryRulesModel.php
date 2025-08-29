@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class categoryRulesModel extends Model
 {
+    protected $table = 'category_rule';
     protected $fillable = [
         'name',
         'description'
